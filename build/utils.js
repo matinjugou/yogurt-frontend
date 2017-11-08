@@ -2,6 +2,45 @@
 const path = require('path')
 const config = require('../config')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
+const glob = require('glob')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const merge = require('webpack-merge')
+
+exports.getEntries = function (globPath) {
+  let entries = {}
+  glob.sync(globPath).forEach(function (entry) {
+    let basename = path.basename(entry, path.extname(entry), 'router.js')
+    entries[basename] = entry
+  })
+  return entries
+}
+
+exports.htmlPlugins = function(globPath) {
+  let entries = exports.getEntries(globPath)
+  let plugins = []
+  for (const entry in entries){
+    let conf = {
+      filename: entry + '.html',
+      template: entries[entry],
+      inject: true,
+      excludeChunks: Object.keys(entries).filter(item => {
+        return (item != entry)
+      })
+    }
+    if (process.env.NODE_ENV === 'production') {
+      conf = merge(conf, {
+        minify: {
+          removeComments: true,
+          collapseWhitespace: true,
+          removeAttributeQuotes: true
+        },
+        chunksSortMode: 'dependency'
+      })
+    }
+    plugins.push(new HtmlWebpackPlugin(conf))
+  }
+  return plugins
+}
 
 exports.assetsPath = function (_path) {
   const assetsSubDirectory = process.env.NODE_ENV === 'production'
