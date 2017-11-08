@@ -2,6 +2,64 @@
 const path = require('path')
 const config = require('../config')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
+const glob = require('glob')
+const HtmlWebpackPlugin = require("html-webpack-plugin")
+const merge = require('webpack-merge')
+
+exports.getEntries = function () {
+  if (!/\*/.test(config.pageEntry)) {
+    // single page
+    return { 'index': config.pageEntry }
+  }
+  else {
+    // multi page
+    let entries = {}
+    glob.sync(config.pageEntry).forEach(function (path) {
+      let split = path.split('/')
+      let name = split[split.length - 2]
+      entries[name] = path
+    })
+    return entries
+  }
+}
+
+exports.getRewrites = function () {
+  let entries = exports.getEntries()
+  let rewrites = []
+  Object.keys(entries).forEach(function (name) {
+    let reg = new RegExp('^\/' + name + '$')
+    rewrites.push({
+      from: reg, 
+      to: '\/' + name + '.html'
+    })
+  })
+  return rewrites
+}
+
+exports.htmlPlugins = function () {
+  let entries = exports.getEntries()
+  let plugins = []
+  Object.keys(entries).forEach(function (name) {
+    let conf = {
+      filename: name + '.html',
+      template: entries[name].slice(0, -3) + '.html',
+      inject: true,
+      chunks: ['manifest', 'vendor', name]
+    }
+    if (process.env.NODE_ENV === 'production') {
+      conf = merge(conf, {
+        minify: {
+          removeComments: true,
+          collapseWhitespace: true,
+          removeAttributeQuotes: true
+        },
+        chunksSortMode: 'dependency'
+      })
+    }
+    plugins.push(new HtmlWebpackPlugin(conf))
+  })
+  return plugins
+}
 
 exports.assetsPath = function (_path) {
   const assetsSubDirectory = process.env.NODE_ENV === 'production'
