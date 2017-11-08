@@ -1,4 +1,5 @@
 # yogurt-fe
+[![Build Status](https://travis-ci.com/matinjugou/yogurt-frontend.svg?token=YWXDqp5MTARNnQYDB4E8&branch=master)](https://travis-ci.com/matinjugou/yogurt-frontend)
 
 > Front end of yogurt customer service platform, using Vue.js
 
