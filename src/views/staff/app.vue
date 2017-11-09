@@ -22,14 +22,14 @@
           </MenuItem>
           <div class="menu-vertical-spacing"></div>
           <MenuItem name='rest' disabled>
-            <Button type="primary" shape="circle" icon="coffee" @click="changeRestStatus">{{ restAction }}</Button>
+            <Button :type="restAction" shape="circle" icon="coffee" @click="changeRestStatus">{{ restCaption }}</Button>
           </MenuItem>
         </Menu>
       </Col>
       <Col :span="spanRight">
-          <div class="layout-router-view">
+          <transition name = "fade" mode="out-in">
             <router-view/>
-          </div>
+          </transition>
           <footer class="layout-copy">
             2017 &copy; Yogurt
           </footer>
@@ -50,7 +50,10 @@ export default {
   },
   computed: {
     restAction () {
-      return this.restStatus ? '恢复工作' : '准备休息'
+      return this.restStatus ? 'success' : 'error'
+    },
+    restCaption () {
+      return this.restStatus ? '返回工作' : '准备休息'
     },
     spanRight () {
       return 24 - this.spanLeft
@@ -92,11 +95,7 @@ export default {
   background: #464c5b;
   text-align: center;
 }
-.layout-router-view{
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+
 .ivu-col{
   transition: width .2s ease-in-out;
 }
