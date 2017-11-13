@@ -36,6 +36,7 @@
               <Icon type="monitor"></Icon>
             </Button>
             <Button style="float: right">发送</Button>
+            <Input type="textarea" style="margin-top: 5px" :rows="6" placeholder="在此输入消息"></Input>
           </div>
         </div>
         <div class="layout-copy">
@@ -85,6 +86,7 @@
   }
   .layout-content-input-main{
     padding: 10px;
+    max-height: 200px;
   }
   .layout-copy{
     text-align: center;
