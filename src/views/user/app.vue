@@ -240,7 +240,7 @@ export default {
       contentList: [
         {
           id: '1',
-          msg: 'Hello, I\'m staff1.',
+          msg: 'Hello, I\'m staff_1.',
           from: 'staff_2',
           to: 'user_1',
           type: 'text',
