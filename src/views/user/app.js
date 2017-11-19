@@ -5,9 +5,11 @@ import App from './app.vue'
 import router from './router'
 import iView from 'iview'
 import 'iview/dist/styles/iview.css'
+import VueSocketio from 'vue-socket.io'
 
 Vue.config.productionTip = false
 Vue.use(iView)
+Vue.use(VueSocketio, 'http://localhost:9090')
 
 /* eslint-disable no-new */
 new Vue({
