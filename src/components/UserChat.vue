@@ -242,6 +242,7 @@ export default {
       token: '12345678',
       inputText: '',
       earlistRecordIndex: '',
+      cachedMsg: {},
       contentList: [
         {
           id: '1',
@@ -285,54 +286,6 @@ export default {
           to: 'staff_2',
           type: 'text',
           time: '2017-11-19 15:39:15'
-        },
-        {
-          id: '5',
-          msg: 'Hello, I\'m staff_1.',
-          from: 'staff_2',
-          to: 'user_1',
-          type: 'text',
-          time: '2017-11-19 15:39:14'
-        },
-        {
-          id: '6',
-          msg: 'Hello, I\'m user.',
-          from: 'user_1',
-          to: 'staff_2',
-          type: 'text',
-          time: '2017-11-19 15:39:15'
-        },
-        {
-          id: '7',
-          msg: 'Hello, I\'m staff_1.',
-          from: 'staff_2',
-          to: 'user_1',
-          type: 'text',
-          time: '2017-11-19 15:39:14'
-        },
-        {
-          id: '8',
-          msg: 'Hello, I\'m user.',
-          from: 'user_1',
-          to: 'staff_2',
-          type: 'text',
-          time: '2017-11-19 15:39:15'
-        },
-        {
-          id: '9',
-          msg: 'Hello, I\'m staff_1.',
-          from: 'staff_2',
-          to: 'user_1',
-          type: 'text',
-          time: '2017-11-19 15:39:14'
-        },
-        {
-          id: '10',
-          msg: 'Hello, I\'m user.',
-          from: 'user_1',
-          to: 'staff_2',
-          type: 'text',
-          time: '2017-11-19 15:39:15'
         }]
 //      let newMsgs = []
 //      let url = '/char-record?userId=' + this.userId + '&staffId=' + this.staffId + '&index=' + this.earlistRecordIndex
@@ -344,7 +297,7 @@ export default {
 //      })
       return new Promise(resolve => {
         setTimeout(() => {
-          for (let i = 0; i < 8; i++) {
+          for (let i = 0; i < 2; i++) {
             this.contentList.unshift(newMsgs[i])
           }
           resolve()
@@ -353,6 +306,24 @@ export default {
     },
     sendMessage () {
       this.$socket.emit('userTextMsg', {staffId: this.staffId, userId: this.userId, token: this.token, msg: this.inputText})
+      let curDate = new Date()
+      this.cachedMsg = {
+        id: '???',  // TODO: get this from backend?
+        msg: 'message', // TODO: how to get this?
+        from: this.staffId,
+        to: this.userId,
+        type: 'text',
+        time: curDate.getYear() + '-' + curDate.getMonth + '-' + curDate.getDay() + ' ' + curDate.getHours() + ':' + curDate.getMinutes() + ':' + curDate.getSeconds()
+      }
+      this.contentList.push(this.cachedMsg)
+    }
+  },
+  sockets: {
+    sendResult (data) {
+      if (data['code'] === '1') {
+        this.contentList.push(this.cachedMsg)
+        this.cachedMsg = {}
+      }
     }
   }
 }

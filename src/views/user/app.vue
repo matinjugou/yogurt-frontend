@@ -15,14 +15,14 @@
             售后
           </div>
           <!--<Button type="text" @click="toggleClick">-->
-            <!--<Icon type="navicon" size="32"></Icon>-->
+          <!--<Icon type="navicon" size="32"></Icon>-->
           <!--</Button>-->
           <!--<Avatar class="inline-middle" shape="square" icon="person"/>-->
           <!--<span class="inline-middle">xxx公司</span>-->
           <!--<span style="float: right;margin-top: 12px;margin-right: 21px">人工客服</span>-->
         </div>
         <!--<div class="layout-content-msg">-->
-          <!--<div class="layout-content-msg-main">messages</div>-->
+        <!--<div class="layout-content-msg-main">messages</div>-->
         <!--</div>-->
         <div class="chat-content">
           <Scroll :on-reach-top="getMoreMessage">
@@ -77,29 +77,29 @@
     overflow: hidden;
   }
   /*.layout-content-msg{*/
-    /*height: calc(100vh - 60px - 30px - 30px - 200px);*/
-    /*margin: 15px;*/
-    /*margin-bottom: 2px;*/
-    /*overflow: hidden;*/
-    /*background: #fff;*/
-    /*border-radius: 4px;*/
-    /*box-shadow: 0 0 1px rgba(0,0,0,.1);*/
+  /*height: calc(100vh - 60px - 30px - 30px - 200px);*/
+  /*margin: 15px;*/
+  /*margin-bottom: 2px;*/
+  /*overflow: hidden;*/
+  /*background: #fff;*/
+  /*border-radius: 4px;*/
+  /*box-shadow: 0 0 1px rgba(0,0,0,.1);*/
   /*}*/
   /*.layout-content-msg-main{*/
-    /*padding: 10px;*/
+  /*padding: 10px;*/
   /*}*/
   /*.layout-content-input{*/
-    /*height: 200px;*/
-    /*overflow: hidden;*/
-    /*margin: 15px;*/
-    /*margin-top: 0;*/
-    /*background: #fff;*/
-    /*border-radius: 4px;*/
-    /*box-shadow: 0 1px 1px rgba(0,0,0,.1);*/
+  /*height: 200px;*/
+  /*overflow: hidden;*/
+  /*margin: 15px;*/
+  /*margin-top: 0;*/
+  /*background: #fff;*/
+  /*border-radius: 4px;*/
+  /*box-shadow: 0 1px 1px rgba(0,0,0,.1);*/
   /*}*/
   /*.layout-content-input-main{*/
-    /*padding: 10px;*/
-    /*max-height: 200px;*/
+  /*padding: 10px;*/
+  /*max-height: 200px;*/
   /*}*/
   .layout-copy{
     text-align: center;
@@ -209,131 +209,84 @@
   }
 </style>
 <script>
-//  export default {
-//    data () {
-//      return {
-//        spanLeft: 5,
-//        spanRight: 19
-//      }
-//    },
-//    computed: {
-//      iconSize () {
-//        return this.spanLeft === 5 ? 14 : 24
-//      }
-//    },
-//    methods: {
-//      toggleClick () {
-//        if (this.spanLeft === 5) {
-//          this.spanLeft = 2
-//          this.spanRight = 22
-//        } else {
-//          this.spanLeft = 5
-//          this.spanRight = 19
-//        }
-//      }
-//    }
-//  }
-export default {
-  name: 'UserChat',
-  data () {
-    return {
-      userId: '1',
-      staffId: '2',
-      token: '12345678',
-      inputText: '',
-      earlistRecordIndex: '',
-      contentList: [
-        {
-          id: '1',
-          msg: 'Hello, I\'m staff_1.',
-          from: 'staff_2',
-          to: 'user_1',
-          type: 'text',
-          time: '2017-11-19 15:39:14'
-        },
-        {
-          id: '2',
-          msg: 'Hello, I\'m user.',
-          from: 'user_1',
-          to: 'staff_2',
-          type: 'text',
-          time: '2017-11-19 15:39:15'
-        }
-      ]
-    }
-  },
-  computed: {
-    currentChatRecord () {
-      return this.contentList
-    }
-  },
-  methods: {
-    getMoreMessage () {
-      let newMsgs = [
-        {
-          id: '3',
-          msg: 'Hello, I\'m staff_1.',
-          from: 'staff_2',
-          to: 'user_1',
-          type: 'text',
-          time: '2017-11-19 15:39:14'
-        },
-        {
-          id: '4',
-          msg: 'Hello, I\'m user.',
-          from: 'user_1',
-          to: 'staff_2',
-          type: 'text',
-          time: '2017-11-19 15:39:15'
-        },
-        {
-          id: '5',
-          msg: 'Hello, I\'m staff_1.',
-          from: 'staff_2',
-          to: 'user_1',
-          type: 'text',
-          time: '2017-11-19 15:39:14'
-        },
-        {
-          id: '6',
-          msg: 'Hello, I\'m user.',
-          from: 'user_1',
-          to: 'staff_2',
-          type: 'text',
-          time: '2017-11-19 15:39:15'
-        },
-        {
-          id: '7',
-          msg: 'Hello, I\'m staff_1.',
-          from: 'staff_2',
-          to: 'user_1',
-          type: 'text',
-          time: '2017-11-19 15:39:14'
-        },
-        {
-          id: '8',
-          msg: 'Hello, I\'m user.',
-          from: 'user_1',
-          to: 'staff_2',
-          type: 'text',
-          time: '2017-11-19 15:39:15'
-        },
-        {
-          id: '9',
-          msg: 'Hello, I\'m staff_1.',
-          from: 'staff_2',
-          to: 'user_1',
-          type: 'text',
-          time: '2017-11-19 15:39:14'
-        },
-        {
-          id: '10',
-          msg: 'Hello, I\'m user.',
-          from: 'user_1',
-          to: 'staff_2',
-          type: 'text',
-          time: '2017-11-19 15:39:15'
-        }]
+  //  export default {
+  //    data () {
+  //      return {
+  //        spanLeft: 5,
+  //        spanRight: 19
+  //      }
+  //    },
+  //    computed: {
+  //      iconSize () {
+  //        return this.spanLeft === 5 ? 14 : 24
+  //      }
+  //    },
+  //    methods: {
+  //      toggleClick () {
+  //        if (this.spanLeft === 5) {
+  //          this.spanLeft = 2
+  //          this.spanRight = 22
+  //        } else {
+  //          this.spanLeft = 5
+  //          this.spanRight = 19
+  //        }
+  //      }
+  //    }
+  //  }
+  export default {
+    name: 'UserChat',
+    data () {
+      return {
+        userId: 'user_1',
+        staffId: 'staff_2',
+        token: '12345678',
+        inputText: '',
+        earlistRecordIndex: '',
+        cachedMsg: {},
+        contentList: [
+          {
+            id: '1',
+            msg: 'Hello, I\'m staff_1.',
+            from: 'staff_2',
+            to: 'user_1',
+            type: 'text',
+            time: '2017-11-19 15:39:14'
+          },
+          {
+            id: '2',
+            msg: 'Hello, I\'m user.',
+            from: 'user_1',
+            to: 'staff_2',
+            type: 'text',
+            time: '2017-11-19 15:39:15'
+          }
+        ]
+      }
+    },
+    computed: {
+      currentChatRecord () {
+        return this.contentList
+      }
+    },
+    methods: {
+      getMoreMessage () {
+        let newMsgs = [
+          {
+            id: '3',
+            msg: 'Hello, I\'m staff_1.',
+            from: 'staff_2',
+            to: 'user_1',
+            type: 'text',
+            time: '2017-11-19 15:39:14'
+          },
+          {
+            id: '4',
+            msg: 'Hello, I\'m user.',
+            from: 'user_1',
+            to: 'staff_2',
+            type: 'text',
+            time: '2017-11-19 15:39:15'
+          }]
 //      let newMsgs = []
 //      let url = '/char-record?userId=' + this.userId + '&staffId=' + this.staffId + '&index=' + this.earlistRecordIndex
 //      this.$http.get(url).then((response) => {
@@ -342,18 +295,36 @@ export default {
 //        this.earlistRecordIndex = data['index']
 //      }, (response) => {
 //      })
-      return new Promise(resolve => {
-        setTimeout(() => {
-          for (let i = 0; i < 8; i++) {
-            this.contentList.unshift(newMsgs[i])
-          }
-          resolve()
-        }, 200)
-      })
+        return new Promise(resolve => {
+          setTimeout(() => {
+            for (let i = 0; i < 2; i++) {
+              this.contentList.unshift(newMsgs[i])
+            }
+            resolve()
+          }, 200)
+        })
+      },
+      sendMessage () {
+        this.$socket.emit('userTextMsg', {staffId: this.staffId, userId: this.userId, token: this.token, msg: this.inputText})
+        let curDate = new Date()
+        this.cachedMsg = {
+          id: '???',  // TODO: get this from backend?
+          msg: 'message', // TODO: how to get this?
+          from: this.userId,
+          to: this.staffId,
+          type: 'text',
+          time: curDate.getYear() + '-' + curDate.getMonth() + '-' + curDate.getDay() + ' ' + curDate.getHours() + ':' + curDate.getMinutes() + ':' + curDate.getSeconds()
+        }
+        this.contentList.push(this.cachedMsg)
+      }
     },
-    sendMessage () {
-      this.$socket.emit('userTextMsg', {staffId: this.staffId, userId: this.userId, token: this.token, msg: this.inputText})
+    sockets: {
+      sendResult (data) {
+        if (data['code'] === '1') {
+          this.contentList.push(this.cachedMsg)
+          this.cachedMsg = {}
+        }
+      }
     }
   }
-}
 </script>
