@@ -1,9 +1,21 @@
 <template>
   <div class="right-content">
-    <div class="layout-header"></div>
+    <div class="layout-header">
+      <Row type="flex" justify="start" style="padding-left: 10px;padding-top: 10px">
+        <h1>客服管理
+        </h1>
+      </Row>
+    </div>
     <div class="layout-content">
       <div class="layout-content-main">
-        <Table border :columns="staffcolumn" :data="staffdata"></Table>
+        <Row style="margin-bottom: 10px">
+          <Button style="float: left" type="info">新增客服</Button>
+          <Input v-model="searchname"
+                 icon="ios-search-strong"
+                 placeholder="请输入姓名..."
+                 style="float: right;width: 200px;"/>
+        </Row>
+        <Table border :columns="staffcolumn" :data="filteredstaffdata"></Table>
       </div>
     </div>
     <div class="layout-copy">
@@ -17,6 +29,7 @@ export default {
   name: 'staffmanager',
   data () {
     return {
+      searchname: '',
       staffcolumn: [
         {
           title: '姓名',
@@ -36,7 +49,54 @@ export default {
         },
         {
           title: '状态',
-          key: 'status'
+          key: 'status',
+          render: (h, params) => {
+            if (params.row.status === 'online') {
+              return h('div', [
+                h('Tag', {
+                  props: {
+                    color: 'green'
+                  },
+                  style: {
+                    marginRight: '5px'
+                  }
+                }, '在线')
+              ])
+            } else if (params.row.status === 'offline') {
+              return h('div', [
+                h('Tag', {
+                  props: {
+                    color: 'red'
+                  },
+                  style: {
+                    marginRight: '5px'
+                  }
+                }, '离线')
+              ])
+            } else if (params.row.status === 'resting') {
+              return h('div', [
+                h('Tag', {
+                  props: {
+                    color: 'yellow'
+                  },
+                  style: {
+                    marginRight: '5px'
+                  }
+                }, '休息')
+              ])
+            } else {
+              return h('div', [
+                h('Tag', {
+                  props: {
+                    color: 'blue'
+                  },
+                  style: {
+                    marginRight: '5px'
+                  }
+                }, '未知')
+              ])
+            }
+          }
         },
         {
           title: '分工',
@@ -96,12 +156,32 @@ export default {
           phonenumber: '15911151830',
           status: 'offline',
           role: '售后'
+        },
+        {
+          name: '贾元昊',
+          nickname: 'billJia',
+          email: 'thss15_jiayh@163.com',
+          phonenumber: '13051337872',
+          status: 'resting',
+          role: '售后'
         }
       ]
     }
   },
   computed: {
-
+    filteredstaffdata: function () {
+      if (this.searchname === '') {
+        return this.staffdata
+      } else {
+        let tmpstaff = []
+        for (let per of this.staffdata) {
+          if (per.name.indexOf(this.searchname) >= 0) {
+            tmpstaff.push(per)
+          }
+        }
+        return tmpstaff
+      }
+    }
   },
   methods: {
 
