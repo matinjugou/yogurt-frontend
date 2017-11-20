@@ -76,7 +76,10 @@
                 <p class="chat-msg-time">
                   <span>{{ singleRecord.time }}</span>
                 </p>
-                <div class="chat-msg-body" :class="[{'from-me': singleRecord.from.startsWith('staff')}]">
+                <div class="chat-msg-body" :class="[{'from-me': singleRecord.from.startsWith('s')}]">
+                  <div class="chat-single-record" v-if="singleRecord.hasSent === false">
+                    <Spin></Spin>
+                  </div>
                   <div class="avatar chat-single-record">
                     <Avatar shape="square" icon="person"/>
                   </div>
@@ -123,27 +126,18 @@ export default {
       inputText: '',
       userList: [
         {
-          userid: 'user_1',
+          userid: 'u1',
           userName: '用户1',
           status: 'chatting'
         },
         {
-          userid: 'user_2',
+          userid: 'u2',
           userName: '用户2',
           status: 'chatting'
-        },
-        {
-          userid: 'user_3',
-          userName: 'Name3',
-          status: 'switching'
-        },
-        {
-          userid: 'user_4',
-          userName: 'Name4',
-          status: 'waiting'
         }
       ],
-      contentList: []
+      contentList: [],
+      socket: null
     }
   },
   computed: {
@@ -174,7 +168,7 @@ export default {
       this.chatUserName = name
       this.chatUserId = userid
       // TODO: refresh chat content
-      // TODO: clear input
+      // clear input
       this.inputText = ''
     },
     showInfo () {
@@ -192,14 +186,23 @@ export default {
       }
       this.inputText = ''
       let date = new Date()
+      // TODO: get the staffid
       this.contentList.push({
-        from: 'staff_1',
-        to: this.chatUserId,
-        msg: sendMsg,
-        type: 'text',
-        time: date.toLocaleTimeString('zh-Hans-CN')
+        'from': this.$store.state.staffId,
+        'to': this.chatUserId,
+        'msg': sendMsg,
+        'type': 'text',
+        'time': date.toLocaleTimeString('zh-Hans-CN')
+        // 'hasSent': false
       })
       // TODO: send message
+      this.socket.emit('staffTextMsg', {
+        'staffId': this.$store.state.staffId,
+        'userId': this.chatUserId,
+        'token': 's1_token',
+        'msg': sendMsg
+      })
+      // TODO: 异步处理消息返回信息（发送成功与否）
     }
   },
   updated () {
@@ -208,7 +211,53 @@ export default {
   created () {
     if (this.$store.state.isLogin === false) {
       this.$router.push('/login')
+      return
     }
+    const io = require('socket.io-client')
+    // socket url
+    this.socket = io('http://yogurt.magichc7.com')
+    // TODO:
+    // 's1' -> real staff id
+    // 's1_token' -> real token
+    this.socket.emit('staffReg', this.$store.state.staffId, 's1_token')
+    // TODO:
+    // deal with register result
+    this.socket.on('regResult', (code, msg) => {
+      console.log('Register result: code ' + code + '& msg ' + msg)
+      if (code === 0) {
+        this.$Message.error({
+          content: msg,
+          duration: 3,
+          closable: true
+        })
+      }
+    })
+    // TODO:
+    // deal with send failure
+    // also timeout affair should be taken care of
+    this.socket.on('sendResult', (code, msg) => {
+      console.log('Send result: code ' + code + '& msg ' + msg)
+      if (code === 0) {
+        this.$Message.error({
+          content: msg,
+          duration: 3,
+          closable: true
+        })
+      } else {
+
+      }
+    })
+    this.socket.on('userTextMsg', (from, msg) => {
+      console.log('User text message: from ' + from + '& msg ' + msg)
+      let date = new Date()
+      this.contentList.push({
+        'from': from,
+        'to': this.$store.state.staffId,
+        'msg': msg,
+        'type': 'text',
+        'time': date.toLocaleTimeString('zh-Hans-CN')
+      })
+    })
   }
 }
 </script>
@@ -264,7 +313,7 @@ export default {
 }
 .chat-single-record {
   display: inline-flex;
-  vertical-align: text-top;
+  vertical-align: middle;
 }
 .chat-msg-body > .avatar {
   margin: 0 10px 0 0;

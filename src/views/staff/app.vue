@@ -140,7 +140,7 @@ export default {
   height: 20px;
 }
 .menu-vertical-spacing {
-   height: calc(100vh - 460px);
+   height: calc(100vh - 461px);
 }
 .ivu-col {
   transition: width .2s ease-in-out;
