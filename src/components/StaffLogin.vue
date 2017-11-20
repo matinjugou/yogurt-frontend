@@ -1,5 +1,5 @@
 <template>
-  <div class="staff-info">
+  <div class="staff-login">
     {{ msg }}
   </div>
 </template>
@@ -7,15 +7,10 @@
 <script>
 
 export default {
-  name: 'StaffInfo',
+  name: 'StaffLogin',
   data () {
     return {
-      msg: '这里是信息界面'
-    }
-  },
-  created () {
-    if (this.$store.state.isLogin === false) {
-      this.$router.push('/login')
+      msg: '这里是登录界面'
     }
   }
 }

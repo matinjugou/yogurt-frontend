@@ -1,8 +1,8 @@
 <template>
-  <div id="app" class="layout">
+  <div id="app" class="staff">
     <Row type="flex">
-      <Col :span="spanLeft" class="layout-menu-left">
-        <Menu active-name="1" theme="dark" width="auto" @on-select="menuAction">
+      <Col :span="spanLeft" class="staff-menu-left">
+        <Menu active-name="1" theme="dark" width="auto" @on-select="menuAction" v-if="spanLeft">
           <!-- here may have a logo -->
           <div class="menu-header"></div>
           <div class="menu-burger-button">
@@ -13,19 +13,19 @@
           <div class="menu-items">
           <MenuItem name="chat">
             <Icon type="chatboxes" :size="iconSize"></Icon>
-            <span class="layout-text" v-if="showText">会话页面</span>
+            <span class="staff-text" v-if="showText">会话页面</span>
           </MenuItem>
           <MenuItem name="info">
             <Icon type="person-stalker" :size="iconSize"></Icon>
-            <span class="layout-text" v-if="showText">个人信息</span>
+            <span class="staff-text" v-if="showText">个人信息</span>
           </MenuItem>
           <MenuItem name="quick-reply">
             <Icon type="reply-all" :size="iconSize"></Icon>
-            <span class="layout-text" v-if="showText">快捷回复</span>
+            <span class="staff-text" v-if="showText">快捷回复</span>
           </MenuItem>
           <MenuItem name="feedback">
             <Icon type="paper-airplane" :size="iconSize"></Icon>
-            <span class="layout-text" v-if="showText">客户反馈</span>
+            <span class="staff-text" v-if="showText">客户反馈</span>
           </MenuItem>
           </div>
 
@@ -38,10 +38,10 @@
             <span v-if="showText" @click="logout">&nbsp;&nbsp;登&nbsp;&nbsp;出&nbsp;&nbsp;</span>
           </Button>
           <div class="menu-button-space"></div>
+          <footer class="staff-copy">
+            Yogurt
+          </footer>
         </Menu>
-        <footer class="layout-copy">
-           Yogurt
-        </footer>
       </Col>
       <Col :span="spanRight">
         <transition name = "fade" mode="out-in">
@@ -57,7 +57,7 @@ export default {
   name: 'app',
   data () {
     return {
-      spanLeft: 3,
+      spanLeft: 0,
       iconSize: 25,
       showText: true,
       restStatus: false
@@ -91,6 +91,14 @@ export default {
         this.$router.push('/' + name)
       }
     }
+  },
+  created () {
+    if (this.$store.state.isLogin === false) {
+      this.$router.push('/login')
+    } else {
+      this.spanLeft = 3
+      this.$router.push('/index')
+    }
   }
 }
 </script>
@@ -103,22 +111,22 @@ export default {
   height: 100%;
   margin: 0;
 }
-.layout {
+.staff {
   border: 1px solid white;
   border-radius: 4px;
   background: #f5f7f9;
   position: relative;
   overflow: hidden;
 }
-.layout-text {
+.staff-text {
   font-size: 15px;
 }
-.layout-copy {
+.staff-copy {
   text-align: center;
   padding: 10px 0 20px;
   color: #9ea7b4;
 }
-.layout-menu-left{
+.staff-menu-left{
   background: #464c5b;
   text-align: center;
 }

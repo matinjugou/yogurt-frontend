@@ -12,6 +12,11 @@ export default {
     return {
       msg: '欢迎使用Yogurt客服系统~'
     }
+  },
+  created () {
+    if (this.$store.state.isLogin === false) {
+      this.$router.push('/login')
+    }
   }
 }
 </script>

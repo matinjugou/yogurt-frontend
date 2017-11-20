@@ -70,9 +70,9 @@
               </Button>
             </div>
           </div>
-          <div class="chat-window-content">
+          <div id="chat-window" class="chat-window-content">
             <ul>
-              <li v-for="(singleRecord, index) in currentChatRecord" :key="singleRecord.id">
+              <li v-for="(singleRecord, index) in currentChatRecord" :key="index">
                 <p class="chat-msg-time">
                   <span>{{ singleRecord.time }}</span>
                 </p>
@@ -96,7 +96,7 @@
             </div>
           </div>
           <div class="chat-window-input">
-            <Input v-model="inputText" type="textarea" :rows="8" placeholder="在这里输入信息，按Ctrl+Enter发送"></Input>
+            <Input v-model="inputText" type="textarea" :rows="8" placeholder="在这里输入信息，按Ctrl+Enter发送" @on-keyup.ctrl.enter="sendMessage"></Input>
           </div>
         </div>
         <div v-else>
@@ -143,24 +143,7 @@ export default {
           status: 'waiting'
         }
       ],
-      contentList: [
-        {
-          id: '1',
-          from: 'staff_1',
-          to: 'user_1',
-          msg: 'Hello, I\'m staff.',
-          type: 'text',
-          time: '2017-11-18 15:39:14'
-        },
-        {
-          id: '2',
-          from: 'user_1',
-          to: 'staff_1',
-          msg: 'Hello, I\'m user.',
-          type: 'text',
-          time: '2017-11-18 15:39:15'
-        }
-      ]
+      contentList: []
     }
   },
   computed: {
@@ -175,6 +158,10 @@ export default {
     }
   },
   methods: {
+    chatWindowScroll () {
+      let element = document.getElementById('chat-window')
+      element.scrollTop = element.scrollHeight
+    },
     openChatWindow (userid) {
       this.isChatting = true
       let name
@@ -194,7 +181,33 @@ export default {
       this.spanRight = this.spanRight === 0 ? 3 : 0
     },
     sendMessage () {
+      let sendMsg = this.inputText
+      if (sendMsg === '') {
+        this.$Message.warning({
+          content: '不可以发送空消息',
+          duration: 3,
+          closable: true
+        })
+        return
+      }
+      this.inputText = ''
+      let date = new Date()
+      this.contentList.push({
+        from: 'staff_1',
+        to: this.chatUserId,
+        msg: sendMsg,
+        type: 'text',
+        time: date.toLocaleTimeString('zh-Hans-CN')
+      })
       // TODO: send message
+    }
+  },
+  updated () {
+    this.chatWindowScroll()
+  },
+  created () {
+    if (this.$store.state.isLogin === false) {
+      this.$router.push('/login')
     }
   }
 }
@@ -252,9 +265,10 @@ export default {
 .chat-single-record {
   display: inline-flex;
   vertical-align: text-top;
-  margin-right: 10px;
 }
-
+.chat-msg-body > .avatar {
+  margin: 0 10px 0 0;
+}
 .chat-msg-body > .content {
   display: inline-block;
   position: relative;

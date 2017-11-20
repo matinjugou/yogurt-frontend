@@ -4,6 +4,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import App from './app.vue'
 import router from './router'
+import store from './store'
 import iView from 'iview'
 import 'iview/dist/styles/iview.css'
 
@@ -15,6 +16,7 @@ Vue.use(iView)
 new Vue({
   el: '#app',
   router,
+  store,
   template: '<App/>',
   components: { App }
 })
