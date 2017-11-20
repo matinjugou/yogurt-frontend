@@ -14,16 +14,7 @@
           <div class="chat-title chat-title-staff-type">
             售后
           </div>
-          <!--<Button type="text" @click="toggleClick">-->
-          <!--<Icon type="navicon" size="32"></Icon>-->
-          <!--</Button>-->
-          <!--<Avatar class="inline-middle" shape="square" icon="person"/>-->
-          <!--<span class="inline-middle">xxx公司</span>-->
-          <!--<span style="float: right;margin-top: 12px;margin-right: 21px">人工客服</span>-->
         </div>
-        <!--<div class="layout-content-msg">-->
-        <!--<div class="layout-content-msg-main">messages</div>-->
-        <!--</div>-->
         <div class="chat-content">
           <Scroll :on-reach-top="getMoreMessage">
             <ul>
@@ -65,42 +56,15 @@
     font-family: 'Avenir', Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    /*text-align: center;*/
     height: 100%;
     margin: 0;
   }
   .layout{
-    /*border: 1px solid #d7dde4;*/
     background: #f5f7f9;
     position: relative;
     border-radius: 4px;
     overflow: hidden;
   }
-  /*.layout-content-msg{*/
-  /*height: calc(100vh - 60px - 30px - 30px - 200px);*/
-  /*margin: 15px;*/
-  /*margin-bottom: 2px;*/
-  /*overflow: hidden;*/
-  /*background: #fff;*/
-  /*border-radius: 4px;*/
-  /*box-shadow: 0 0 1px rgba(0,0,0,.1);*/
-  /*}*/
-  /*.layout-content-msg-main{*/
-  /*padding: 10px;*/
-  /*}*/
-  /*.layout-content-input{*/
-  /*height: 200px;*/
-  /*overflow: hidden;*/
-  /*margin: 15px;*/
-  /*margin-top: 0;*/
-  /*background: #fff;*/
-  /*border-radius: 4px;*/
-  /*box-shadow: 0 1px 1px rgba(0,0,0,.1);*/
-  /*}*/
-  /*.layout-content-input-main{*/
-  /*padding: 10px;*/
-  /*max-height: 200px;*/
-  /*}*/
   .layout-copy{
     text-align: center;
     /*padding: 10px 0 20px;*/
@@ -111,10 +75,6 @@
     background: #464c5b;
   }
   .chat-header{
-    /*font-size: 18px;*/
-    /*height: 60px;*/
-    /*background: #fff;*/
-    /*box-shadow: 0 1px 1px rgba(0,0,0,.1);*/
     height: 60px;
     background: #FFFFFF;
     box-shadow: 0 1px 1px rgba(0,0,0,.1);
@@ -209,30 +169,6 @@
   }
 </style>
 <script>
-  //  export default {
-  //    data () {
-  //      return {
-  //        spanLeft: 5,
-  //        spanRight: 19
-  //      }
-  //    },
-  //    computed: {
-  //      iconSize () {
-  //        return this.spanLeft === 5 ? 14 : 24
-  //      }
-  //    },
-  //    methods: {
-  //      toggleClick () {
-  //        if (this.spanLeft === 5) {
-  //          this.spanLeft = 2
-  //          this.spanRight = 22
-  //        } else {
-  //          this.spanLeft = 5
-  //          this.spanRight = 19
-  //        }
-  //      }
-  //    }
-  //  }
   export default {
     name: 'UserChat',
     data () {
@@ -315,7 +251,6 @@
           type: 'text',
           time: curDate.getYear() + '-' + curDate.getMonth() + '-' + curDate.getDay() + ' ' + curDate.getHours() + ':' + curDate.getMinutes() + ':' + curDate.getSeconds()
         }
-        this.contentList.push(this.cachedMsg)
       }
     },
     sockets: {
@@ -324,6 +259,16 @@
           this.contentList.push(this.cachedMsg)
           this.cachedMsg = {}
         }
+      },
+      staffTextMsg (data) {
+        let newMsg = {
+          msg: data['msg'],
+          from: 'staff_' + data['staffId'],
+          to: this.userId,
+          type: 'text',
+          time: '2017-11-19 15:39:15'
+        }
+        this.contentList.push(newMsg)
       }
     }
   }
