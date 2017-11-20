@@ -9,7 +9,7 @@ import VueSocketio from 'vue-socket.io'
 
 Vue.config.productionTip = false
 Vue.use(iView)
-Vue.use(VueSocketio, 'http://yogurt.magichc7.com/index.js')
+Vue.use(VueSocketio, 'http://yogurt.magichc7.com/websocket')
 
 /* eslint-disable no-new */
 new Vue({
