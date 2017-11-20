@@ -22,7 +22,7 @@
                 <p class="chat-msg-time">
                   <span>{{ singleRecord.time }}</span>
                 </p>
-                <div class="chat-msg-body" :class="[{'from-me': singleRecord.from.startsWith('user')}]">
+                <div class="chat-msg-body" :class="[{'from-me': singleRecord.from.startsWith('u')}]">
                   <div class="avatar chat-single-record">
                     <Avatar shape="square" icon="person"/>
                   </div>
@@ -173,8 +173,8 @@
     name: 'UserChat',
     data () {
       return {
-        userId: 'user_1',
-        staffId: 'staff_2',
+        userId: 'u1',
+        staffId: 's2',
         token: '12345678',
         inputText: '',
         earlistRecordIndex: '',
@@ -183,16 +183,16 @@
           {
             id: '1',
             msg: 'Hello, I\'m staff_1.',
-            from: 'staff_2',
-            to: 'user_1',
+            from: 's2',
+            to: 'u_1',
             type: 'text',
             time: '2017-11-19 15:39:14'
           },
           {
             id: '2',
             msg: 'Hello, I\'m user.',
-            from: 'user_1',
-            to: 'staff_2',
+            from: 'u1',
+            to: 's2',
             type: 'text',
             time: '2017-11-19 15:39:15'
           }
@@ -210,16 +210,16 @@
           {
             id: '3',
             msg: 'Hello, I\'m staff_1.',
-            from: 'staff_2',
-            to: 'user_1',
+            from: 's2',
+            to: 'u1',
             type: 'text',
             time: '2017-11-19 15:39:14'
           },
           {
             id: '4',
             msg: 'Hello, I\'m user.',
-            from: 'user_1',
-            to: 'staff_2',
+            from: 'u1',
+            to: 's2',
             type: 'text',
             time: '2017-11-19 15:39:15'
           }]
@@ -263,7 +263,7 @@
       staffTextMsg (data) {
         let newMsg = {
           msg: data['msg'],
-          from: 'staff_' + data['staffId'],
+          from: 's' + data['staffId'],
           to: this.userId,
           type: 'text',
           time: '2017-11-19 15:39:15'
