@@ -15,8 +15,7 @@
             售后
           </div>
         </div>
-        <div class="chat-content">
-          <Scroll :on-reach-top="getMoreMessage">
+        <div class="chat-content" v-scroll="getMoreMessage" id='userChatContent'>
             <ul>
               <li v-for="(singleRecord, index) in currentChatRecord">
                 <p class="chat-msg-time">
@@ -30,7 +29,6 @@
                 </div>
               </li>
             </ul>
-          </Scroll>
         </div>
         <div class="chat-input-actions">
           <div class="chat-input-media">
@@ -63,7 +61,7 @@
     background: #f5f7f9;
     position: relative;
     border-radius: 4px;
-    overflow: hidden;
+    overflow: auto;
   }
   .layout-copy{
     text-align: center;
@@ -169,6 +167,7 @@
   }
 </style>
 <script>
+  let enableScroll = true
   export default {
     name: 'UserChat',
     data () {
@@ -206,6 +205,10 @@
     },
     methods: {
       getMoreMessage () {
+        enableScroll = false
+
+        // debug
+        console.log('get more message')
         let newMsgs = [
           {
             msg: 'Hello, I\'m staff_1.',
@@ -230,14 +233,12 @@
 //        this.earlistRecordIndex = data['index']
 //      }, (response) => {
 //      })
-        return new Promise(resolve => {
-          setTimeout(() => {
-            for (let i = 0; i < 2; i++) {
-              this.contentList.unshift(newMsgs[i])
-            }
-            resolve()
-          }, 200)
-        })
+        setTimeout(() => {
+          for (let i = 0; i < 2; i++) {
+            this.contentList.unshift(newMsgs[i])
+          }
+          enableScroll = true
+        }, 200)
       },
       sendMessage () {
         // debug
@@ -252,6 +253,12 @@
           time: curDate.getFullYear() + '-' + curDate.getMonth() + '-' + curDate.getDay() + ' ' + curDate.getHours() + ':' + curDate.getMinutes() + ':' + curDate.getSeconds()
         }
         this.inputText = ''
+      },
+      scrollToBottom () {
+        this.$nextTick(() => {
+          let el = document.getElementById('userChatContent')
+          el.scrollTop = el.scrollHeight
+        })
       }
     },
     created () {
@@ -275,15 +282,29 @@
           time: data['time']
         }
         this.contentList.push(newMsg)
+        this.scrollToBottom()
       })
       this.socket.on('sendResult', (data) => {
         // debug
         console.log('receive sendResult: code: ' + data['code'] + ', msg: ' + data['msg'])
         if (data['code'] === 1) {
           this.contentList.push(this.cachedMsg)
-          this.cachedMsg = {}
+          this.scrollToBottom()
         }
       })
+    },
+    directives: {
+      scroll: {
+        bind: function (el, binding) {
+          el.addEventListener('scroll', () => {
+            console.log('scrolly: ' + el.scrollTop)
+            if (el.scrollTop === 0 && enableScroll) {
+              let fnc = binding.value
+              fnc()
+            }
+          })
+        }
+      }
     }
   }
 </script>
