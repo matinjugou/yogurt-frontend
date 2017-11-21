@@ -270,6 +270,16 @@
         }
         this.contentList.push(newMsg)
       }
+    },
+    created () {
+      const io = require('socket.io-client')
+      this.socket = io('http://yogurt.magichc7.com')
+      this.socket.emit('userReg', {userId: this.userId, token: this.userId + '_token'})
+      // debug
+      console.log('Sent userReg.')
+      this.socket.on('regResult', (code, msg) => {
+        console.log('Register result: code ' + code + '& msg ' + msg)
+      })
     }
   }
 </script>
