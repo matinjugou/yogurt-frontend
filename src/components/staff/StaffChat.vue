@@ -76,7 +76,7 @@
                 <p class="chat-msg-time">
                   <span>{{ singleRecord.time }}</span>
                 </p>
-                <div class="chat-msg-body" :class="[{'from-me': singleRecord.from.startsWith('s')}]">
+                <div class="chat-msg-body" :class="[{'from-me': singleRecord.from.indexOf('s') >= 0}]">
                   <div class="chat-single-record" v-if="singleRecord.hasSent === false">
                     <Spin></Spin>
                   </div>
@@ -126,12 +126,12 @@ export default {
       inputText: '',
       userList: [
         {
-          userid: 'u1',
+          userid: '1_u1',
           userName: '用户1',
           status: 'chatting'
         },
         {
-          userid: 'u2',
+          userid: '1_u2',
           userName: '用户2',
           status: 'chatting'
         }
@@ -215,20 +215,21 @@ export default {
     }
     const io = require('socket.io-client')
     // socket url
-    this.socket = io('http://yogurt.magichc7.com', {
-      path: '/websocket'
-    })
+    this.socket = io(this.$store.state.socketServerUrl)
     // TODO:
     // 's1' -> real staff id
     // 's1_token' -> real token
-    this.socket.emit('staffReg', this.$store.state.staffId, 's1_token')
+    this.socket.emit('staffReg', {
+      staffId: this.$store.state.staffId,
+      token: 's1_token'
+    })
     // TODO:
     // deal with register result
-    this.socket.on('regResult', (code, msg) => {
-      console.log('Register result: code ' + code + '& msg ' + msg)
-      if (code === 0) {
+    this.socket.on('regResult', (data) => {
+      console.log('Register result: code ' + data.code + '& msg ' + data.msg)
+      if (data.code === 0) {
         this.$Message.error({
-          content: msg,
+          content: data.msg,
           duration: 3,
           closable: true
         })
@@ -237,11 +238,11 @@ export default {
     // TODO:
     // deal with send failure
     // also timeout affair should be taken care of
-    this.socket.on('sendResult', (code, msg) => {
-      console.log('Send result: code ' + code + '& msg ' + msg)
-      if (code === 0) {
+    this.socket.on('sendResult', (data) => {
+      console.log('Send result: code ' + data.code + '& msg ' + data.msg)
+      if (data.code === 0) {
         this.$Message.error({
-          content: msg,
+          content: data.msg,
           duration: 3,
           closable: true
         })
@@ -249,13 +250,13 @@ export default {
 
       }
     })
-    this.socket.on('userTextMsg', (from, msg) => {
-      console.log('User text message: from ' + from + '& msg ' + msg)
+    this.socket.on('userTextMsg', (data) => {
+      console.log('User text message: from ' + data.from + '& msg ' + data.msg)
       let date = new Date()
       this.contentList.push({
-        'from': from,
+        'from': data.from,
         'to': this.$store.state.staffId,
-        'msg': msg,
+        'msg': data.msg,
         'type': 'text',
         'time': date.toLocaleTimeString('zh-Hans-CN')
       })
