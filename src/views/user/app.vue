@@ -249,8 +249,9 @@
           from: this.userId,
           to: this.staffId,
           type: 'text',
-          time: curDate.getYear() + '-' + curDate.getMonth() + '-' + curDate.getDay() + ' ' + curDate.getHours() + ':' + curDate.getMinutes() + ':' + curDate.getSeconds()
+          time: curDate.getFullYear() + '-' + curDate.getMonth() + '-' + curDate.getDay() + ' ' + curDate.getHours() + ':' + curDate.getMinutes() + ':' + curDate.getSeconds()
         }
+        this.inputText = ''
       }
     },
     created () {
@@ -278,7 +279,7 @@
       this.socket.on('sendResult', (data) => {
         // debug
         console.log('receive sendResult: code: ' + data['code'] + ', msg: ' + data['msg'])
-        if (data['code'] === '1') {
+        if (data['code'] === 1) {
           this.contentList.push(this.cachedMsg)
           this.cachedMsg = {}
         }
