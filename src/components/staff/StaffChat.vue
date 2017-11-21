@@ -178,7 +178,7 @@ export default {
       let sendMsg = this.inputText
       if (sendMsg === '') {
         this.$Message.warning({
-          content: '不可以发送空消息',
+          content: '不可以发送空消息！',
           duration: 3,
           closable: true
         })
@@ -195,7 +195,7 @@ export default {
         'time': date.toLocaleTimeString('zh-Hans-CN')
         // 'hasSent': false
       })
-      // TODO: send message
+      // TODO: change the token part
       this.socket.emit('staffTextMsg', {
         'staffId': this.$store.state.staffId,
         'userId': this.chatUserId,
@@ -223,8 +223,7 @@ export default {
       staffId: this.$store.state.staffId,
       token: 's1_token'
     })
-    // TODO:
-    // deal with register result
+    // TODO: deal with register result
     this.socket.on('regResult', (data) => {
       console.log('Register result: code ' + data.code + '& msg ' + data.msg)
       if (data.code === 0) {
@@ -235,8 +234,7 @@ export default {
         })
       }
     })
-    // TODO:
-    // deal with send failure
+    // TODO: deal with send failure
     // also timeout affair should be taken care of
     this.socket.on('sendResult', (data) => {
       console.log('Send result: code ' + data.code + '& msg ' + data.msg)

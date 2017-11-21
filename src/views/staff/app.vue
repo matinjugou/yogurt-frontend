@@ -72,6 +72,9 @@ export default {
     },
     spanRight () {
       return 24 - this.spanLeft
+    },
+    isLogin () {
+      return this.$store.state.isLogin
     }
   },
   methods: {
@@ -92,8 +95,20 @@ export default {
       }
     }
   },
+  watch: {
+    isLogin: function (val) {
+      if (this.isLogin === false) {
+        this.$router.push('/login')
+      } else {
+        this.spanLeft = 3
+        this.$router.push('/index')
+      }
+    }
+  },
   created () {
-    if (this.$store.state.isLogin === false) {
+    // TODO: if token appears
+    // change login status use this.$store.commit('login')
+    if (this.isLogin === false) {
       this.$router.push('/login')
     } else {
       this.spanLeft = 3
