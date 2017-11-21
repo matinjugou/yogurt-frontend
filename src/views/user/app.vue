@@ -241,6 +241,8 @@
         })
       },
       sendMessage () {
+        // debug
+        console.log('Sent usertext')
         this.socket.emit('userTextMsg', {staffId: this.staffId, userId: this.userId, token: this.token, msg: this.inputText})
         let curDate = new Date()
         this.cachedMsg = {

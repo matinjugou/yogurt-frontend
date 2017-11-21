@@ -9,7 +9,6 @@ import 'iview/dist/styles/iview.css'
 
 Vue.config.productionTip = false
 Vue.use(iView)
-// Vue.use(VueSocketio, '"http://yogurt.magichc7.com')
 
 /* eslint-disable no-new */
 new Vue({

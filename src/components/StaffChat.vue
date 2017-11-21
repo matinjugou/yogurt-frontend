@@ -215,7 +215,9 @@ export default {
     }
     const io = require('socket.io-client')
     // socket url
-    this.socket = io('http://yogurt.magichc7.com')
+    this.socket = io('http://yogurt.magichc7.com', {
+      path: '/websocket'
+    })
     // TODO:
     // 's1' -> real staff id
     // 's1_token' -> real token
