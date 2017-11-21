@@ -6,8 +6,8 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     socketServerUrl: 'http://yogurt.magichc7.com',
-    isLogin: false,
-    staffId: 's1'
+    isLogin: true,
+    staffId: '1_s1'
   },
   mutations: {
     login (state) {
