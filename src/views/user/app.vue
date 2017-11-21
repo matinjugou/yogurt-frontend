@@ -18,11 +18,11 @@
         <div class="chat-content">
           <Scroll :on-reach-top="getMoreMessage">
             <ul>
-              <li v-for="(singleRecord, index) in currentChatRecord" :key="singleRecord.id">
+              <li v-for="(singleRecord, index) in currentChatRecord">
                 <p class="chat-msg-time">
                   <span>{{ singleRecord.time }}</span>
                 </p>
-                <div class="chat-msg-body" :class="[{'from-me': singleRecord.from.startsWith('u')}]">
+                <div class="chat-msg-body" :class="[{'from-me': singleRecord.from.startsWith('1_u')}]">
                   <div class="avatar chat-single-record">
                     <Avatar shape="square" icon="person"/>
                   </div>
@@ -173,8 +173,8 @@
     name: 'UserChat',
     data () {
       return {
-        userId: 'u1',
-        staffId: 's2',
+        userId: '1_u1', // companyid + '_' + u + userid
+        staffId: '1_s1',
         token: '12345678',
         inputText: '',
         earlistRecordIndex: '',
@@ -183,16 +183,16 @@
           {
             id: '1',
             msg: 'Hello, I\'m staff_1.',
-            from: 's2',
-            to: 'u_1',
+            from: '1_s1',
+            to: '1_u1',
             type: 'text',
             time: '2017-11-19 15:39:14'
           },
           {
             id: '2',
             msg: 'Hello, I\'m user.',
-            from: 'u1',
-            to: 's2',
+            from: '1_u1',
+            to: '1_s1',
             type: 'text',
             time: '2017-11-19 15:39:15'
           }
@@ -208,18 +208,17 @@
       getMoreMessage () {
         let newMsgs = [
           {
-            id: '3',
             msg: 'Hello, I\'m staff_1.',
-            from: 's2',
-            to: 'u1',
+            from: '1_s1',
+            to: '1_u1',
             type: 'text',
             time: '2017-11-19 15:39:14'
           },
           {
             id: '4',
             msg: 'Hello, I\'m user.',
-            from: 'u1',
-            to: 's2',
+            from: '1_u1',
+            to: '1_s1',
             type: 'text',
             time: '2017-11-19 15:39:15'
           }]
@@ -241,11 +240,12 @@
         })
       },
       sendMessage () {
-        this.$socket.emit('userTextMsg', {staffId: this.staffId, userId: this.userId, token: this.token, msg: this.inputText})
+        // debug
+        console.log('Sent userTextMsg')
+        this.socket.emit('userTextMsg', {staffId: this.staffId, userId: this.userId, token: this.token, msg: this.inputText})
         let curDate = new Date()
         this.cachedMsg = {
-          id: '???',  // TODO: get this from backend?
-          msg: 'message', // TODO: how to get this?
+          msg: this.inputText, // TODO: how to get this?
           from: this.userId,
           to: this.staffId,
           type: 'text',
@@ -253,23 +253,36 @@
         }
       }
     },
-    sockets: {
-      sendResult (data) {
+    created () {
+      const io = require('socket.io-client')
+      this.socket = io('http://yogurt.magichc7.com')
+      this.socket.emit('userReg', {userId: this.userId, token: this.userId + '_token'})
+      // debug
+      console.log('Sent userReg.')
+      this.socket.on('regResult', (data) => {
+        // debug
+        console.log('Register result: code: ' + data['code'] + ', msg: ' + data['msg'])
+      })
+      this.socket.on('staffTextMsg', (data) => {
+        // debug
+        console.log('receive staffTextMsg: msg: ' + data['msg'] + ', from' + data['from'] + ', type: ' + data['type'] + ', time: ' + data['time'])
+        let newMsg = {
+          msg: data['msg'],
+          from: data['from'],
+          to: this.userId,
+          type: data['type'],
+          time: data['time']
+        }
+        this.contentList.push(newMsg)
+      })
+      this.socket.on('sendResult', (data) => {
+        // debug
+        console.log('receive sendResult: code: ' + data['code'] + ', msg: ' + data['msg'])
         if (data['code'] === '1') {
           this.contentList.push(this.cachedMsg)
           this.cachedMsg = {}
         }
-      },
-      staffTextMsg (data) {
-        let newMsg = {
-          msg: data['msg'],
-          from: 's' + data['staffId'],
-          to: this.userId,
-          type: 'text',
-          time: '2017-11-19 15:39:15'
-        }
-        this.contentList.push(newMsg)
-      }
+      })
     }
   }
 </script>
