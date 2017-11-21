@@ -215,13 +215,14 @@ export default {
     }
     const io = require('socket.io-client')
     // socket url
-    this.socket = io('http://yogurt.magichc7.com', {
-      path: '/websocket'
-    })
+    this.socket = io(this.$store.state.socketServerUrl)
     // TODO:
     // 's1' -> real staff id
     // 's1_token' -> real token
-    this.socket.emit('staffReg', this.$store.state.staffId, 's1_token')
+    this.socket.emit('staffReg', {
+      staffId: this.$store.state.staffId,
+      token: 's1_token'
+    })
     // TODO:
     // deal with register result
     this.socket.on('regResult', (code, msg) => {
