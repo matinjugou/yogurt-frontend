@@ -241,7 +241,9 @@
         })
       },
       sendMessage () {
-        this.$socket.emit('userTextMsg', {staffId: this.staffId, userId: this.userId, token: this.token, msg: this.inputText})
+        // debug
+        console.log('Sent usertext')
+        this.socket.emit('userTextMsg', {staffId: this.staffId, userId: this.userId, token: this.token, msg: this.inputText})
         let curDate = new Date()
         this.cachedMsg = {
           id: '???',  // TODO: get this from backend?
@@ -253,23 +255,38 @@
         }
       }
     },
-    sockets: {
-      sendResult (data) {
-        if (data['code'] === '1') {
+    created () {
+      const io = require('socket.io-client')
+      this.socket = io('http://yogurt.magichc7.com')
+      this.socket.emit('userReg', {userId: this.userId, token: this.userId + '_token'})
+      // debug
+      console.log('Sent userReg.')
+      this.socket.on('regResult', (code, msg) => {
+        // debug
+        console.log('Register result: code ' + code + '& msg ' + msg)
+      })
+      this.socket.on('staffTextMsg', (code, msg) => {
+        // debug
+        console.log('receive stafftextmsg')
+        if (code === 1) {
+          let newMsg = {
+            msg: msg,
+            from: 's' + this.staffId,
+            to: this.userId,
+            type: 'text',
+            time: '2017-11-19 15:39:15'
+          }
+          this.contentList.push(newMsg)
+        }
+      })
+      this.socket.on('sendResult', (code, msg) => {
+        // debug
+        console.log('receive sendresult')
+        if (code === 1) {
           this.contentList.push(this.cachedMsg)
           this.cachedMsg = {}
         }
-      },
-      staffTextMsg (data) {
-        let newMsg = {
-          msg: data['msg'],
-          from: 's' + data['staffId'],
-          to: this.userId,
-          type: 'text',
-          time: '2017-11-19 15:39:15'
-        }
-        this.contentList.push(newMsg)
-      }
+      })
     }
   }
 </script>
