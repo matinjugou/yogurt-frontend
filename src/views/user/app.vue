@@ -25,21 +25,35 @@
                   <div class="avatar chat-single-record">
                     <Avatar shape="square" icon="person"/>
                   </div>
-                  <div class="content chat-single-record" :class="[singleRecord.type]">{{ singleRecord.msg }}</div>
+                  <div v-if="singleRecord.type === 'text'" class="content chat-single-record">
+                    {{ singleRecord.msg }}
+                  </div>
+                  <div v-else-if="singleRecord.type === 'file' && singleRecord.from === staffId" @click="downloadFile" class="content chat-single-record" style="cursor: pointer">
+                    {{ singleRecord.msg }}
+                  </div>
+                  <div v-else-if="singleRecord.type === 'file' && singleRecord.from === userId" @click="showLocalFile" class="content chat-single-record" style="cursor: pointer">
+                    <div style="float: left; margin: 10px; margin-left: 0;">
+                    <template :class="[{'fileicon-doc': singleRecord.suffix.startsWith('doc')}, {'fileicon-pdf': singleRecord.suffix.startsWith('pdf')}, {'fileicon-txt': singleRecord.suffix.startsWith('txt')}, {'fileicon-xls': singleRecord.suffix.startsWith('xls')}]" style="float: left; margin: 10px; margin-left: 0;"></template>
+                    <div style="float: right">
+                      {{ singleRecord.msg }}
+                    </div>
+                    </div>
+                  </div>
                 </div>
               </li>
             </ul>
         </div>
         <div class="chat-input-actions">
           <div class="chat-input-media">
-            <Button type="ghost" icon="document">文件</Button>
+            <input type="file" ref="uploadFile" style="display:none" @change="handleUploadChange">
+            <Button type="ghost" icon="document" @click="clickUploadFile">文件</Button>
             <Button type="ghost" icon="happy">表情</Button>
-            <Button type="ghost">历史消息</Button>
+            <Button type="ghost file">历史消息</Button>
             <Button type="ghost" icon="monitor">截图</Button>
           </div>
           <div class="chat-input-send">
-            <Button type="success" icon="paper-airplane" @click="sendMessage">发送</Button>
-          </div>
+          <Button type="success" icon="paper-airplane" @click="sendMessage">发送</Button>
+        </div>
         </div>
         <div class="chat-input">
           <Input v-model="inputText" type="textarea" :rows="8" placeholder="在这里输入信息，按Ctrl+Enter发送"></Input>
@@ -146,6 +160,38 @@
     left: 100%;
     border-right-color: transparent;
     border-left-color: #2d8cf0;
+  }
+  .fileicon-doc,
+  .fileicon-pdf,
+  .fileicon-txt,
+  .fileicon-xls
+  {
+    background: url('./assets/file_icon.png');
+  }
+  .fileicon-doc {
+    width: 80px;
+    height: 80px;
+    background-position: 0 0;
+  }
+  .fileicon-pdf {
+    width: 80px;
+    height: 80px;
+    background-position: -90px 0;
+  }
+  .fileicon-txt {
+    width: 80px;
+    height: 80px;
+    background-position: -180px 0;
+  }
+  .fileicon-unknown {
+    width: 80px;
+    height: 80px;
+    background-position: -270px 0;
+  }
+  .fileicon-xls {
+    width: 80px;
+    height: 80px;
+    background-position: -360px 0;
   }
   .chat-input-actions{
     height: 50px;
@@ -259,14 +305,46 @@
           let el = document.getElementById('userChatContent')
           el.scrollTop = el.scrollHeight
         })
+      },
+      clickUploadFile () {
+        this.$refs.uploadFile.click()
+      },
+      handleUploadChange () {
+        let inputDOM = this.$refs.uploadFile
+        let len = inputDOM.files.length
+        if (len === 0) {
+          return
+        }
+        for (let i = 0; i < len; i++) {
+          let file = inputDOM.files[i]
+          let curDate = new Date()
+          let fileRecord = {
+            msg: file.name,
+            from: this.userId,
+            to: this.staffId,
+            type: 'file',
+            suffix: file.name.substr(file.name.lastIndexOf('.') + 1),
+            time: curDate.getFullYear() + '-' + curDate.getMonth() + '-' + curDate.getDay() + ' ' + curDate.getHours() + ':' + curDate.getMinutes() + ':' + curDate.getSeconds()
+          }
+          this.contentList.push(fileRecord)
+          this.scrollToBottom()
+        }
+      },
+      downloadFile () {
+        // debug
+        console.log('downloadFile')
+      },
+      showLocalFile () {
+        // debug
+        console.log('showLocalFile')
       }
     },
     created () {
       const io = require('socket.io-client')
       this.socket = io('http://yogurt.magichc7.com')
-      this.socket.emit('userReg', {userId: this.userId, token: this.userId + '_token'})
-      // debug
-      console.log('Sent userReg.')
+//      this.socket.emit('userReg', {userId: this.userId, token: this.userId + '_token'})
+//      // debug
+//      console.log('Sent userReg.')
       this.socket.on('regResult', (data) => {
         // debug
         console.log('Register result: code: ' + data['code'] + ', msg: ' + data['msg'])
