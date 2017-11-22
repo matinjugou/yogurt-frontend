@@ -32,11 +32,9 @@
                     {{ singleRecord.msg }}
                   </div>
                   <div v-else-if="singleRecord.type === 'file' && singleRecord.from === userId" @click="showLocalFile" class="content chat-single-record" style="cursor: pointer">
-                    <div style="float: left; margin: 10px; margin-left: 0;">
-                    <template :class="[{'fileicon-doc': singleRecord.suffix.startsWith('doc')}, {'fileicon-pdf': singleRecord.suffix.startsWith('pdf')}, {'fileicon-txt': singleRecord.suffix.startsWith('txt')}, {'fileicon-xls': singleRecord.suffix.startsWith('xls')}]" style="float: left; margin: 10px; margin-left: 0;"></template>
+                    <div :class="[{'fileicon-doc': singleRecord.suffix.startsWith('doc')}, {'fileicon-pdf': singleRecord.suffix.startsWith('pdf')}, {'fileicon-txt': singleRecord.suffix.startsWith('txt')}, {'fileicon-xls': singleRecord.suffix.startsWith('xls')}]" style="float: left; margin: 10px; margin-left: 0;"></div>
                     <div style="float: right">
                       {{ singleRecord.msg }}
-                    </div>
                     </div>
                   </div>
                 </div>
@@ -63,7 +61,7 @@
           </div>
           <div class="chat-input-send">
           <Button type="success" icon="paper-airplane" @click="sendMessage">发送</Button>
-        </div>
+          </div>
         </div>
         <div class="chat-input">
           <Input v-model="inputText" type="textarea" :rows="8" placeholder="在这里输入信息，按Ctrl+Enter发送"></Input>
