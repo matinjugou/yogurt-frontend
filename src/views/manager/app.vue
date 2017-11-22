@@ -32,8 +32,8 @@
               <Icon type="ios-paper"></Icon>
               客服管理
             </template>
-            <MenuItem name="2-1">
-              <router-link to="/stfmgn">客服管理</router-link>
+            <MenuItem name="2-1" @click.native="jump('/stfmgn')">
+              客服管理
             </MenuItem>
           </Submenu>
           <Submenu name="3">
@@ -41,11 +41,11 @@
               <Icon type="ios-paper"></Icon>
               设置
             </template>
-            <MenuItem name="3-1">
-              <router-link to="/settings-robot">机器人设置</router-link>
+            <MenuItem name="3-1" @click.native="jump('/settings-robot')">
+              机器人设置
             </MenuItem>
-            <MenuItem name="3-2">
-              <router-link to="/settings-quickrly">快捷回复设置</router-link>
+            <MenuItem name="3-2" @click.native="jump('/settings-quickrly')">
+              快捷回复设置
             </MenuItem>
             <MenuItem name="3-3">购买设置</MenuItem>
             <MenuItem name="3-4">企业信息设置</MenuItem>
@@ -68,6 +68,10 @@
     computed: {
     },
     methods: {
+      jump: function (str) {
+        console.log('jump')
+        this.$router.push(str)
+      }
     }
   }
 </script>

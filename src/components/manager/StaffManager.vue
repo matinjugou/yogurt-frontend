@@ -9,13 +9,24 @@
     <div class="layout-content">
       <div class="layout-content-main">
         <Row style="margin-bottom: 10px">
-          <Button style="float: left" type="info">新增客服</Button>
-          <Input v-model="searchname"
+          <Button style="float: left" @click="newStaffModal = true" type="info">新增客服</Button>
+          <Modal
+            v-model="newStaffModal"
+            title="新增客服"
+            width="200"
+            @on-ok="newStaffModalOk"
+            @on-cancel="newStaffModalCancel">
+            <span style="margin-bottom: 7px">
+              数量
+            </span>
+            <InputNumber :min="1" v-model="newStaffNum"></InputNumber>
+          </Modal>
+          <Input v-model="searchName"
                  icon="ios-search-strong"
                  placeholder="请输入姓名..."
                  style="float: right;width: 200px;"/>
         </Row>
-        <Table border :columns="staffcolumn" :data="filteredstaffdata"></Table>
+        <Table border :columns="staffColumn" :data="filteredstaffdata"></Table>
       </div>
     </div>
     <div class="layout-copy">
@@ -31,8 +42,10 @@
     name: 'staffmanager',
     data () {
       return {
-        searchname: '',
-        staffcolumn: [
+        newStaffModal: false,
+        newStaffNum: 0,
+        searchName: '',
+        staffColumn: [
           {
             title: '客服ID',
             key: 'staffId'
@@ -157,7 +170,7 @@
         } else {
           let tmpstaff = []
           for (let per of this.staffdata) {
-            if (per.name.indexOf(this.searchname) >= 0) {
+            if (per.name.indexOf(this.searchName) >= 0) {
               tmpstaff.push(per)
             }
           }
@@ -166,6 +179,22 @@
       }
     },
     methods: {
+      newStaffModalOk () {
+        const self = this
+        axios.post('http://yogurt.magichc7.com/api/manager/staff', {
+          number: self.newStaffNum,
+          companyId: 1
+        }).then(function (response) {
+          console.log(response.data.data)
+        }).catch(function (error) {
+          console.log(error)
+          self.$Message.info('Clicked cancel')
+        })
+        self.$Message.info('Clicked ok')
+      },
+      newStaffModalCancel () {
+        this.$Message.info('Clicked cancel')
+      }
     },
     created: function () {
       const self = this
