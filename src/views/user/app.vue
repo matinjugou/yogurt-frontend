@@ -15,7 +15,7 @@
             售后
           </div>
         </div>
-        <div class="chat-content" v-scroll="getMoreMessage" id='userChatContent'>
+        <div class="chat-content" v-scroll="getMoreMessage" ref="userChatContent">
             <ul>
               <li v-for="(singleRecord, index) in currentChatRecord">
                 <p class="chat-msg-time">
@@ -28,13 +28,19 @@
                   <div v-if="singleRecord.type === 'text'" class="content chat-single-record">
                     {{ singleRecord.msg }}
                   </div>
-                  <div v-else-if="singleRecord.type === 'file' && singleRecord.from === staffId" @click="downloadFile" class="content chat-single-record" style="cursor: pointer">
-                    {{ singleRecord.msg }}
-                  </div>
-                  <div v-else-if="singleRecord.type === 'file' && singleRecord.from === userId" @click="showLocalFile" class="content chat-single-record" style="cursor: pointer">
-                    <div :class="[{'fileicon-doc': singleRecord.suffix.startsWith('doc')}, {'fileicon-pdf': singleRecord.suffix.startsWith('pdf')}, {'fileicon-txt': singleRecord.suffix.startsWith('txt')}, {'fileicon-xls': singleRecord.suffix.startsWith('xls')}]" style="float: left; margin: 10px; margin-left: 0;"></div>
+                  <div v-else-if="singleRecord.type === 'file'" @click="singleRecord.from === staffId ? downloadFile() : showLocalFile()" class="content chat-single-record" style="cursor: pointer">
+                    <div v-if="singleRecord.suffix.startsWith('doc')" class="fileicon-doc"></div>
+                    <div v-else-if="singleRecord.suffix.startsWith('pdf')" class="fileicon-pdf"></div>
+                    <div v-else-if="singleRecord.suffix.startsWith('xls')" class="fileicon-xls"></div>
+                    <div v-else-if="singleRecord.suffix.startsWith('txt')" class="fileicon-txt"></div>
+                    <div v-else class="fileicon-unknown"></div>
                     <div style="float: right">
-                      {{ singleRecord.msg }}
+                      <div class="file-name">
+                        {{ singleRecord.msg }}
+                      </div>
+                      <div class="file-size">
+                        {{ singleRecord.size }}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -163,6 +169,22 @@
     color: #ffffff;
     background-color: #2d8cf0;
   }
+  .file-name {
+    margin-top: 10px;
+    line-height: 22px;
+    height: 50px;
+    width: 240px;
+    overflow: hidden;
+  }
+  .file-size {
+    position: absolute;
+    bottom: 0;
+    margin-right: 10px;
+    line-height: 22px;
+    height: 30px;
+    width: 240px;
+    overflow: hidden;
+  }
   .from-me > .content::before {
     right: inherit;
     left: 100%;
@@ -172,8 +194,12 @@
   .fileicon-doc,
   .fileicon-pdf,
   .fileicon-txt,
-  .fileicon-xls
+  .fileicon-xls,
+  .fileicon-unknown
   {
+    float: left;
+    margin: 10px;
+    margin-left: 0;
     background: url('./assets/file_icon.png');
   }
   .fileicon-doc {
@@ -313,6 +339,8 @@
           for (let i = 0; i < 2; i++) {
             this.contentList.unshift(newMsgs[i])
           }
+          let el = this.$refs.userChatContent
+          el.scrollTop = 100
           enableScroll = true
         }, 200)
       },
@@ -332,7 +360,7 @@
       },
       scrollToBottom () {
         this.$nextTick(() => {
-          let el = document.getElementById('userChatContent')
+          let el = this.$refs.userChatContent
           el.scrollTop = el.scrollHeight
         })
       },
@@ -341,18 +369,23 @@
       },
       handleUploadChange () {
         let inputDOM = this.$refs.uploadFile
-        let len = inputDOM.files.length
+        let files = inputDOM.files
+        this.handleChosenFiles(files)
+      },
+      handleChosenFiles (files) {
+        let len = files.length
         if (len === 0) {
           return
         }
         for (let i = 0; i < len; i++) {
-          let file = inputDOM.files[i]
+          let file = files[i]
           let curDate = new Date()
           let fileRecord = {
             msg: file.name,
             from: this.userId,
             to: this.staffId,
             type: 'file',
+            size: file.size + ' KB',
             suffix: file.name.substr(file.name.lastIndexOf('.') + 1),
             time: curDate.getFullYear() + '-' + curDate.getMonth() + '-' + curDate.getDay() + ' ' + curDate.getHours() + ':' + curDate.getMinutes() + ':' + curDate.getSeconds()
           }
@@ -371,6 +404,28 @@
       insertEmoji (emoji, event) {
         this.inputText += emoji.native
         console.log(this.inputText)
+      },
+      preventDefaultEvent (eventName) {
+        document.addEventListener(eventName, function (e) {
+          e.preventDefault()
+        }, false)
+      },
+      addDropSupport () {
+        let chatwindow = this.$refs.userChatContent
+        chatwindow.addEventListener('drop', (e) => {
+          e.preventDefault()
+//          if (this.readonly) return false
+//          this.errText = ''
+          let fileList = e.dataTransfer.files
+          if (fileList.length === 0) {
+            return false
+          }
+          if (fileList.length > 1) {
+//            this.errText = '暂不支持多文件'
+            return false
+          }
+          this.handleChosenFiles(fileList)
+        })
       }
     },
     created () {
@@ -417,6 +472,12 @@
           })
         }
       }
+    },
+    mounted () {
+      ['dragleave', 'drop', 'dragenter', 'dragover'].forEach(e => {
+        this.preventDefaultEvent(e)
+      })
+      this.addDropSupport()
     }
   }
 </script>
