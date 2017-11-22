@@ -1,11 +1,11 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import StaffLogin from '@/components/StaffLogin'
-import StaffHello from '@/components/StaffHello'
-import StaffChat from '@/components/StaffChat'
-import StaffInfo from '@/components/StaffInfo'
-import StaffQuickReply from '@/components/StaffQuickReply'
-import StaffFeedback from '@/components/StaffFeedback'
+import StaffLogin from '@/components/staff/StaffLogin'
+import StaffHello from '@/components/staff/StaffHello'
+import StaffChat from '@/components/staff/StaffChat'
+import StaffInfo from '@/components/staff/StaffInfo'
+import StaffQuickReply from '@/components/staff/StaffQuickReply'
+import StaffFeedback from '@/components/staff/StaffFeedback'
 
 Vue.use(Router)
 

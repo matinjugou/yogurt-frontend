@@ -1,0 +1,125 @@
+<template>
+  <div class="right-content">
+    <link href="https://cdn.bootcss.com/vuetify/0.17.0/vuetify.min.css" rel="stylesheet">
+    <div class="layout-header">
+      <Row type="flex" justify="start" style="padding-left: 10px;padding-top: 10px">
+        <h1 style="padding-left: 5px;border-left: 5px solid #2baee9">机器人设置
+        </h1>
+      </Row>
+    </div>
+    <div class="layout-content" style="width: 960px;min-width: 960px; overflow: auto">
+      <div class="layout-content-main">
+        <Row type="flex">
+          <div class="img-container" style="width: 307px;height: 307px">
+            <img src="http://pic.58pic.com/58pic/13/19/78/59U58PICDad_1024.jpg" center width="300px" height="300px">
+          </div>
+          <div style="padding-left: 20px">
+            <Card style="width: 600px; height:307px">
+              <h2 slot="title">
+                {{ robotName }}
+              </h2>
+              <a href="#" slot="extra" @click.prevent="changeRobotName">
+                <Icon type="edit"></Icon>
+                修改昵称
+              </a>
+              <div style="max-height:240px; overflow: auto">
+                <h5>基本信息</h5>
+                <p>XXX公司专属客服机器人</p>
+                <h5>诞生日期</h5>
+                <p>2017年11月22日</p>
+                <h5>专攻领域</h5>
+                <p>软件工程</p>
+              </div>
+          </Card>
+          </div>
+        </Row>
+      </div>
+    </div>
+    <div style="margin: 15px">
+      <Row type="flex" style="padding-bottom: 7px; margin-bottom: 10px;border-bottom: 1px solid #e9eaec">
+        <h3 style="padding-left: 5px;border-left: 5px solid orange">
+          消息设置
+        </h3>
+      </Row>
+      <Row>
+        <h4 style="margin-bottom: 7px">
+          接入时显示的消息
+        </h4>
+        <Input v-model="inMessage"
+               type="textarea"
+               placeholder="Enter something..."
+               style="margin-bottom: 10px"/>
+      </Row>
+      <Row>
+        <h4 style="margin-bottom: 7px">
+          结束服务时显示的消息
+        </h4>
+        <Input v-model="inMessage"
+               type="textarea"
+               placeholder="Enter something..."
+               style="margin-bottom: 10px"/>
+      </Row>
+      <Row>
+        <h4 style="margin-bottom: 7px">
+          转接时显示的消息
+        </h4>
+        <Input v-model="inMessage"
+               type="textarea"
+               placeholder="Enter something..."/>
+      </Row>
+    </div>
+    <div class="layout-copy">
+      2017-2017 &copy; HJZY开发小组
+    </div>
+  </div>
+</template>
+
+<script>
+  export default {
+    name: 'robotmanager',
+    data () {
+      return {
+        robotName: 'Yogurt'
+      }
+    },
+    methods: {
+      changeRobotName: function () {
+      }
+    }
+  }
+</script>
+
+<style scoped>
+  .right-content {
+    min-height: 100vh;
+  }
+  .layout-header{
+    height: 60px;
+    background: #fff;
+    box-shadow: 0 1px 1px rgba(0,0,0,.1);
+  }
+  .layout-content{
+    min-height: 200px;
+    margin: 15px;
+    overflow: hidden;
+    background: #fff;
+    border-radius: 4px;
+  }
+  .layout-content-main{
+    padding: 10px;
+  }
+  .layout-copy{
+    text-align: center;
+    padding: 10px 0 20px;
+    color: #9ea7b4;
+  }
+  .img-container {
+    transition: box-shadow 0.2s;
+    padding: 2px;
+    border: 1px solid #e9eaec;
+    border-radius: 2px;
+  }
+  .img-container:hover{
+    box-shadow: 0 0 1px 1px rgba(0,0,0,.1);
+  }
+</style>
