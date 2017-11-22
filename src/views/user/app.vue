@@ -29,19 +29,24 @@
                     {{ singleRecord.msg }}
                   </div>
                   <div v-else-if="singleRecord.type === 'file'" @click="singleRecord.from === staffId ? downloadFile() : showLocalFile()" class="content chat-single-record" style="cursor: pointer">
-                    <div v-if="singleRecord.suffix.startsWith('doc')" class="fileicon-doc"></div>
-                    <div v-else-if="singleRecord.suffix.startsWith('pdf')" class="fileicon-pdf"></div>
-                    <div v-else-if="singleRecord.suffix.startsWith('xls')" class="fileicon-xls"></div>
-                    <div v-else-if="singleRecord.suffix.startsWith('txt')" class="fileicon-txt"></div>
-                    <div v-else class="fileicon-unknown"></div>
-                    <div style="float: right">
-                      <div class="file-name">
-                        {{ singleRecord.msg }}
+                    <template v-if="singleRecord.suffix.startsWith('png')">
+                      <img v-bind:src=singleRecord.imgUrl />
+                    </template>
+                    <template v-else>
+                      <div v-if="singleRecord.suffix.startsWith('doc')" class="fileicon-doc"></div>
+                      <div v-else-if="singleRecord.suffix.startsWith('pdf')" class="fileicon-pdf"></div>
+                      <div v-else-if="singleRecord.suffix.startsWith('xls')" class="fileicon-xls"></div>
+                      <div v-else-if="singleRecord.suffix.startsWith('txt')" class="fileicon-txt"></div>
+                      <div v-else class="fileicon-unknown"></div>
+                      <div style="float: right">
+                        <div class="file-name">
+                          {{ singleRecord.msg }}
+                        </div>
+                        <div class="file-size">
+                          {{ singleRecord.size }}
+                        </div>
                       </div>
-                      <div class="file-size">
-                        {{ singleRecord.size }}
-                      </div>
-                    </div>
+                    </template>
                   </div>
                 </div>
               </li>
@@ -297,7 +302,8 @@
             type: 'text',
             time: '2017-11-19 15:39:15'
           }
-        ]
+        ],
+        imgFileIndex: -1
       }
     },
     computed: {
@@ -385,11 +391,20 @@
             from: this.userId,
             to: this.staffId,
             type: 'file',
+            filetype: file.type,
             size: file.size + ' KB',
             suffix: file.name.substr(file.name.lastIndexOf('.') + 1),
             time: curDate.getFullYear() + '-' + curDate.getMonth() + '-' + curDate.getDay() + ' ' + curDate.getHours() + ':' + curDate.getMinutes() + ':' + curDate.getSeconds()
           }
-          this.contentList.push(fileRecord)
+          if (/^image/.test(file.type) && window.FileReader) {
+            let reader = new FileReader()
+            reader.readAsDataURL(file)
+            this.contentList.push(fileRecord)
+            this.scrollToBottom()
+            reader.onload = function (e) {
+              fileRecord.imgUrl = e.target.result
+            }
+          }
           this.scrollToBottom()
         }
       },
