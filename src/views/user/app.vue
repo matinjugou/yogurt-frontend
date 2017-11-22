@@ -43,11 +43,21 @@
               </li>
             </ul>
         </div>
+        <div class="chat-emoji-panel" v-show="showEmojiPanel">
+          <picker
+            ref="emoji-mart"
+            native
+            :i18n="emojiLocalization"
+            :perLine="10"
+            color="#2d8cf0"
+            @click="insertEmoji"
+          ></picker>
+        </div>
         <div class="chat-input-actions">
           <div class="chat-input-media">
             <input type="file" ref="uploadFile" style="display:none" @change="handleUploadChange">
             <Button type="ghost" icon="document" @click="clickUploadFile">文件</Button>
-            <Button type="ghost" icon="happy">表情</Button>
+            <Button type="ghost" icon="happy" @click="() => {showEmojiPanel = !showEmojiPanel}">表情</Button>
             <Button type="ghost file">历史消息</Button>
             <Button type="ghost" icon="monitor">截图</Button>
           </div>
@@ -211,6 +221,10 @@
   .ivu-col{
     transition: width .2s ease-in-out;
   }
+  .chat-emoji-panel {
+    position: absolute;
+    bottom: 225px;
+  }
 </style>
 <script>
   let enableScroll = true
@@ -223,7 +237,25 @@
         token: '12345678',
         inputText: '',
         earlistRecordIndex: '',
+        showEmojiPanel: false,
         cachedMsg: {},
+        emojiLocalization: {
+          search: '搜索',
+          notfound: '没有找到表情',
+          categories: {
+            search: '搜索结果',
+            recent: '常用',
+            people: '表情符号与人物',
+            nature: '动物与自然',
+            foods: '食物与饮料',
+            activity: '活动',
+            places: '旅行与地点',
+            objects: '物体',
+            symbols: '符号',
+            flags: '旗帜',
+            custom: '自定义'
+          }
+        },
         contentList: [
           {
             id: '1',
@@ -337,6 +369,10 @@
       showLocalFile () {
         // debug
         console.log('showLocalFile')
+      },
+      insertEmoji (emoji, event) {
+        this.inputText += emoji.native
+        console.log(this.inputText)
       }
     },
     created () {
