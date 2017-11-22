@@ -37,6 +37,7 @@
 </template>
 
 <script>
+import axios from 'axios'
 export default {
   name: 'StaffLogin',
   data () {
@@ -48,7 +49,9 @@ export default {
   },
   methods: {
     login () {
-      if ((this.username === '') || (this.password === '')) {
+      let username = this.username
+      let password = this.password
+      if ((username === '') || (password === '')) {
         this.$Message.error({
           content: '用户名和密码不能为空！',
           duration: 3,
@@ -57,16 +60,41 @@ export default {
         return
       }
       // TODO: encrypted the password
-      // TODO: Use vue-resource to send http request
+      // TODO: Use axios to send http request
       // this.$store.commit('login')
-      this.$http.get(this.$store.state.httpServerUrl + '/login').then(response => {
-        // get body data
-      }, response => {
-        // error callback
-      })
       // TODO: handle response
-      // if success, isLogin=true, save token in localStorage
       // else pop wrong message
+      axios.get(this.$store.state.httpServerUrl + '/login', {
+        params: {
+          'staffId': username,
+          'password': password
+        }
+      }).then(response => {
+        let body = response.data.data
+        if (body.code === 0) {
+          // successfully login
+          this.$store.commit('login')
+          this.$store.commit({
+            type: 'changeStaffId',
+            staffId: username
+          })
+          // TODO: save token
+        } else {
+          // error login
+          this.$Message.error({
+            content: '用户名或密码错误',
+            duration: 3,
+            closable: true
+          })
+        }
+      }).catch(error => {
+        console.log(error)
+        this.$Message.error({
+          content: '服务器发生错误，请稍后再试...',
+          duration: 3,
+          closable: true
+        })
+      })
     }
   },
   created () {

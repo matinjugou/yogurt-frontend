@@ -16,6 +16,9 @@ export default new Vuex.Store({
     },
     logout (state) {
       state.isLogin = false
+    },
+    changeStaffId (state, payload) {
+      state.staffId = payload.staffId
     }
   }
 })

@@ -1,8 +1,8 @@
 <template>
   <div id="app" class="staff">
     <Row type="flex">
-      <Col :span="spanLeft" class="staff-menu-left">
-        <Menu active-name="1" theme="dark" width="auto" @on-select="menuAction" v-if="spanLeft">
+      <Col :span="spanLeft" class="staff-menu-left" v-if="spanLeft">
+        <Menu active-name="1" theme="dark" width="auto" @on-select="menuAction">
           <!-- here may have a logo -->
           <div class="menu-header"></div>
           <div class="menu-burger-button">
@@ -13,29 +13,29 @@
           <div class="menu-items">
           <MenuItem name="chat">
             <Icon type="chatboxes" :size="iconSize"></Icon>
-            <span class="staff-text" v-if="showText">会话页面</span>
+            <span class="staff-text" v-if="showMenuText">会话页面</span>
           </MenuItem>
           <MenuItem name="info">
             <Icon type="person-stalker" :size="iconSize"></Icon>
-            <span class="staff-text" v-if="showText">个人信息</span>
+            <span class="staff-text" v-if="showMenuText">个人信息</span>
           </MenuItem>
           <MenuItem name="quick-reply">
             <Icon type="reply-all" :size="iconSize"></Icon>
-            <span class="staff-text" v-if="showText">快捷回复</span>
+            <span class="staff-text" v-if="showMenuText">快捷回复</span>
           </MenuItem>
           <MenuItem name="feedback">
             <Icon type="paper-airplane" :size="iconSize"></Icon>
-            <span class="staff-text" v-if="showText">客户反馈</span>
+            <span class="staff-text" v-if="showMenuText">客户反馈</span>
           </MenuItem>
+          <!--TODO: let all the actions in here-->
           </div>
-
           <div class="menu-vertical-spacing"></div>
           <Button :type="restAction" shape="circle" icon="coffee" size="large" @click="changeRestStatus">
-            <span v-if="showText">{{ restCaption }}</span>
+            <span v-if="showMenuText">{{ restCaption }}</span>
           </Button>
           <div class="menu-button-space"></div>
           <Button type="error" shape="circle" icon="log-out" size="large" @click="logout">
-            <span v-if="showText" @click="logout">&nbsp;&nbsp;登&nbsp;&nbsp;出&nbsp;&nbsp;</span>
+            <span v-if="showMenuText" @click="logout">&nbsp;&nbsp;登&nbsp;&nbsp;出&nbsp;&nbsp;</span>
           </Button>
           <div class="menu-button-space"></div>
           <footer class="staff-copy">
@@ -44,9 +44,7 @@
         </Menu>
       </Col>
       <Col :span="spanRight">
-        <transition name = "fade" mode="out-in">
-          <router-view/>
-        </transition>  
+        <router-view/>
       </Col>
     </Row>
   </div>
@@ -59,11 +57,13 @@ export default {
     return {
       spanLeft: 0,
       iconSize: 25,
-      showText: true,
       restStatus: false
     }
   },
   computed: {
+    showMenuText () {
+      return this.spanLeft >= 3
+    },
     restAction () {
       return this.restStatus ? 'success' : 'primary'
     },
@@ -84,12 +84,11 @@ export default {
     },
     logout () {
       // TODO: logout
-
+      this.$store.commit('logout')
     },
     menuAction (name) {
       if (name === 'burger-button') {
         this.spanLeft = this.spanLeft === 3 ? 1 : 3
-        this.showText = !this.showText
       } else {
         this.$router.push('/' + name)
       }
@@ -99,9 +98,10 @@ export default {
     isLogin: function (val) {
       if (this.isLogin === false) {
         this.$router.push('/login')
+        this.spanLeft = 0
       } else {
-        this.spanLeft = 3
         this.$router.push('/index')
+        this.spanLeft = 3
       }
     }
   },
@@ -111,8 +111,8 @@ export default {
     if (this.isLogin === false) {
       this.$router.push('/login')
     } else {
-      this.spanLeft = 3
       this.$router.push('/index')
+      this.spanLeft = 3
     }
   }
 }
@@ -155,9 +155,9 @@ export default {
   height: 20px;
 }
 .menu-vertical-spacing {
-   height: calc(100vh - 461px);
+  height: calc(100vh - 461px);
 }
 .ivu-col {
-  transition: width .2s ease-in-out;
+  transition: width 0.2s ease-in-out;
 }
 </style>
