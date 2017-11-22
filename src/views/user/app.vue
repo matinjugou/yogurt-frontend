@@ -30,7 +30,9 @@
                   </div>
                   <div v-else-if="singleRecord.type === 'file'" @click="singleRecord.from === staffId ? downloadFile() : showLocalFile()" class="content chat-single-record" style="cursor: pointer">
                     <template v-if="singleRecord.suffix.startsWith('png')">
-                      <img v-bind:src=singleRecord.imgUrl />
+                      <div style="margin-top: 10px">
+                        <img v-bind:src=singleRecord.imgUrl />
+                      </div>
                     </template>
                     <template v-else>
                       <div v-if="singleRecord.suffix.startsWith('doc')" class="fileicon-doc"></div>
@@ -396,15 +398,19 @@
             suffix: file.name.substr(file.name.lastIndexOf('.') + 1),
             time: curDate.getFullYear() + '-' + curDate.getMonth() + '-' + curDate.getDay() + ' ' + curDate.getHours() + ':' + curDate.getMinutes() + ':' + curDate.getSeconds()
           }
-          if (/^image/.test(file.type) && window.FileReader) {
-            let reader = new FileReader()
-            reader.readAsDataURL(file)
-            this.contentList.push(fileRecord)
-            this.scrollToBottom()
-            reader.onload = function (e) {
-              fileRecord.imgUrl = e.target.result
-            }
+//          if (/^image/.test(file.type) && window.FileReader) {
+//            let reader = new FileReader()
+//            reader.readAsDataURL(file)
+//            this.contentList.push(fileRecord)
+//            this.scrollToBottom()
+//            reader.onload = function (e) {
+//              fileRecord.imgUrl = e.target.result
+//            }
+//          }
+          if (/^image/.test(file.type) && URL.createObjectURL) {
+            fileRecord.imgUrl = URL.createObjectURL(file)
           }
+          this.contentList.push(fileRecord)
           this.scrollToBottom()
         }
       },
