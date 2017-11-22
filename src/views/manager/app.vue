@@ -41,7 +41,9 @@
               <Icon type="ios-paper"></Icon>
               设置
             </template>
-            <MenuItem name="3-1">机器人设置</MenuItem>
+            <MenuItem name="3-1">
+              <router-link to="/settings-robot">机器人设置</router-link>
+            </MenuItem>
             <MenuItem name="3-2">
               <router-link to="/settings-quickrly">快捷回复设置</router-link>
             </MenuItem>

@@ -2,7 +2,7 @@
   <div class="right-content">
     <div class="layout-header">
       <Row type="flex" justify="start" style="padding-left: 10px;padding-top: 10px">
-        <h1>客服管理
+        <h1 style="padding-left: 5px;border-left: 5px solid #2baee9">客服管理
         </h1>
       </Row>
     </div>
@@ -25,168 +25,173 @@
 </template>
 
 <script>
-export default {
-  name: 'staffmanager',
-  data () {
-    return {
-      searchname: '',
-      staffcolumn: [
-        {
-          title: '姓名',
-          key: 'name'
-        },
-        {
-          title: '昵称',
-          key: 'nickname'
-        },
-        {
-          title: '邮箱',
-          key: 'email'
-        },
-        {
-          title: '手机号',
-          key: 'phonenumber'
-        },
-        {
-          title: '状态',
-          key: 'status',
-          render: (h, params) => {
-            if (params.row.status === 'online') {
-              return h('div', [
-                h('Tag', {
-                  props: {
-                    color: 'green'
-                  },
-                  style: {
-                    marginRight: '5px'
-                  }
-                }, '在线')
-              ])
-            } else if (params.row.status === 'offline') {
-              return h('div', [
-                h('Tag', {
-                  props: {
-                    color: 'red'
-                  },
-                  style: {
-                    marginRight: '5px'
-                  }
-                }, '离线')
-              ])
-            } else if (params.row.status === 'resting') {
-              return h('div', [
-                h('Tag', {
-                  props: {
-                    color: 'yellow'
-                  },
-                  style: {
-                    marginRight: '5px'
-                  }
-                }, '休息')
-              ])
-            } else {
-              return h('div', [
-                h('Tag', {
-                  props: {
-                    color: 'blue'
-                  },
-                  style: {
-                    marginRight: '5px'
-                  }
-                }, '未知')
-              ])
-            }
-          }
-        },
-        {
-          title: '分工',
-          key: 'role',
-          filters: [
-            {
-              label: '售前',
-              value: '售前'
-            },
-            {
-              label: '售后',
-              value: '售后'
-            }
-          ],
-          filterMultiple: false,
-          filterMethod (value, row) {
-            return row.role === value
-          }
-        },
-        {
-          title: '操作',
-          key: 'actions',
-          render: (h, params) => {
-            return h('div', [
-              h('Button', {
-                props: {
-                  type: 'primary',
-                  size: 'small'
-                },
-                style: {
-                  marginRight: '5px'
-                }
-              }, '编辑'),
-              h('Button', {
-                props: {
-                  type: 'error',
-                  size: 'small'
-                }
-              }, '删除')
-            ])
-          }
-        }
-      ],
-      staffdata: [
-        {
-          name: '黄超',
-          nickname: '闪翼魔术师',
-          email: 'thss15_huangc@163.com',
-          phonenumber: '18110382770',
-          status: 'online',
-          role: '售前'
-        },
-        {
-          name: '杨壁菲',
-          nickname: 'effie-0',
-          email: 'thss15_yangbf@163.com',
-          phonenumber: '15911151830',
-          status: 'offline',
-          role: '售后'
-        },
-        {
-          name: '贾元昊',
-          nickname: 'billJia',
-          email: 'thss15_jiayh@163.com',
-          phonenumber: '13051337872',
-          status: 'resting',
-          role: '售后'
-        }
-      ]
-    }
-  },
-  computed: {
-    filteredstaffdata: function () {
-      if (this.searchname === '') {
-        return this.staffdata
-      } else {
-        let tmpstaff = []
-        for (let per of this.staffdata) {
-          if (per.name.indexOf(this.searchname) >= 0) {
-            tmpstaff.push(per)
-          }
-        }
-        return tmpstaff
-      }
-    }
-  },
-  methods: {
+  import axios from 'axios'
 
+  export default {
+    name: 'staffmanager',
+    data () {
+      return {
+        searchname: '',
+        staffcolumn: [
+          {
+            title: '客服ID',
+            key: 'staffId'
+          },
+          {
+            title: '姓名',
+            key: 'name'
+          },
+          {
+            title: '昵称',
+            key: 'nickname'
+          },
+          {
+            title: '邮箱',
+            key: 'email'
+          },
+          {
+            title: '手机号',
+            key: 'phonenumber'
+          },
+          {
+            title: '状态',
+            key: 'status',
+            render: (h, params) => {
+              if (params.row.status === 1) {
+                return h('div', [
+                  h('Tag', {
+                    props: {
+                      color: 'green'
+                    },
+                    style: {
+                      marginRight: '5px'
+                    }
+                  }, '在线')
+                ])
+              } else if (params.row.status === 0) {
+                return h('div', [
+                  h('Tag', {
+                    props: {
+                      color: 'red'
+                    },
+                    style: {
+                      marginRight: '5px'
+                    }
+                  }, '离线')
+                ])
+              } else if (params.row.status === 2) {
+                return h('div', [
+                  h('Tag', {
+                    props: {
+                      color: 'yellow'
+                    },
+                    style: {
+                      marginRight: '5px'
+                    }
+                  }, '休息')
+                ])
+              } else {
+                return h('div', [
+                  h('Tag', {
+                    props: {
+                      color: 'blue'
+                    },
+                    style: {
+                      marginRight: '5px'
+                    }
+                  }, '未知')
+                ])
+              }
+            }
+          },
+          {
+            title: '分工',
+            key: 'role',
+            filters: [
+              {
+                label: '售前',
+                value: '售前'
+              },
+              {
+                label: '售后',
+                value: '售后'
+              }
+            ],
+            filterMultiple: false,
+            filterMethod (value, row) {
+              return row.role === value
+            }
+          },
+          {
+            title: '操作',
+            key: 'actions',
+            render: (h, params) => {
+              return h('div', [
+                h('Button', {
+                  props: {
+                    type: 'primary',
+                    size: 'small'
+                  },
+                  style: {
+                    marginRight: '5px'
+                  }
+                }, '编辑'),
+                h('Button', {
+                  props: {
+                    type: 'error',
+                    size: 'small'
+                  }
+                }, '删除')
+              ])
+            }
+          }
+        ],
+        staffdata: [
+        ]
+      }
+    },
+    computed: {
+      filteredstaffdata: function () {
+        if (this.searchname === '') {
+          return this.staffdata
+        } else {
+          let tmpstaff = []
+          for (let per of this.staffdata) {
+            if (per.name.indexOf(this.searchname) >= 0) {
+              tmpstaff.push(per)
+            }
+          }
+          return tmpstaff
+        }
+      }
+    },
+    methods: {
+    },
+    created: function () {
+      const self = this
+      axios.get('http://yogurt.magichc7.com/api/manager/staff', {
+        params: {
+          companyId: 1
+        }
+      }).then(function (response) {
+        let tmpstaffdata = []
+        for (let staff of response.data.data) {
+          tmpstaffdata.push({
+            staffId: staff.staffId,
+            name: staff.name,
+            nickname: staff.nickname,
+            email: staff.email,
+            phonenumber: staff.tel,
+            status: staff.onlineStatus,
+            role: staff.role
+          })
+        }
+        self.staffdata = tmpstaffdata
+      }).catch(function (error) {
+        console.log(error)
+      })
+    }
   }
-}
 </script>
 
 <style scoped>

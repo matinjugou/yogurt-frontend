@@ -2,14 +2,32 @@
   <div class="right-content">
     <div class="layout-header">
       <Row type="flex" justify="start" style="padding-left: 10px;padding-top: 10px">
-        <h1>快捷回复设置
+        <h1 style="padding-left: 5px;border-left: 5px solid #2baee9">快捷回复设置
         </h1>
       </Row>
     </div>
     <div class="layout-content">
       <div class="layout-content-main">
         <Row type="flex" justify="start" style="margin-bottom: 10px">
-          <Button type="info">新增短语</Button>
+          <Button type="info" @click="newPhraseModal = true">新增短语</Button>
+          <Modal
+            v-model="newPhraseModal"
+            title="新增短语"
+            @on-ok="newPhraseModalOk"
+            @on-cancel="newPhraseModalCancel">
+            <h4 style="margin-bottom: 7px">
+              短语
+            </h4>
+            <Input v-model="newPhrase"
+                   placeholder="Enter something..."
+                   style="margin-bottom: 10px"/>
+            <h4 style="margin-bottom: 7px">
+              句子
+            </h4>
+            <Input v-model="newSentence"
+                   placeholder="Enter something..."
+                   style="margin-bottom: 10px"/>
+          </Modal>
         </Row>
         <Table border :columns="tablecolumns" :data="replies"></Table>
       </div>
@@ -25,6 +43,9 @@
     name: 'quickreplymanager',
     data () {
       return {
+        newPhraseModal: false,
+        newPhrase: '',
+        newSentence: '',
         tablecolumns: [
           {
             title: '短语',
@@ -68,6 +89,20 @@
             sentence: '谢谢您对我们的支持，祝您生活愉快'
           }
         ]
+      }
+    },
+    methods: {
+      newPhraseModalOk () {
+        this.$Message.info('Clicked ok')
+        if (this.newPhrase !== '' && this.newSentence !== '') {
+          this.replies.push({
+            phrase: this.newPhrase,
+            sentence: this.newSentence
+          })
+        }
+      },
+      newPhraseModalCancel () {
+        this.$Message.info('Clicked cancel')
       }
     }
   }
