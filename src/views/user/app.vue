@@ -452,9 +452,9 @@
     created () {
       const io = require('socket.io-client')
       this.socket = io('http://yogurt.magichc7.com')
-//      this.socket.emit('userReg', {userId: this.userId, token: this.userId + '_token'})
-//      // debug
-//      console.log('Sent userReg.')
+      this.socket.emit('userReg', {userId: this.userId, token: this.userId + '_token'})
+      // debug
+      console.log('Sent userReg.')
       this.socket.on('regResult', (data) => {
         // debug
         console.log('Register result: code: ' + data['code'] + ', msg: ' + data['msg'])
