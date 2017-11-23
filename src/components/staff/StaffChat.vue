@@ -83,15 +83,30 @@
                   <div class="avatar chat-single-record">
                     <Avatar shape="square" icon="person"/>
                   </div>
-                  <div class="content chat-single-record" :class="[singleRecord.type]">{{ singleRecord.msg }}</div>
+                  <div class="content chat-single-record" :class="singleRecord.type" v-if="singleRecord.type === 'text'">
+                    {{ singleRecord.msg }}
+                  </div>
+                  <div class="content chat-single-record" :class="singleRecord.type" v-if="singleRecord.type === 'pic'">
+                    <img class="chat-image" :src="singleRecord.msg" alt="聊天图片" width="200px" height="100px" />
+                  </div>
                 </div>
               </li>
             </ul>
           </div>
+          <div class="chat-emoji-panel" v-show="showEmojiPanel">
+            <picker 
+              ref="emoji-mart"
+              native 
+              :i18n="emojiLocalization" 
+              :perLine="10"
+              color="#2d8cf0"
+              @click="insertEmoji"
+            ></picker>
+          </div>
           <div class="chat-window-input-actions">
             <div class="chat-window-input-media">
               <Button type="ghost" icon="document">文件</Button>
-              <Button type="ghost" icon="happy">表情</Button>
+              <Button type="ghost" icon="happy" @click="() => {showEmojiPanel = !showEmojiPanel}">表情</Button>
               <Button type="ghost" icon="monitor">请求截图</Button>
             </div>
             <div class="chat-window-input-send">
@@ -99,7 +114,15 @@
             </div>
           </div>
           <div class="chat-window-input">
-            <Input v-model="inputText" type="textarea" :rows="8" placeholder="在这里输入信息，按Ctrl+Enter发送" @on-keyup.ctrl.enter="sendMessage"></Input>
+            <Input
+              v-model="inputText" 
+              type="textarea" 
+              :rows="8" 
+              placeholder="在这里输入信息，按Ctrl+Enter发送" 
+              @on-keyup.ctrl.enter="sendMessage"
+              @on-focus="updateCaretPos"
+              @click="updateCaretPos"
+            ></Input>
           </div>
         </div>
         <div v-else>
@@ -121,9 +144,28 @@ export default {
       spanLeft: 6,
       spanRight: 0,
       isChatting: false,
+      showEmojiPanel: false,
       chatUserName: '',
       chatUserId: '',
       inputText: '',
+      inputCaretPos: 0,
+      emojiLocalization: {
+        search: '搜索',
+        notfound: '没有找到表情',
+        categories: {
+          search: '搜索结果',
+          recent: '常用',
+          people: '表情符号与人物',
+          nature: '动物与自然',
+          foods: '食物与饮料',
+          activity: '活动',
+          places: '旅行与地点',
+          objects: '物体',
+          symbols: '符号',
+          flags: '旗帜',
+          custom: '自定义'
+        }
+      },
       userList: [
         {
           userid: '1_u1',
@@ -136,7 +178,15 @@ export default {
           status: 'chatting'
         }
       ],
-      contentList: [],
+      contentList: [
+        {
+          'from': '1_u1',
+          'to': '1_s1',
+          'msg': 'http://s1.picswalls.com/wallpapers/2015/09/20/wallpaper-2015_111528356_269.jpg',
+          'type': 'pic',
+          'time': 'test_pic'
+        }
+      ],
       socket: null
     }
   },
@@ -178,7 +228,7 @@ export default {
       let sendMsg = this.inputText
       if (sendMsg === '') {
         this.$Message.warning({
-          content: '不可以发送空消息',
+          content: '不可以发送空消息！',
           duration: 3,
           closable: true
         })
@@ -195,7 +245,7 @@ export default {
         'time': date.toLocaleTimeString('zh-Hans-CN')
         // 'hasSent': false
       })
-      // TODO: send message
+      // TODO: change the token part
       this.socket.emit('staffTextMsg', {
         'staffId': this.$store.state.staffId,
         'userId': this.chatUserId,
@@ -203,6 +253,12 @@ export default {
         'msg': sendMsg
       })
       // TODO: 异步处理消息返回信息（发送成功与否）
+    },
+    updateCaretPos () {
+      // TODO: get the caret pos
+    },
+    insertEmoji (emoji, event) {
+      this.inputText += emoji.native
     }
   },
   updated () {
@@ -223,8 +279,7 @@ export default {
       staffId: this.$store.state.staffId,
       token: 's1_token'
     })
-    // TODO:
-    // deal with register result
+    // TODO: deal with register result
     this.socket.on('regResult', (data) => {
       console.log('Register result: code ' + data.code + '& msg ' + data.msg)
       if (data.code === 0) {
@@ -235,8 +290,7 @@ export default {
         })
       }
     })
-    // TODO:
-    // deal with send failure
+    // TODO: deal with send failure
     // also timeout affair should be taken care of
     this.socket.on('sendResult', (data) => {
       console.log('Send result: code ' + data.code + '& msg ' + data.msg)
@@ -257,7 +311,7 @@ export default {
         'from': data.from,
         'to': this.$store.state.staffId,
         'msg': data.msg,
-        'type': 'text',
+        'type': data.type,
         'time': date.toLocaleTimeString('zh-Hans-CN')
       })
     })
@@ -316,21 +370,21 @@ export default {
 }
 .chat-single-record {
   display: inline-flex;
-  vertical-align: middle;
+  vertical-align: text-top;
 }
 .chat-msg-body > .avatar {
   margin: 0 10px 0 0;
 }
 .chat-msg-body > .content {
-  display: inline-block;
   position: relative;
   padding: 0 10px;
-  max-width: calc(100vw - 40px);
+  max-width: calc(40vw - 50px);
   min-height: 30px;
   line-height: 2.5;
   font-size: 16px;
   text-align: left;
   word-break: break-all;
+  word-wrap: break-word;
   background-color: #FFF;
   border-radius: 4px;
   box-shadow: 0 1px 1px rgba(0,0,0,.1);
@@ -342,6 +396,9 @@ export default {
   right: 100%;
   border: 6px solid transparent;
   border-right-color: #ffffff;
+}
+.chat-msg-body > .pic {
+  padding: 10px 10px 10px 10px;
 }
 .from-me {
   text-align: right;
@@ -369,7 +426,23 @@ export default {
   align-items: center;
   justify-content: space-between;
 }
+.chat-emoji-panel {
+  position: absolute;
+  bottom: 225px;
+}
+.chat-image {
+  
+}
 .ivu-col {
   transition: width .1s ease-in-out;
+}
+</style>
+
+<style lang="less">
+.emoji-mart-bar, .emoji-mart-search, .emoji-mart-category {
+  font-family: "Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif;
+  .emoji-mart-preview {
+    display: none;
+  }
 }
 </style>

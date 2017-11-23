@@ -4,7 +4,7 @@
     <div class="login-logo">{{ title }}</div>
     <div class="staff-login-action">
       <div class="login-input">
-        <Input v-model="username" placeholder="用户名" size="large" autocomplete="on" autofocus>
+        <Input v-model="username" placeholder="用户名" size="large" autocomplete="on" autofocus @on-keyup.enter="login">
           <span slot="prepend">
             &nbsp;
             <Icon type="person" size="20"></Icon>
@@ -12,7 +12,7 @@
           </span>
         </Input>
         <div class="login-input-vertical-space"></div>
-        <Input v-model="password" type="password" placeholder="密码" size="large">
+        <Input v-model="password" type="password" placeholder="密码" size="large" @on-keyup.enter="login">
           <span slot="prepend">
             &nbsp;
             <Icon type="locked" size="20"></Icon>
@@ -21,12 +21,12 @@
         </Input>
       </div>
       <div class="login-button">
-        <div class="login-button-item login-action-text">
+        <div class="login-button-item">
           <!-- TODO: add forget password page and link to it-->
-          <a href="#">忘记密码</a>
+          <a class="login-action-text" href="#">忘记密码？</a>
         </div>
-        <div class="login-button-item login-action-button">
-          <Button type="success" size="large" @click="login">&nbsp;登&nbsp;录&nbsp;系&nbsp;统&nbsp;</Button>
+        <div class="login-button-item ">
+          <Button class="login-action-button" type="success" size="large" @click="login">&nbsp;登&nbsp;录&nbsp;系&nbsp;统&nbsp;</Button>
         </div>
       </div>
     </div>
@@ -37,6 +37,7 @@
 </template>
 
 <script>
+import axios from 'axios'
 export default {
   name: 'StaffLogin',
   data () {
@@ -46,8 +47,59 @@ export default {
       password: ''
     }
   },
-  method: {
+  methods: {
     login () {
+      let username = this.username
+      let password = this.password
+      if ((username === '') || (password === '')) {
+        this.$Message.error({
+          content: '用户名和密码不能为空！',
+          duration: 3,
+          closable: true
+        })
+        return
+      }
+      // TODO: encrypted the password
+      // TODO: Use axios to send http request
+      // this.$store.commit('login')
+      // TODO: handle response
+      // else pop wrong message
+      axios.get(this.$store.state.httpServerUrl + '/login', {
+        params: {
+          'staffId': username,
+          'password': password
+        }
+      }).then(response => {
+        let body = response.data.data
+        if (body.code === 0) {
+          // successfully login
+          this.$store.commit('login')
+          this.$store.commit({
+            type: 'changeStaffId',
+            staffId: username
+          })
+          // TODO: save token
+        } else {
+          // error login
+          this.$Message.error({
+            content: '用户名或密码错误',
+            duration: 3,
+            closable: true
+          })
+        }
+      }).catch(error => {
+        console.log(error)
+        this.$Message.error({
+          content: '服务器发生错误，请稍后再试...',
+          duration: 3,
+          closable: true
+        })
+      })
+    }
+  },
+  created () {
+    if (this.$store.state.isLogin) {
+      this.$router.push('/index')
     }
   }
 }
@@ -93,6 +145,19 @@ export default {
 }
 .login-action-text {
   font-size: 15px;
+}
+a:link {
+  color: rgba(255, 255, 255, 0.9);
+}
+a:visited {
+  color: rgba(255, 255, 255, 0.9);
+}
+a:hover {
+  text-decoration:underline;
+  color: #ffffff;
+}
+a:active {
+  color: rgba(255, 255, 255, 0.5);
 }
 </style>
 
