@@ -120,8 +120,7 @@
               :rows="8" 
               placeholder="在这里输入信息，按Ctrl+Enter发送" 
               @on-keyup.ctrl.enter="sendMessage"
-              @on-focus="updateCaretPos"
-              @click="updateCaretPos"
+              @on-focus="getFocus"
             ></Input>
           </div>
         </div>
@@ -254,7 +253,8 @@ export default {
       })
       // TODO: 异步处理消息返回信息（发送成功与否）
     },
-    updateCaretPos () {
+    getFocus () {
+      this.showEmojiPanel = false
       // TODO: get the caret pos
     },
     insertEmoji (emoji, event) {
