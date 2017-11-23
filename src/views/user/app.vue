@@ -346,7 +346,7 @@
             this.contentList.unshift(newMsgs[i])
           }
           let el = this.$refs.userChatContent
-          el.scrollTop = 100
+          el.scrollTop = 400
           enableScroll = true
         }, 200)
       },
