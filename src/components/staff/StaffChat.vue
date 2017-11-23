@@ -83,11 +83,11 @@
                   <div class="avatar chat-single-record">
                     <Avatar shape="square" icon="person"/>
                   </div>
-                  <div class="content chat-single-record" v-if="singleRecord.type === 'text'">
+                  <div class="content chat-single-record" :class="singleRecord.type" v-if="singleRecord.type === 'text'">
                     {{ singleRecord.msg }}
                   </div>
-                  <div class="content chat-single-record" v-if="singleRecord.type === 'pic'">
-                    <!--img class="chat-image" :src="singleRecord.msg" alt="聊天图片" width="200px" height="100px" /-->
+                  <div class="content chat-single-record" :class="singleRecord.type" v-if="singleRecord.type === 'pic'">
+                    <img class="chat-image" :src="singleRecord.msg" alt="聊天图片" width="200px" height="100px" />
                   </div>
                 </div>
               </li>
@@ -259,7 +259,6 @@ export default {
     },
     insertEmoji (emoji, event) {
       this.inputText += emoji.native
-      console.log(this.inputText)
     }
   },
   updated () {
@@ -371,7 +370,7 @@ export default {
 }
 .chat-single-record {
   display: inline-flex;
-  vertical-align: middle;
+  vertical-align: text-top;
 }
 .chat-msg-body > .avatar {
   margin: 0 10px 0 0;
@@ -397,6 +396,9 @@ export default {
   right: 100%;
   border: 6px solid transparent;
   border-right-color: #ffffff;
+}
+.chat-msg-body > .pic {
+  padding: 10px 10px 10px 10px;
 }
 .from-me {
   text-align: right;
@@ -429,7 +431,7 @@ export default {
   bottom: 225px;
 }
 .chat-image {
-  ;
+  
 }
 .ivu-col {
   transition: width .1s ease-in-out;
