@@ -76,7 +76,7 @@
                 <p class="chat-msg-time">
                   <span>{{ singleRecord.time }}</span>
                 </p>
-                <div class="chat-msg-body" :class="[{'from-me': singleRecord.from.indexOf('s') >= 0}]">
+                <div class="chat-msg-body" :class="[{'from-me': singleRecord.from.indexOf('_s') >= 0}]">
                   <div class="chat-single-record" v-if="singleRecord.hasSent === false">
                     <Spin></Spin>
                   </div>
@@ -177,15 +177,6 @@ export default {
           status: 'chatting'
         }
       ],
-      contentList: [
-        {
-          'from': '1_u1',
-          'to': '1_s1',
-          'msg': 'http://s1.picswalls.com/wallpapers/2015/09/20/wallpaper-2015_111528356_269.jpg',
-          'type': 'pic',
-          'time': 'test_pic'
-        }
-      ],
       socket: null
     }
   },
@@ -194,10 +185,7 @@ export default {
       return 24 - this.spanLeft - this.spanRight
     },
     currentChatRecord () {
-      let userid = this.chatUserId
-      return this.contentList.filter(function (singleRecord) {
-        return (singleRecord.from === userid) || (singleRecord.to === userid)
-      })
+      return this.$store.state.chatRecordList[this.chatUserId]
     }
   },
   methods: {
@@ -216,7 +204,7 @@ export default {
       }
       this.chatUserName = name
       this.chatUserId = userid
-      // TODO: refresh chat content
+      // TODO: refresh chat record
       // clear input
       this.inputText = ''
     },
@@ -236,13 +224,17 @@ export default {
       this.inputText = ''
       let date = new Date()
       // TODO: get the staffid
-      this.contentList.push({
-        'from': this.$store.state.staffId,
-        'to': this.chatUserId,
-        'msg': sendMsg,
-        'type': 'text',
-        'time': date.toLocaleTimeString('zh-Hans-CN')
-        // 'hasSent': false
+      this.$store.commit({
+        type: 'changeStaffId',
+        userId: this.chatUserName,
+        content: {
+          'from': this.$store.state.staffId,
+          'to': this.chatUserId,
+          'msg': sendMsg,
+          'type': 'text',
+          'time': date.toLocaleTimeString('zh-Hans-CN')
+          // 'hasSent': false
+        }
       })
       // TODO: change the token part
       this.socket.emit('staffTextMsg', {
@@ -399,8 +391,8 @@ export default {
 }
 .chat-msg-body > .pic {
   padding: 10px 10px 10px 10px;
-  max-width: 200px;
-  max-height: 200px;
+  max-width: 300px;
+  max-height: 300px;
 }
 .from-me {
   text-align: right;
@@ -433,11 +425,10 @@ export default {
   bottom: 225px;
 }
 .chat-image {
-  width:auto;
-  height:auto;
-  max-width:100%;
-  max-height:100%;
   border-radius: 4px;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 .ivu-col {
   transition: width .1s ease-in-out;
