@@ -87,7 +87,7 @@
                     {{ singleRecord.msg }}
                   </div>
                   <div class="content chat-single-record" :class="singleRecord.type" v-if="singleRecord.type === 'pic'">
-                    <img class="chat-image" :src="singleRecord.msg" alt="聊天图片" width="200px" height="100px" />
+                    <img class="chat-image" :src="singleRecord.msg" alt="聊天图片"/>
                   </div>
                 </div>
               </li>
@@ -399,6 +399,8 @@ export default {
 }
 .chat-msg-body > .pic {
   padding: 10px 10px 10px 10px;
+  max-width: 200px;
+  max-height: 200px;
 }
 .from-me {
   text-align: right;
@@ -431,7 +433,11 @@ export default {
   bottom: 225px;
 }
 .chat-image {
-  
+  width:auto;
+  height:auto;
+  max-width:100%;
+  max-height:100%;
+  border-radius: 4px;
 }
 .ivu-col {
   transition: width .1s ease-in-out;

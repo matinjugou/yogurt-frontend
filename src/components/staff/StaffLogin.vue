@@ -2,34 +2,34 @@
   <div class="staff-login">
     <!-- should have a logo here -->
     <div class="login-logo">{{ title }}</div>
-    <div class="staff-login-action">
+    <transition name="slide-fade">
+    <div class="staff-login-action" v-show="showInput">
       <div class="login-input">
         <Input v-model="username" placeholder="用户名" size="large" autocomplete="on" autofocus @on-keyup.enter="login">
-          <span slot="prepend">
-            &nbsp;
+          <span class="input-prepend" slot="prepend">
             <Icon type="person" size="20"></Icon>
-            &nbsp;
           </span>
         </Input>
         <div class="login-input-vertical-space"></div>
         <Input v-model="password" type="password" placeholder="密码" size="large" @on-keyup.enter="login">
-          <span slot="prepend">
-            &nbsp;
+          <span class="input-prepend" slot="prepend">
             <Icon type="locked" size="20"></Icon>
-            &nbsp;
           </span>
         </Input>
       </div>
       <div class="login-button">
         <div class="login-button-item">
           <!-- TODO: add forget password page and link to it-->
-          <a class="login-action-text" href="#">忘记密码？</a>
+          <a class="login-link-text" href="#">忘记密码？</a>
         </div>
         <div class="login-button-item ">
-          <Button class="login-action-button" type="success" size="large" @click="login">&nbsp;登&nbsp;录&nbsp;系&nbsp;统&nbsp;</Button>
+          <Button type="success" size="large" @click="login">
+            <span class="login-button-text">登录系统</span>
+          </Button>
         </div>
       </div>
     </div>
+    </transition>
     <footer class="staff-login-footer">
       2017 &copy; yogurt
     </footer>
@@ -44,7 +44,8 @@ export default {
     return {
       title: 'Yogurt 客服系统',
       username: '',
-      password: ''
+      password: '',
+      showInput: false
     }
   },
   methods: {
@@ -101,6 +102,9 @@ export default {
     if (this.$store.state.isLogin) {
       this.$router.push('/index')
     }
+  },
+  mounted () {
+    this.showInput = true
   }
 }
 </script>
@@ -137,14 +141,20 @@ export default {
 .login-input {
   margin-bottom: 30px;
 }
+.input-prepend {
+  padding: 0 5px 0 5px;
+}
 .login-button {
   padding: 0 10px 0 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
-.login-action-text {
+.login-link-text {
   font-size: 15px;
+}
+.login-button-text {
+  letter-spacing: 2px;
 }
 a:link {
   color: rgba(255, 255, 255, 0.9);
@@ -158,6 +168,16 @@ a:hover {
 }
 a:active {
   color: rgba(255, 255, 255, 0.5);
+}
+.slide-fade-enter-active {
+  transition: all .5s ease;
+}
+.slide-fade-leave-active {
+  transition: all .3s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+}
+.slide-fade-enter, .slide-fade-leave-to {
+  transform: translateY(10px);
+  opacity: 0;
 }
 </style>
 

@@ -35,7 +35,7 @@
           </Button>
           <div class="menu-button-space"></div>
           <Button type="error" shape="circle" icon="log-out" size="large" @click="logout">
-            <span v-if="showMenuText" @click="logout">&nbsp;&nbsp;登&nbsp;&nbsp;出&nbsp;&nbsp;</span>
+            <span class="menu-button-logout-text" v-if="showMenuText">登出</span>
           </Button>
           <div class="menu-button-space"></div>
           <footer class="staff-copy">
@@ -153,6 +153,10 @@ export default {
 }
 .menu-button-space {
   height: 20px;
+}
+.menu-button-logout-text {
+  padding: 0 4px 0 4px;
+  letter-spacing: 9px;
 }
 .menu-vertical-spacing {
   height: calc(100vh - 461px);
