@@ -114,7 +114,7 @@ export default {
 .staff-login {
   height: calc(100vh - 2px);
   text-align: center;
-  background: url(../../views/staff/assets/login_background.jpg) center fixed no-repeat;
+  background: url(assets/login_background.jpg) center fixed no-repeat;
   padding-top: 25vh;
 }
 .staff-login-action {

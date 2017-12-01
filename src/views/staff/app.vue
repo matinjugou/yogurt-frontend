@@ -39,7 +39,7 @@
           </Button>
           <div class="menu-button-space"></div>
           <footer class="staff-copy">
-            Yogurt
+            &copy; Yogurt
           </footer>
         </Menu>
       </Col>
@@ -159,7 +159,7 @@ export default {
   letter-spacing: 9px;
 }
 .menu-vertical-spacing {
-  height: calc(100vh - 461px);
+  height: calc(100vh - 460px);
 }
 .ivu-col {
   transition: width 0.2s ease-in-out;
