@@ -196,7 +196,9 @@ export default {
     allUnread () {
       let sum = 0
       for (let i = 0, len = this.userList.length; i < len; i++) {
-        sum += this.userList[i].unread
+        if (this.userList[i].status === 'serving') {
+          sum += this.userList[i].unread
+        }
       }
       return sum
     },
