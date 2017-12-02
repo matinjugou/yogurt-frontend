@@ -75,6 +75,7 @@ export default {
   name: 'StaffInfo',
   data () {
     return {
+      showInfo: false,
       avatarUrl: 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1512143132319&di=4f1af9a57c13467a0939aaeea1627b94&imgtype=0&src=http%3A%2F%2Fi0.hdslb.com%2Fbfs%2Fface%2F08224a0bc9b5652fd9b2ad9b4f0717a38166d632.jpg',
       nickName: '',
       email: '',
@@ -98,9 +99,7 @@ export default {
     }
   },
   created () {
-    if (this.$store.state.isLogin === false) {
-      this.$router.push('/login')
-    }
+    // TODO: If not login, jump to login page
     // TODO: update info
   }
 }

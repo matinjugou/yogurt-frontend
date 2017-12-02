@@ -8,8 +8,8 @@ export default new Vuex.Store({
     socketServerUrl: 'http://yogurt.magichc7.com',
     httpServerUrl: 'http://yogurt.magichc7.com/api/staff',
     fileServerUrl: 'http://123.206.22.71/api/v1/file/',
-    isLogin: true,
-    staffId: '1_s1',
+    isLogin: false,
+    staffId: '',
     chatRecordList: {
       '1_u1': [
         {

@@ -298,10 +298,7 @@ export default {
     this.chatWindowScroll()
   },
   created () {
-    if (this.$store.state.isLogin === false) {
-      this.$router.push('/login')
-      return
-    }
+    // build socket
     const io = require('socket.io-client')
     // socket url
     this.socket = io(this.$store.state.socketServerUrl)

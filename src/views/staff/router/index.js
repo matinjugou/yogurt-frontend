@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import StaffLogin from '@/components/staff/StaffLogin'
 import StaffHello from '@/components/staff/StaffHello'
 import StaffChat from '@/components/staff/StaffChat'
 import StaffInfo from '@/components/staff/StaffInfo'
@@ -12,12 +11,7 @@ Vue.use(Router)
 export default new Router({
   routes: [
     {
-      path: '/login',
-      name: 'Login',
-      component: StaffLogin
-    },
-    {
-      path: '/index',
+      path: '/',
       name: 'Index',
       component: StaffHello
     },
