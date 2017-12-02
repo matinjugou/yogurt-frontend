@@ -16,41 +16,41 @@
           </div>
         </div>
         <div class="chat-content" v-scroll="getMoreMessage" ref="userChatContent">
-            <ul>
-              <li v-for="(singleRecord, index) in currentChatRecord">
-                <p class="chat-msg-time">
-                  <span>{{ singleRecord.time }}</span>
-                </p>
-                <div class="chat-msg-body" :class="[{'from-me': singleRecord.from.startsWith('1_u')}]">
-                  <div class="avatar chat-single-record">
-                    <Avatar shape="square" icon="person"/>
-                  </div>
-                  <div v-if="singleRecord.type === 'text'" class="content chat-single-record">
-                    {{ singleRecord.msg }}
-                  </div>
-                  <div v-else-if="singleRecord.type === 'file'" @click="singleRecord.from === staffId ? downloadFile() : showLocalFile()" style="cursor: pointer" class="content chat-single-record">
-                    <template v-if="singleRecord.suffix === 'jpg' || singleRecord.suffix === 'jpeg' || singleRecord.suffix === 'png' || singleRecord.suffix === 'JPG' || singleRecord.suffix === 'JPEG' || singleRecord.suffix === 'PNG'">
-                      <img v-bind:src=singleRecord.imgUrl style="margin-top: 10px; margin-bottom: 10px; vertical-align: middle"/>
-                    </template>
-                    <template v-else>
-                      <div v-if="singleRecord.suffix.startsWith('doc')" class="fileicon-doc"></div>
-                      <div v-else-if="singleRecord.suffix.startsWith('pdf')" class="fileicon-pdf"></div>
-                      <div v-else-if="singleRecord.suffix.startsWith('xls')" class="fileicon-xls"></div>
-                      <div v-else-if="singleRecord.suffix.startsWith('txt')" class="fileicon-txt"></div>
-                      <div v-else class="fileicon-unknown"></div>
-                      <div style="float: right">
-                        <div class="file-name">
-                          {{ singleRecord.msg }}
-                        </div>
-                        <div class="file-size">
-                          {{ singleRecord.size }}
-                        </div>
-                      </div>
-                    </template>
-                  </div>
+          <ul>
+            <li v-for="(singleRecord, index) in currentChatRecord">
+              <p class="chat-msg-time">
+                <span>{{ singleRecord.time }}</span>
+              </p>
+              <div class="chat-msg-body" :class="[{'from-me': singleRecord.from.startsWith('1_u')}]">
+                <div class="avatar chat-single-record">
+                  <Avatar shape="square" icon="person"/>
                 </div>
-              </li>
-            </ul>
+                <div v-if="singleRecord.type === 'text'" class="content chat-single-record">
+                  {{ singleRecord.msg }}
+                </div>
+                <div v-else-if="singleRecord.type === 'file'" @click="singleRecord.from === staffId ? downloadFile() : showLocalFile()" style="cursor: pointer" class="content chat-single-record">
+                  <template v-if="singleRecord.suffix === 'jpg' || singleRecord.suffix === 'jpeg' || singleRecord.suffix === 'png' || singleRecord.suffix === 'JPG' || singleRecord.suffix === 'JPEG' || singleRecord.suffix === 'PNG'">
+                    <img v-bind:src=singleRecord.imgUrl style="margin-top: 10px; margin-bottom: 10px; vertical-align: middle"/>
+                  </template>
+                  <template v-else>
+                    <div v-if="singleRecord.suffix.startsWith('doc')" class="fileicon-doc"></div>
+                    <div v-else-if="singleRecord.suffix.startsWith('pdf')" class="fileicon-pdf"></div>
+                    <div v-else-if="singleRecord.suffix.startsWith('xls')" class="fileicon-xls"></div>
+                    <div v-else-if="singleRecord.suffix.startsWith('txt')" class="fileicon-txt"></div>
+                    <div v-else class="fileicon-unknown"></div>
+                    <div style="float: right">
+                      <div class="file-name">
+                        {{ singleRecord.msg }}
+                      </div>
+                      <div class="file-size">
+                        {{ singleRecord.size }}
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </li>
+          </ul>
         </div>
         <div class="chat-emoji-panel" v-show="showEmojiPanel">
           <picker
@@ -71,7 +71,7 @@
             <Button type="ghost" icon="monitor">截图</Button>
           </div>
           <div class="chat-input-send">
-          <Button type="success" icon="paper-airplane" @click="sendMessage">发送</Button>
+            <Button type="success" icon="paper-airplane" @click="sendMessage">发送</Button>
           </div>
         </div>
         <div class="chat-input">
@@ -412,6 +412,8 @@
           }
           this.contentList.push(fileRecord)
           this.scrollToBottom()
+          // debug
+          console.log('scrollheight: ' + this.$refs.userChatContent.scrollHeight)
         }
       },
       downloadFile () {
@@ -489,6 +491,9 @@
             if (el.scrollTop === 0 && enableScroll) {
               let fnc = binding.value
               fnc()
+
+              // debug
+//              console.log('scrollheight: ' + this.$refs.userChatContent.scrollHeight)
             }
           })
         }
