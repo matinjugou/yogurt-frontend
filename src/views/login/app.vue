@@ -106,11 +106,9 @@ export default {
       // TODO: Use axios to send http request
       // TODO: handle response
       // else pop wrong message
-      axios.get(url, {
-        params: {
-          'staffId': username,
-          'password': password
-        }
+      axios.post(url, {
+        'staffId': username,
+        'password': password
       }).then(response => {
         let body = response.data.data
         console.log(body)
@@ -159,15 +157,38 @@ export default {
         this.type = 'manager'
       }
     }
-    // TODO: check if the token is valid
+    // use token to auto login
     let storeType = window.localStorage.getItem('type')
     let storeToken = window.localStorage.getItem('token')
-    if (storeToken) {
-      if (storeType === 'staff') {
-        window.location.href = this.staffBackUrl
-      } else if (storeType === 'manager') {
-        window.location.href = this.managerBackUrl
-      }
+    let storeId = window.localStorage.getItem('id')
+    let url = ''
+    let requestBody = {}
+    requestBody['token'] = storeToken
+    if (storeType === 'staff') {
+      url = this.$store.state.staffLoginUrl
+      requestBody['staffId'] = storeId
+    } else if (storeType === 'manager') {
+      url = this.$store.state.managerLoginUrl
+      requestBody['managerId'] = storeId
+    }
+    // check if the token is valid
+    if (url) {
+      axios.get(url, {
+        params: requestBody
+      }).then(response => {
+        let body = response.data.data
+        console.log(body)
+        if (body.code === 0) {
+          // successfully login
+          if (storeType === 'staff') {
+            window.location.href = this.staffBackUrl
+          } else if (storeType === 'manager') {
+            window.location.href = this.managerBackUrl
+          }
+        }
+      }).catch(error => {
+        console.log(error)
+      })
     }
   },
   mounted () {

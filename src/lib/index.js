@@ -4,7 +4,6 @@ export default {
     let queryString = url ? url.split('?')[1] : window.location.search.slice(1)
     let obj = {}
     if (queryString) {
-      queryString = queryString.split('#')[0]
       let arr = queryString.split('&')
       for (let i = 0, len = arr.length; i < len; i++) {
         let a = arr[i].split('=')

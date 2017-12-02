@@ -51,6 +51,7 @@
 </template>
 
 <script>
+import axios from 'axios'
 export default {
   name: 'app',
   data () {
@@ -99,22 +100,34 @@ export default {
     }
   },
   created () {
-    // TODO: check if the token valid
+    // check if the token is valid
     let storeType = window.localStorage.getItem('type')
     let storeId = window.localStorage.getItem('id')
     let storeToken = window.localStorage.getItem('token')
-    if (storeToken) {
-      console.log(storeType)
-      if (storeType === 'staff' && storeId) {
-        this.$store.commit('login')
-        this.$store.commit({
-          type: 'changeStaffId',
-          staffId: storeId
-        })
-      }
-    }
-    // jump to login page
-    if (this.isLogin === false) {
+    if (storeType === 'staff' && storeId) {
+      axios.get(this.$store.state.httpServerUrl + '/login', {
+        params: {
+          staffId: storeId,
+          token: storeToken
+        }
+      }).then(response => {
+        let body = response.data.data
+        console.log(body)
+        if (body.code === 0) {
+          // successfully login
+          this.$store.commit('login')
+          this.$store.commit({
+            type: 'changeStaffId',
+            staffId: storeId
+          })
+        } else {
+          window.location.href = 'login?backUrl=' + window.location.href
+        }
+      }).catch(error => {
+        console.log(error)
+        window.location.href = 'login?backUrl=' + window.location.href
+      })
+    } else {
       window.location.href = 'login?backUrl=' + window.location.href
     }
   }
