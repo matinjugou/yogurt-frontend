@@ -1,23 +1,17 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import StaffLogin from '@/components/StaffLogin'
-import StaffHello from '@/components/StaffHello'
-import StaffChat from '@/components/StaffChat'
-import StaffInfo from '@/components/StaffInfo'
-import StaffQuickReply from '@/components/StaffQuickReply'
-import StaffFeedback from '@/components/StaffFeedback'
+import StaffHello from '@/components/staff/StaffHello'
+import StaffChat from '@/components/staff/StaffChat'
+import StaffInfo from '@/components/staff/StaffInfo'
+import StaffQuickReply from '@/components/staff/StaffQuickReply'
+import StaffFeedback from '@/components/staff/StaffFeedback'
 
 Vue.use(Router)
 
 export default new Router({
   routes: [
     {
-      path: '/login',
-      name: 'Login',
-      component: StaffLogin
-    },
-    {
-      path: '/index',
+      path: '/',
       name: 'Index',
       component: StaffHello
     },
