@@ -13,33 +13,33 @@
           <div class="menu-items">
           <MenuItem name="chat">
             <Icon type="chatboxes" :size="iconSize"></Icon>
-            <span class="staff-text" v-if="showMenuText">会话页面</span>
+            <span class="staff-text" v-show="showMenuText">会话页面</span>
           </MenuItem>
           <MenuItem name="info">
             <Icon type="person-stalker" :size="iconSize"></Icon>
-            <span class="staff-text" v-if="showMenuText">个人信息</span>
+            <span class="staff-text" v-show="showMenuText">个人信息</span>
           </MenuItem>
           <MenuItem name="quick-reply">
             <Icon type="reply-all" :size="iconSize"></Icon>
-            <span class="staff-text" v-if="showMenuText">快捷回复</span>
+            <span class="staff-text" v-show="showMenuText">快捷回复</span>
           </MenuItem>
           <MenuItem name="feedback">
             <Icon type="paper-airplane" :size="iconSize"></Icon>
-            <span class="staff-text" v-if="showMenuText">客户反馈</span>
+            <span class="staff-text" v-show="showMenuText">客户反馈</span>
           </MenuItem>
           <!--TODO: let all the actions in here-->
           </div>
           <div class="menu-vertical-spacing"></div>
           <Button :type="restAction" shape="circle" icon="coffee" size="large" @click="changeRestStatus">
-            <span v-if="showMenuText">{{ restCaption }}</span>
+            <span v-show="showMenuText">{{ restCaption }}</span>
           </Button>
           <div class="menu-button-space"></div>
           <Button type="error" shape="circle" icon="log-out" size="large" @click="logout">
-            <span v-if="showMenuText" @click="logout">&nbsp;&nbsp;登&nbsp;&nbsp;出&nbsp;&nbsp;</span>
+            <span class="menu-button-logout-text" v-show="showMenuText">登出</span>
           </Button>
           <div class="menu-button-space"></div>
           <footer class="staff-copy">
-            Yogurt
+            &copy; Yogurt
           </footer>
         </Menu>
       </Col>
@@ -55,7 +55,7 @@ export default {
   name: 'app',
   data () {
     return {
-      spanLeft: 0,
+      spanLeft: 3,
       iconSize: 25,
       restStatus: false
     }
@@ -85,6 +85,10 @@ export default {
     logout () {
       // TODO: logout
       this.$store.commit('logout')
+      window.localStorage.removeItem('id')
+      window.localStorage.removeItem('type')
+      window.localStorage.removeItem('token')
+      window.location.href = 'login'
     },
     menuAction (name) {
       if (name === 'burger-button') {
@@ -94,25 +98,24 @@ export default {
       }
     }
   },
-  watch: {
-    isLogin: function (val) {
-      if (this.isLogin === false) {
-        this.$router.push('/login')
-        this.spanLeft = 0
-      } else {
-        this.$router.push('/index')
-        this.spanLeft = 3
+  created () {
+    // TODO: check if the token valid
+    let storeType = window.localStorage.getItem('type')
+    let storeId = window.localStorage.getItem('id')
+    let storeToken = window.localStorage.getItem('token')
+    if (storeToken) {
+      console.log(storeType)
+      if (storeType === 'staff' && storeId) {
+        this.$store.commit('login')
+        this.$store.commit({
+          type: 'changeStaffId',
+          staffId: storeId
+        })
       }
     }
-  },
-  created () {
-    // TODO: if token appears
-    // change login status use this.$store.commit('login')
+    // jump to login page
     if (this.isLogin === false) {
-      this.$router.push('/login')
-    } else {
-      this.$router.push('/index')
-      this.spanLeft = 3
+      window.location.href = 'login?backUrl=' + window.location.href
     }
   }
 }
@@ -154,8 +157,12 @@ export default {
 .menu-button-space {
   height: 20px;
 }
+.menu-button-logout-text {
+  padding: 0 4px 0 4px;
+  letter-spacing: 9px;
+}
 .menu-vertical-spacing {
-  height: calc(100vh - 461px);
+  height: calc(100vh - 460px);
 }
 .ivu-col {
   transition: width 0.2s ease-in-out;

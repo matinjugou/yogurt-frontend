@@ -14,9 +14,7 @@ export default {
     }
   },
   created () {
-    if (this.$store.state.isLogin === false) {
-      this.$router.push('/login')
-    }
+    // TODO: If not login, jump to login page
   }
 }
 </script>
