@@ -1,0 +1,279 @@
+<template>
+  <div id="app">
+    <Row type="flex">
+      <Col :span="15"> 
+        <div class="login-left">
+          {{ msg }}
+        </div>
+      </Col>
+      <Col :span="9">
+        <div class="login-right">
+          <transition name="slide-fade">
+            <div class="login-action-bg" v-show="showAction">
+              <div class="login-action">
+                <Tabs 
+                  :value="type" 
+                  @on-click="changeType">
+                  <TabPane label="客服登录" name="staff">
+                    <div class="login-tab-vertical-space"></div>
+                    <div class="login-input">
+                      <Input v-model="username" placeholder="客服ID" size="large" autocomplete="on" autofocus @on-keyup.enter="login">
+                        <span class="input-prepend" slot="prepend">
+                          <Icon type="person" size="20"></Icon>
+                        </span>
+                      </Input>
+                      <div class="login-input-vertical-space"></div>
+                      <Input v-model="password" type="password" placeholder="密码" size="large" @on-keyup.enter="login">
+                        <span class="input-prepend" slot="prepend">
+                          <Icon type="locked" size="20"></Icon>
+                        </span>
+                      </Input>
+                    </div>
+                  </TabPane>
+                  <TabPane label="管理员登录" name="manager">
+                    <div class="login-tab-vertical-space"></div>
+                    <div class="login-input">
+                      <Input v-model="username" placeholder="管理员ID" size="large" autocomplete="on" autofocus @on-keyup.enter="login">
+                        <span class="input-prepend" slot="prepend">
+                          <Icon type="person" size="20"></Icon>
+                        </span>
+                      </Input>
+                      <div class="login-input-vertical-space"></div>
+                      <Input v-model="password" type="password" placeholder="密码" size="large" @on-keyup.enter="login">
+                        <span class="input-prepend" slot="prepend">
+                          <Icon type="locked" size="20"></Icon>
+                        </span>
+                      </Input>
+                    </div>
+                  </TabPane>
+                </Tabs>
+                
+                <div class="login-button">
+                  <div class="login-button-item">
+                    <!-- TODO: add forget password page and link to it-->
+                    <a class="login-link-text" href="#">忘记密码？</a>
+                  </div>
+                  <div class="login-button-item ">
+                    <Button type="success" size="large" @click="login">
+                      <span class="login-button-text">登录系统</span>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </transition>
+        </div>
+      </Col>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
+    </Row>                                                                                                                                                                                                                                      
+  </div>
+</template>
+<script>
+import axios from 'axios'
+import lib from '@/lib'
+export default {
+  name: 'app',
+  data () {
+    return {
+      msg: '欢迎使用Yogurt客服系统',
+      showAction: false,
+      type: 'staff',
+      username: '',
+      password: '',
+      staffBackUrl: 'staff',
+      managerBackUrl: 'manager'
+    }
+  },
+  methods: {
+    login () {
+      let type = this.type
+      let username = this.username
+      let password = this.password
+      if ((username === '') || (password === '')) {
+        this.$Message.error({
+          content: '用户名和密码不能为空！',
+          duration: 3,
+          closable: true
+        })
+        return
+      }
+      let url = ''
+      if (type === 'staff') {
+        url = this.$store.state.staffLoginUrl
+      } else if (type === 'manager') {
+        url = this.$store.state.managerLoginUrl
+      }
+      // TODO: encrypted the password
+      // TODO: Use axios to send http request
+      // TODO: handle response
+      // else pop wrong message
+      axios.post(url, {
+        'staffId': username,
+        'password': password
+      }).then(response => {
+        let body = response.data.data
+        console.log(body)
+        if (body.code === 0) {
+          // successfully login
+          window.localStorage.setItem('type', type)
+          window.localStorage.setItem('id', username)
+          window.localStorage.setItem('token', body.token)
+          if (type === 'staff') {
+            window.location.href = this.staffBackUrl
+          } else if (type === 'manager') {
+            window.location.href = this.managerBackUrl
+          }
+        } else {
+          // error login
+          this.$Message.error({
+            content: '用户名或密码错误',
+            duration: 3,
+            closable: true
+          })
+        }
+      }).catch(error => {
+        console.log(error)
+        this.$Message.error({
+          content: '服务器发生错误，请稍后再试...',
+          duration: 3,
+          closable: true
+        })
+      })
+    },
+    changeType (name) {
+      this.type = name
+      this.username = ''
+      this.password = ''
+    }
+  },
+  created () {
+    // handle url params
+    let params = lib.getUrlParams(window.location.href)
+    if (typeof params.backUrl === 'string') {
+      if (params.backUrl.indexOf('staff') >= 0) {
+        this.staffBackUrl = params.backUrl
+        this.type = 'staff'
+      } else if (params.backUrl.indexOf('manager') >= 0) {
+        this.managerBackUrl = params.backUrl
+        this.type = 'manager'
+      }
+    }
+    // use token to auto login
+    let storeType = window.localStorage.getItem('type')
+    let storeToken = window.localStorage.getItem('token')
+    let storeId = window.localStorage.getItem('id')
+    let url = ''
+    let requestBody = {}
+    requestBody['token'] = storeToken
+    if (storeType === 'staff') {
+      url = this.$store.state.staffLoginUrl
+      requestBody['staffId'] = storeId
+    } else if (storeType === 'manager') {
+      url = this.$store.state.managerLoginUrl
+      requestBody['managerId'] = storeId
+    }
+    // check if the token is valid
+    if (url) {
+      axios.get(url, {
+        params: requestBody
+      }).then(response => {
+        let body = response.data.data
+        console.log(body)
+        if (body.code === 0) {
+          // successfully login
+          if (storeType === 'staff') {
+            window.location.href = this.staffBackUrl
+          } else if (storeType === 'manager') {
+            window.location.href = this.managerBackUrl
+          }
+        }
+      }).catch(error => {
+        console.log(error)
+      })
+    }
+  },
+  mounted () {
+    this.showAction = true
+  }
+}
+</script>
+<style scoped>
+#app {
+  font-family: "Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  background-size: 100%;
+  background: url(assets/login_bg.png) fixed no-repeat;
+  background-size: 100% 100%;
+}
+.login-left {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  color: rgba(255, 255, 255, 0.7);
+}
+.login-right {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.login-action-bg {
+  width: 350px;
+  height: 370px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 10px;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
+}
+.login-tab-vertical-space {
+  height: 50px;
+}
+.login-action {
+  width: 280px;
+}
+.login-input-vertical-space {
+  height: 40px;
+}
+.login-input {
+  margin-bottom: 40px;
+  padding: 0 10px;
+}
+.input-prepend {
+  padding: 0 5px 0 5px;
+}
+.login-button {
+  padding: 0 10px 0 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.login-link-text {
+  font-size: 15px;
+}
+.login-button-text {
+  letter-spacing: 2px;
+}
+.slide-fade-enter-active {
+  transition: all .5s ease;
+}
+.slide-fade-leave-active {
+  transition: all .3s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+}
+.slide-fade-enter, .slide-fade-leave-to {
+  transform: translateY(10px);
+  opacity: 0;
+}
+</style>
+
+<style>
+.ivu-input {
+  background-color: rgba(255, 255, 255, 0.7);
+}
+</style>
