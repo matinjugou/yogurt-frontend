@@ -76,6 +76,9 @@ export default {
     },
     isLogin () {
       return this.$store.state.isLogin
+    },
+    socket () {
+      return this.$store.state.socket
     }
   },
   methods: {
@@ -97,9 +100,59 @@ export default {
       } else {
         this.$router.push('/' + name)
       }
+    },
+    socketListenInit () {
+      // TODO: deal with register result
+      this.socket.on('regResult', (data) => {
+        console.log('Register result: code ' + data.code + ' & msg ' + data.msg)
+        if (data.code !== 0) {
+          this.$Message.error({
+            content: data.msg,
+            duration: 3,
+            closable: true
+          })
+        }
+      })
+      // TODO: deal with send failure
+      // also timeout affair should be taken care of
+      this.socket.on('sendResult', (data) => {
+        console.log('Send result: code ' + data.code + ' & msg ' + data.msg)
+        if (data.code !== 0) {
+          this.$Message.error({
+            content: data.msg,
+            duration: 3,
+            closable: true
+          })
+        } else {
+
+        }
+      })
+      // receive user text message from socket
+      // this.socket.on('userTextMsg', (data) => {
+      //   console.log('User text message: from ' + data.from + ' & msg ' + data.msg)
+      //   let date = new Date()
+      //   this.$store.commit({
+      //     type: 'addChatRecord',
+      //     userId: data.from,
+      //     content: {
+      //       'from': data.from,
+      //       'to': this.$store.state.staffId,
+      //       'msg': data.msg,
+      //       'type': data.type,
+      //       'time': date.toLocaleTimeString('zh-Hans-CN')
+      //     }
+      //   })
+      //   if (data.from !== this.chatUserId) {
+      //     this.$store.commit({
+      //       type: 'addUserUnread',
+      //       userId: data.from
+      //     })
+      //   }
+      // })
     }
   },
   created () {
+    this.$store.commit('buildSocketConnect')
     // check if the token is valid
     let storeType = window.localStorage.getItem('type')
     let storeId = window.localStorage.getItem('id')
@@ -120,6 +173,11 @@ export default {
             type: 'changeStaffId',
             staffId: storeId
           })
+          this.socket.emit('staffReg', {
+            staffId: this.$store.state.staffId,
+            token: this.$store.state.token
+          })
+          this.socketListenInit()
         } else {
           window.location.href = 'login?backUrl=' + window.location.href
         }

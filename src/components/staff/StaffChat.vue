@@ -8,20 +8,25 @@
         <Menu
           theme="light" 
           width="auto" 
-          :open-names="['chatting', 'switching', 'waiting']"
+          :open-names="['serving', 'switching', 'waiting']"
           @on-select="openChatWindow"
         >
-          <Submenu name="chatting">
+          <Submenu name="serving">
             <template slot="title">
-              处理中
+                <div class="chat-menu-title">
+                  处理中
+                </div>
+                <Badge :count="allUnread" overflow-count="999"></Badge>
             </template>
-            <MenuItem v-for="(user, index) in userList" v-if="user.status === 'chatting'":key="user.userid" :name="user.userid">
+            <MenuItem v-for="(user, index) in userList" v-if="user.status === 'serving'":key="user.userId" :name="user.userId">
               <div class="chat-menu-item">
-                <Avatar shape="square" icon="person"/>
+                <Badge :count="user.unread" overflow-count="99">
+                  <Avatar shape="square" icon="person"/>
+                </Badge>
               </div>
               <div class="chat-menu-item">
-                {{ user.userName }} <br />
-                {{ user.status }}
+                用户{{ user.userId.length > 10 ? user.userId.slice(0, 10) + '...' : user.userId }} <br />
+                {{ lastChatRecord[user.userId] }}
               </div>
             </MenuItem>
           </Submenu>
@@ -29,13 +34,12 @@
             <template slot="title">
               待转接
             </template>
-            <MenuItem v-for="(user, index) in userList" v-if="user.status === 'switching'" :key="user.userid" :name="user.userid">
+            <MenuItem v-for="(user, index) in userList" v-if="user.status === 'switching'" :key="user.userId" :name="user.userId">
               <div class="chat-menu-item">
                 <Avatar shape="square" icon="person"/>
               </div>
               <div class="chat-menu-item">
-                {{ user.userName }} <br />
-                {{ user.status }}
+                用户{{ user.userId.length > 10 ? user.userId.slice(0, 10) + '...' : user.userId }}
               </div>
             </MenuItem>
           </Submenu>
@@ -43,13 +47,12 @@
             <template slot="title">
               正在排队
             </template>
-            <MenuItem v-for="(user, index) in userList" v-if="user.status === 'waiting'" :key="user.userid" :name="user.userid">
+            <MenuItem v-for="(user, index) in userList" v-if="user.status === 'waiting'" :key="user.userId" :name="user.userId">
               <div class="chat-menu-item">
                 <Avatar shape="square" icon="person"/>
               </div>
               <div class="chat-menu-item">
-                {{ user.userName }} <br />
-                {{ user.status }}
+                用户{{ user.userId.length > 10 ? user.userId.slice(0, 10) + '...' : user.userId }}
               </div>
             </MenuItem>
           </Submenu>
@@ -59,7 +62,7 @@
         <div v-if="isChatting">
           <div class="chat-window-header">
             <div class="chat-window-title">
-              {{ chatUserName }}
+              用户{{ chatUserId.length > 10 ? chatUserId.slice(0, 10) + '...' : chatUserId }}
             </div>
             <div class="chat-window-title-actions">
               <Button type="text">
@@ -68,7 +71,7 @@
               <Button type="text" @click="showInfo">
                 <Icon type="more" size="28"></Icon>
               </Button>
-              <Button type="text">
+              <Button type="text" @click="closeChat">
                 <Icon type="close-round" size="24"></Icon>
               </Button>
             </div>
@@ -146,6 +149,7 @@
 </template>
 
 <script>
+import axios from 'axios'
 export default {
   name: 'StaffChat',
   data () {
@@ -154,7 +158,6 @@ export default {
       spanRight: 0,
       isChatting: false,
       showEmojiPanel: false,
-      chatUserName: '',
       chatUserId: '',
       inputText: '',
       inputCaretPos: 0,
@@ -174,28 +177,43 @@ export default {
           flags: '旗帜',
           custom: '自定义'
         }
-      },
-      userList: [
-        {
-          userid: '1_u1',
-          userName: '用户1',
-          status: 'chatting'
-        },
-        {
-          userid: '1_u2',
-          userName: '用户2',
-          status: 'chatting'
-        }
-      ],
-      socket: null
+      }
     }
   },
   computed: {
     spanMiddle () {
       return 24 - this.spanLeft - this.spanRight
     },
+    chatRecordList () {
+      return this.$store.state.chatRecordList
+    },
     currentChatRecord () {
       return this.$store.state.chatRecordList[this.chatUserId]
+    },
+    userList () {
+      return this.$store.state.userList
+    },
+    allUnread () {
+      let sum = 0
+      for (let i = 0, len = this.userList.length; i < len; i++) {
+        sum += this.userList[i].unread
+      }
+      return sum
+    },
+    lastChatRecord () {
+      let obj = {}
+      for (let ele of this.userList) {
+        if (ele.status === 'serving') {
+          obj[ele.userId] = this.getLastChatRecord(ele.userId)
+        }
+      }
+      return obj
+    },
+    socket () {
+      return this.$store.state.socket
+    },
+    staffId () {
+      return this.$store.state.staffId
     }
   },
   methods: {
@@ -205,20 +223,35 @@ export default {
         element.scrollTop = element.scrollHeight
       }
     },
-    openChatWindow (userid) {
+    openChatWindow (userId) {
       this.isChatting = true
-      let name
-      for (let user of this.userList) {
-        if (user.userid === userid) {
-          name = user.userName
-          break
-        }
-      }
-      this.chatUserName = name
-      this.chatUserId = userid
+      this.chatUserId = userId
       // TODO: refresh chat record
       // clear input
       this.inputText = ''
+      // clear unread
+      this.$store.commit({
+        type: 'clearUserUnread',
+        userId: this.chatUserId
+      })
+    },
+    closeChat () {
+      // TODO: close chat with chatUserId
+    },
+    getLastChatRecord (userId) {
+      let chatRecord = this.chatRecordList[userId]
+      if (chatRecord) {
+        let singleRecord = chatRecord[chatRecord.length - 1]
+        if (singleRecord.type === 'text') {
+          return singleRecord.msg
+        } else if (singleRecord.type === 'pic') {
+          return '[图片]'
+        } else if (singleRecord.type === 'file') {
+          return '[文件]'
+        }
+      } else {
+        return '无消息'
+      }
     },
     showInfo () {
       this.spanRight = this.spanRight === 0 ? 3 : 0
@@ -240,12 +273,11 @@ export default {
       }
       this.inputText = ''
       let date = new Date()
-      // TODO: get the staffid
       this.$store.commit({
         type: 'addChatRecord',
         userId: this.chatUserId,
         content: {
-          'from': this.$store.state.staffId,
+          'from': this.staffId,
           'to': this.chatUserId,
           'msg': sendMsg,
           'type': 'text',
@@ -253,11 +285,10 @@ export default {
           // 'hasSent': false
         }
       })
-      // TODO: change the token part
       this.socket.emit('staffTextMsg', {
-        'staffId': this.$store.state.staffId,
+        'staffId': this.staffId,
         'userId': this.chatUserId,
-        'token': 's1_token',
+        'token': window.localStorage.getItem('token'),
         'msg': sendMsg
       })
       // TODO: 异步处理消息返回信息（发送成功与否）
@@ -298,52 +329,67 @@ export default {
     this.chatWindowScroll()
   },
   created () {
-    // build socket
-    const io = require('socket.io-client')
-    // socket url
-    this.socket = io(this.$store.state.socketServerUrl)
-    // TODO:
-    // 's1' -> real staff id
-    // 's1_token' -> real token
-    this.socket.emit('staffReg', {
-      staffId: this.$store.state.staffId,
-      token: 's1_token'
-    })
-    // TODO: deal with register result
-    this.socket.on('regResult', (data) => {
-      console.log('Register result: code ' + data.code + '& msg ' + data.msg)
-      if (data.code === 0) {
-        this.$Message.error({
-          content: data.msg,
-          duration: 3,
-          closable: true
-        })
+    // update user queue
+    axios.get(this.$store.state.httpServerUrl + '/queue', {
+      params: {
+        staffId: window.localStorage.getItem('id'),
+        token: window.localStorage.getItem('token')
       }
-    })
-    // TODO: deal with send failure
-    // also timeout affair should be taken care of
-    this.socket.on('sendResult', (data) => {
-      console.log('Send result: code ' + data.code + '& msg ' + data.msg)
-      if (data.code === 0) {
-        this.$Message.error({
-          content: data.msg,
-          duration: 3,
-          closable: true
+    }).then(response => {
+      let body = response.data.data
+      console.log(body)
+      if (body.code === 0) {
+        // successfully get user queue
+        let arr = []
+        for (let value of body.queue.serving) {
+          arr.push({
+            userId: value,
+            status: 'serving',
+            unread: 0
+          })
+        }
+        for (let value of body.queue.waiting) {
+          arr.push({
+            userId: value,
+            status: 'waiting'
+          })
+        }
+        this.$store.commit({
+          type: 'refreshUserList',
+          content: arr
         })
       } else {
-
+        // failed to get user queue
+        this.$Message.error({
+          content: '没能成功获取用户列表，请刷新重试',
+          duration: 3,
+          closable: true
+        })
       }
+    }).catch(error => {
+      console.log(error)
     })
+    // receive user text message from socket
     this.socket.on('userTextMsg', (data) => {
-      console.log('User text message: from ' + data.from + '& msg ' + data.msg)
+      console.log('User text message: from ' + data.from + ' & msg ' + data.msg)
       let date = new Date()
-      this.contentList.push({
-        'from': data.from,
-        'to': this.$store.state.staffId,
-        'msg': data.msg,
-        'type': data.type,
-        'time': date.toLocaleTimeString('zh-Hans-CN')
+      this.$store.commit({
+        type: 'addChatRecord',
+        userId: data.from,
+        content: {
+          'from': data.from,
+          'to': this.staffId,
+          'msg': data.msg,
+          'type': data.type,
+          'time': date.toLocaleTimeString('zh-Hans-CN')
+        }
       })
+      if (data.from !== this.chatUserId) {
+        this.$store.commit({
+          type: 'addUserUnread',
+          userId: data.from
+        })
+      }
     })
   }
 }
@@ -359,6 +405,10 @@ export default {
   background: #FFFFFF;
   overflow: auto;
 }
+.chat-menu-title {
+  display: inline-flex;
+  margin-right: 10px;
+}
 .chat-empty {
   width: 100%;
   height: 100%;
@@ -373,7 +423,8 @@ export default {
 }
 .chat-menu-item{
   display: inline-flex;
-  vertical-align:middle
+  vertical-align: middle;
+  margin-right: 20px;
 }
 .chat-window-header {
   height: 60px;

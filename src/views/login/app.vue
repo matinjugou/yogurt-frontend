@@ -1,8 +1,9 @@
 <template>
   <div id="app">
     <Row type="flex">
-      <Col :span="15"> 
+      <Col :span="15">
         <div class="login-left">
+          <!--img src="./assets/logo.png" width="400px" /-->
           {{ msg }}
         </div>
       </Col>
@@ -213,7 +214,7 @@ export default {
   align-items: center;
   justify-content: center;
   font-size: 36px;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.8);
 }
 .login-right {
   width: 100%;
@@ -267,7 +268,7 @@ export default {
   transition: all .3s cubic-bezier(1.0, 0.5, 0.8, 1.0);
 }
 .slide-fade-enter, .slide-fade-leave-to {
-  transform: translateY(10px);
+  transform: translateY(20px);
   opacity: 0;
 }
 </style>
