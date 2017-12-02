@@ -32,7 +32,7 @@
                   {{ singleRecord.msg }}
                 </div>
                 <div v-else-if="singleRecord.type === 'pic'" @click="singleRecord.from === staffId ? downloadFile() : showLocalFile()" class="content chat-single-record" style="cursor: pointer">
-                    <img v-bind:src=singleRecord.imgUrl class="chat-image" />
+                    <img v-bind:src=singleRecord.fileUrl class="chat-image" />
                 </div>
                 <div v-else-if="singleRecord.type === 'file'" @click="singleRecord.from === staffId ? downloadFile() : showLocalFile()" style="cursor: pointer" class="content chat-single-record">
                     <svg class="file-icon">
@@ -378,21 +378,19 @@
             suffix: file.name.substr(file.name.lastIndexOf('.') + 1),
             time: curDate.getFullYear() + '-' + curDate.getMonth() + '-' + curDate.getDay() + ' ' + curDate.getHours() + ':' + curDate.getMinutes() + ':' + curDate.getSeconds()
           }
-//          if (/^image/.test(file.type) && window.FileReader) {
-//            let reader = new FileReader()
-//            reader.readAsDataURL(file)
-//            this.contentList.push(fileRecord)
-//            this.scrollToBottom()
-//            reader.onload = function (e) {
-//              fileRecord.imgUrl = e.target.result
-//            }
-//          }
           if ((fileRecord.suffix === 'jpg' || fileRecord.suffix === 'jpeg' || fileRecord.suffix === 'png' || fileRecord.suffix === 'JPG' || fileRecord.suffix === 'JPEG' || fileRecord.suffix === 'PNG') && URL.createObjectURL) {
             fileRecord.type = 'pic'
-            fileRecord.imgUrl = URL.createObjectURL(file)
+//            fileRecord.imgUrl = URL.createObjectURL(file)
           } else {
             this.modifyFileSuffix(fileRecord)
           }
+          let postData = {'fileType': 'text', 'validTime': 1, 'file': file}
+          this.$http.post('http://123.206.22.71/api/v1/file/', postData)
+            .then(function (response) {
+              // debug
+              console.log(response)
+              fileRecord.fileUrl = response
+            })
           this.contentList.push(fileRecord)
           this.scrollToBottom()
           // debug
