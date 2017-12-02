@@ -6,13 +6,13 @@ import router from './router'
 import iView from 'iview'
 import 'iview/dist/styles/iview.css'
 import { Picker } from 'emoji-mart-vue'
-import axios from 'axios'
+// import axios from 'axios'
 // import VueSocketio from 'vue-socket.io'
 
 Vue.config.productionTip = false
 Vue.use(iView)
 Vue.component('picker', Picker)
-Vue.prototype.$http = axios
+// Vue.prototype.$http = axios
 
 /* eslint-disable no-new */
 new Vue({
