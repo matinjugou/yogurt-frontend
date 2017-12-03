@@ -124,6 +124,10 @@ export default {
             type: 'changeStaffId',
             staffId: storeId
           })
+          this.socket.emit('staffReg', {
+            staffId: this.$store.state.staffId,
+            token: this.$store.state.token
+          })
         } else {
           window.location.href = 'login?backUrl=' + window.location.href
         }

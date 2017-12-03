@@ -90,7 +90,7 @@ export default {
       let username = this.username
       let password = this.password
       if ((username === '') || (password === '')) {
-        this.$Message.error({
+        this.$Notice.error({
           content: '用户名和密码不能为空！',
           duration: 3,
           closable: true
@@ -125,7 +125,7 @@ export default {
           }
         } else {
           // error login
-          this.$Message.error({
+          this.$Notice.error({
             content: '用户名或密码错误',
             duration: 3,
             closable: true
@@ -133,7 +133,7 @@ export default {
         }
       }).catch(error => {
         console.log(error)
-        this.$Message.error({
+        this.$Notice.error({
           content: '服务器发生错误，请稍后再试...',
           duration: 3,
           closable: true
