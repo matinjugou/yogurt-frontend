@@ -1,0 +1,118 @@
+<template>
+  <div class="right-content">
+    <div class="layout-header">
+      <Row type="flex" justify="start" style="padding-left: 10px;padding-top: 10px">
+        <h1 style="padding-left: 5px;border-left: 5px solid #2baee9">管理员信息设置
+        </h1>
+      </Row>
+    </div>
+    <div class="layout-content">
+      <div class="layout-content-main">
+        <Row type="flex">
+          <my-avatar btnName="修改头像">
+            <!--vue-core-image-upload
+              slot="uploadBtn"
+              class="btn btn-primary my-avatar-button"
+              :crop="false"
+              text="修改头像"
+              inputOfFile="file"
+              @imageuploaded="avatarLoaded"
+              :max-file-size="5242880"
+              :data="avatarData"
+              url="http://123.206.22.71/api/v1/file/"
+              >
+            </vue-core-image-upload-->
+          </my-avatar>
+          <div style="padding-left: 20px">
+            <Card style="width: 500px; height:210px">
+              <h2 slot="title">
+                {{ managerName }}
+              </h2>
+              <a href="#" slot="extra" @click.prevent="changeRobotName">
+                修改昵称
+              </a>
+              <a href="#" slot="extra" @click.prevent="changeRobotName">
+                修改密码
+              </a>
+              <div style="max-height:130px; overflow: auto">
+                <p style="padding-bottom: 3px"><b>管理员ID:&nbsp;</b>{{ managerID }}</p>
+                <p style="padding-bottom: 3px"><b>所属公司:&nbsp;</b>{{ companyName }}</p>
+              </div>
+            </Card>
+          </div>
+        </Row>
+      </div>
+    </div>
+    <div style="margin: 15px">
+      <Row type="flex" style="padding-bottom: 7px; margin-bottom: 10px;border-bottom: 1px solid #e9eaec">
+        <h3 style="padding-left: 5px;border-left: 5px solid orange">
+          其他信息
+        </h3>
+      </Row>
+      <Row>
+        <h5 style="padding-bottom: 5px">个人邮箱</h5>
+        <p>thss15_huangc@163.com</p>
+      </Row>
+    </div>
+    <div class="layout-copy">
+      2017-2017 &copy; HJZY开发小组
+    </div>
+  </div>
+</template>
+<script>
+  import MyAvatar from '@/components/public/MyAvatar'
+
+  export default {
+    name: 'managerinfo',
+    data () {
+      return {
+        avatarSrc: 'http://img1.vued.vanthink.cn/vued0a233185b6027244f9d43e653227439a.png',
+        managerName: 'Yogurt',
+        managerID: '1_m1',
+        companyName: '清华大学软件学院',
+        avatarData: {
+          fileType: 'avatar',
+          validTime: 1
+        },
+        avatarCropRatio: '1:1'
+      }
+    },
+    methods: {
+      avatarLoaded: function () {
+      },
+      changeRobotName: function () {
+      }
+    },
+    components: {
+      'my-avatar': MyAvatar
+    }
+  }
+</script>
+<style scoped>
+  .right-content {
+    min-height: 100vh;
+    width: 960px;
+    min-width: 960px;
+    overflow: auto
+  }
+  .layout-header{
+    height: 60px;
+    background: #fff;
+    box-shadow: 0 1px 1px rgba(0,0,0,.1);
+  }
+  .layout-content{
+    min-height: 200px;
+    margin: 15px;
+    overflow: hidden;
+    background: #fff;
+    border-radius: 4px;
+  }
+  .layout-content-main{
+    padding: 10px;
+  }
+  .layout-copy {
+    text-align: center;
+    padding: 10px 0 20px;
+    color: #9ea7b4;
+  }
+</style>
