@@ -96,13 +96,18 @@
                   <div class="content chat-single-record-element" :class="singleRecord.type" v-if="singleRecord.type === 'text'">
                     {{ singleRecord.msg }}
                   </div>
-                  <div class="content chat-single-record-element" :class="singleRecord.type" v-if="singleRecord.type === 'pic'">
+                  <div class="content chat-single-record-element" :class="singleRecord.type" v-if="singleRecord.type === 'image'">
                     <img class="chat-image" :src="singleRecord.msg" alt="聊天图片" @click="showLargeImage(singleRecord.msg)"/>
                   </div>
                   <div class="content chat-single-record-element" :class="singleRecord.type" v-if="singleRecord.type === 'file'">
-                    <svg class="chat-file-icon">
-                      <use xlink:href="#css" />
-                    </svg>
+                    <div class="chat-file-prepend">
+                      <svg class="chat-file-icon">
+                        <use :xlink:href="getFileIconName(singleRecord.msg)" />
+                      </svg>
+                    </div>
+                    <div class="chat-file-info">
+                      {{ singleRecord.msg.split('/')[singleRecord.msg.split('/').length - 1 ]}}
+                    </div>
                   </div>
                 </div>
               </li>
@@ -141,7 +146,7 @@
                     正在上传...
                   </div>
                 </div>
-                <div class="upload-single-file-cover" @click="handleDelete(file)">
+                <div class="upload-single-file-cover" @click="handleRemove(file)">
                   <Icon type="close-round" size="20"></Icon>
                 </div>
               </div>
@@ -320,6 +325,14 @@ export default {
     },
     staffId () {
       return this.$store.state.staffId
+    },
+    readyToSend () {
+      for (let file of this.uploadList) {
+        if (file.status !== 'finished') {
+          return false
+        }
+      }
+      return true
     }
   },
   methods: {
@@ -344,15 +357,16 @@ export default {
         console.log('Send result: code ' + data.code + ' & msg ' + data.msg)
         if (data.code !== 0) {
           this.$Notice.error({
-            title: data.msg
+            title: '发送失败，请重新发送'
           })
         } else {
-
+          // success
         }
       })
-      // receive user text message from socket
-      this.socket.on('userTextMsg', (data) => {
-        console.log('User text message: from ' + data.from + ' & msg ' + data.msg)
+      // receive user message from socket
+      // TODO: update time to time in userMsg
+      this.socket.on('userMsg', (data) => {
+        console.log('User message: from ' + data.from + ' & msg ' + data.msg)
         let date = new Date()
         this.$store.commit({
           type: 'addChatRecord',
@@ -371,6 +385,25 @@ export default {
             userId: data.from
           })
         }
+      })
+      // receive new user notification from socket
+      this.socket.on('newUser', (data) => {
+        console.log('New user: ' + data.userId)
+        this.$store.commit({
+          type: 'addUser',
+          content: {
+            userId: data.userId,
+            status: 'waiting'
+          }
+        })
+      })
+      // receive user stop notification from socket
+      this.socket.on('userServiceStop', (data) => {
+        console.log('User stop: ' + data.from + ' & msg: ' + data.msg)
+        this.$store.commit({
+          type: 'removeUser',
+          userId: data.from
+        })
       })
     },
     chatWindowScroll () {
@@ -403,7 +436,7 @@ export default {
         let singleRecord = chatRecord[chatRecord.length - 1]
         if (singleRecord.type === 'text') {
           return singleRecord.msg
-        } else if (singleRecord.type === 'pic') {
+        } else if (singleRecord.type === 'image') {
           return '[图片]'
         } else if (singleRecord.type === 'file') {
           return '[文件]'
@@ -421,33 +454,72 @@ export default {
       this.largeImageSrc = src
     },
     sendMessage () {
+      if (!this.readyToSend) {
+        this.$Notice.error({
+          title: '文件传送完毕之前不可发送'
+        })
+        return
+      }
       let sendMsg = this.inputText
-      if (sendMsg === '') {
+      if (sendMsg === '' && this.uploadList.length === 0) {
         this.$Notice.warning({
           title: '不可以发送空消息！'
         })
         return
       }
-      this.inputText = ''
       let date = new Date()
-      this.$store.commit({
-        type: 'addChatRecord',
-        userId: this.chatUserId,
-        content: {
-          'from': this.staffId,
-          'to': this.chatUserId,
+      // send text msg
+      if (sendMsg !== '') {
+        this.$store.commit({
+          type: 'addChatRecord',
+          userId: this.chatUserId,
+          content: {
+            'from': this.staffId,
+            'to': this.chatUserId,
+            'msg': sendMsg,
+            'type': 'text',
+            'time': date.toLocaleTimeString('zh-Hans-CN')
+            // 'hasSent': false
+          }
+        })
+        this.socket.emit('staffMsg', {
+          'staffId': this.staffId,
+          'userId': this.chatUserId,
+          'token': window.localStorage.getItem('token'),
           'msg': sendMsg,
-          'type': 'text',
-          'time': date.toLocaleTimeString('zh-Hans-CN')
-          // 'hasSent': false
+          'type': 'text'
+        })
+        // clear input
+        this.inputText = ''
+      }
+      // send files
+      if (this.uploadList.length) {
+        for (let index of this.uploadList.keys()) {
+          let fileType = this.uploadList[index].response.type.startsWith('image') ? 'image' : 'file'
+          this.$store.commit({
+            type: 'addChatRecord',
+            userId: this.chatUserId,
+            content: {
+              'from': this.staffId,
+              'to': this.chatUserId,
+              'msg': this.uploadList[index].response.data,
+              'type': fileType,
+              'time': date.toLocaleTimeString('zh-Hans-CN')
+              // 'hasSent': false
+            }
+          })
+          this.socket.emit('staffMsg', {
+            'staffId': this.staffId,
+            'userId': this.chatUserId,
+            'token': window.localStorage.getItem('token'),
+            'msg': this.uploadList[index].response.data,
+            'type': 'text'
+          })
         }
-      })
-      this.socket.emit('staffTextMsg', {
-        'staffId': this.staffId,
-        'userId': this.chatUserId,
-        'token': window.localStorage.getItem('token'),
-        'msg': sendMsg
-      })
+        // clear files
+        this.$refs.upload.clearFiles()
+        this.uploadList = this.$refs.upload.fileList
+      }
       // TODO: 异步处理消息返回信息（发送成功与否）
     },
     handleBeforeUpload (file) {
@@ -465,7 +537,7 @@ export default {
         desc: '文件  ' + file.name + ' 过大，不应该超过 ' + this.maxFileSize + ' KB.'
       })
     },
-    handleDelete (file) {
+    handleRemove (file) {
       const fileList = this.$refs.upload.fileList
       this.$refs.upload.fileList.splice(fileList.indexOf(file), 1)
       this.$Notice.success({
@@ -689,10 +761,33 @@ export default {
   border: 6px solid transparent;
   border-right-color: #ffffff;
 }
-.chat-msg-body > .pic {
+.chat-msg-body > .image {
   padding: 10px 10px 10px 10px;
-  max-width: 300px;
-  max-height: 300px;
+  width: 200px;
+  height: 150px;
+  cursor: pointer;
+}
+.chat-msg-body > .file {
+  padding: 10px 5px 0 5px;
+  cursor: pointer;
+  width: 350px;
+}
+.chat-image{
+  border-radius: 4px;
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+.chat-file-prepend {
+  max-width: 70px;
+  max-height: 70px;
+  margin-right: 10px;
+}
+.chat-file-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  cursor: pointer;
 }
 .from-me {
   text-align: right;
@@ -783,17 +878,11 @@ export default {
 .list-file-name {
   font-size: 14px;
 }
-.chat-image{
-  border-radius: 4px;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  cursor: pointer;
-}
 .large-image {
+  text-align: center;
   width: 100%;
   height: 100%;
-  overflow: auto;
+  overflow: scroll;
 }
 .slide-fade-enter-active {
   transition: all .3s ease;

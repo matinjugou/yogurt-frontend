@@ -16,8 +16,8 @@ export default new Vuex.Store({
           'from': '1_u1',
           'to': '1_s1',
           'msg': 'http://s1.picswalls.com/wallpapers/2015/09/20/wallpaper-2015_111528356_269.jpg',
-          'type': 'pic',
-          'time': 'test_pic'
+          'type': 'image',
+          'time': 'test_image'
         }
       ]
     },
@@ -45,6 +45,15 @@ export default new Vuex.Store({
     },
     addUser (state, payload) {
       state.userList.push(payload.content)
+    },
+    removeUser (state, payload) {
+      let userIndex
+      for (let index of state.userList.keys()) {
+        if (state.userList[index].userId === payload.userId) {
+          userIndex = index
+        }
+      }
+      state.userList.splice(userIndex, 1)
     },
     clearUserUnread (state, payload) {
       state.userList.find(function (user) {
