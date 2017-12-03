@@ -73,7 +73,7 @@
               <Button type="text" @click="showInfo">
                 <Icon type="more" size="28"></Icon>
               </Button>
-              <Button type="text" @click="closeChat">
+              <Button type="text" @click="closeChatWindow">
                 <Icon type="close-round" size="24"></Icon>
               </Button>
             </div>
@@ -385,13 +385,16 @@ export default {
       // TODO: refresh chat record
       // clear input
       this.inputText = ''
+      // clear files
+      this.$refs.upload.clearFiles()
+      this.uploadList = this.$refs.upload.fileList
       // clear unread
       this.$store.commit({
         type: 'clearUserUnread',
         userId: this.chatUserId
       })
     },
-    closeChat () {
+    closeChatWindow () {
       // TODO: close chat with chatUserId
     },
     getLastChatRecord (userId) {
@@ -454,7 +457,6 @@ export default {
           title: '每次最多仅能传输5个文件'
         })
       }
-      console.log(file)
       return check
     },
     handleMaxSize (file) {
