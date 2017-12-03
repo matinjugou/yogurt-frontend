@@ -21,18 +21,7 @@ export default new Vuex.Store({
         }
       ]
     },
-    userList: [
-      {
-        userId: '1_u1',
-        status: 'serving',
-        unread: 0
-      },
-      {
-        userId: '1_u2',
-        status: 'serving',
-        unread: 0
-      }
-    ],
+    userList: [],
     socket: null
   },
   mutations: {

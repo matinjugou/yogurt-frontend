@@ -145,6 +145,12 @@
         detail info
       </Col>
     </Row>
+    <Modal v-model="showLargeImageModal" width="80%" title="查看图片">
+      <div class="large-image">
+        <img :src="largeImageSrc" />
+      </div>
+      <div slot="footer"></div>
+    </Modal>
   </div>
 </template>
 
@@ -161,6 +167,8 @@ export default {
       chatUserId: '',
       inputText: '',
       inputCaretPos: 0,
+      showLargeImageModal: false,
+      largeImageSrc: '',
       emojiLocalization: {
         search: '搜索',
         notfound: '没有找到表情',
@@ -219,6 +227,64 @@ export default {
     }
   },
   methods: {
+    socketListenInit () {
+      this.socket.emit('staffReg', {
+        staffId: this.$store.state.staffId,
+        token: this.$store.state.token
+      })
+      this.socket.on('regResult', (data) => {
+        console.log('Register result: code ' + data.code + ' & msg ' + data.msg)
+        if (data.code === 0) {
+          this.$Message.success({
+            content: '连接消息服务器成功！',
+            duration: 3,
+            closable: true
+          })
+        } else {
+          this.$Message.error({
+            content: '连接消息服务器失败，程序会自动尝试重新连接',
+            duration: 3,
+            closable: true
+          })
+        }
+      })
+      // TODO: deal with send failure
+      // also timeout affair should be taken care of
+      this.socket.on('sendResult', (data) => {
+        console.log('Send result: code ' + data.code + ' & msg ' + data.msg)
+        if (data.code !== 0) {
+          this.$Message.error({
+            content: data.msg,
+            duration: 3,
+            closable: true
+          })
+        } else {
+
+        }
+      })
+      // receive user text message from socket
+      this.socket.on('userTextMsg', (data) => {
+        console.log('User text message: from ' + data.from + ' & msg ' + data.msg)
+        let date = new Date()
+        this.$store.commit({
+          type: 'addChatRecord',
+          userId: data.from,
+          content: {
+            'from': data.from,
+            'to': this.$store.state.staffId,
+            'msg': data.msg,
+            'type': data.type,
+            'time': date.toLocaleTimeString('zh-Hans-CN')
+          }
+        })
+        if (data.from !== this.chatUserId) {
+          this.$store.commit({
+            type: 'addUserUnread',
+            userId: data.from
+          })
+        }
+      })
+    },
     chatWindowScroll () {
       let element = document.getElementById('chat-window')
       if (element) {
@@ -260,8 +326,8 @@ export default {
       // TODO: Add detail info
     },
     showLargeImage (src) {
-      // TODO: show large image
-      console.log('show image: ' + src)
+      this.showLargeImageModal = true
+      this.largeImageSrc = src
     },
     sendMessage () {
       let sendMsg = this.inputText
@@ -371,28 +437,8 @@ export default {
     }).catch(error => {
       console.log(error)
     })
-    // receive user text message from socket
-    this.socket.on('userTextMsg', (data) => {
-      console.log('User text message: from ' + data.from + ' & msg ' + data.msg)
-      let date = new Date()
-      this.$store.commit({
-        type: 'addChatRecord',
-        userId: data.from,
-        content: {
-          'from': data.from,
-          'to': this.staffId,
-          'msg': data.msg,
-          'type': data.type,
-          'time': date.toLocaleTimeString('zh-Hans-CN')
-        }
-      })
-      if (data.from !== this.chatUserId) {
-        this.$store.commit({
-          type: 'addUserUnread',
-          userId: data.from
-        })
-      }
-    })
+    // socket listening initialization
+    this.socketListenInit()
   }
 }
 </script>
@@ -530,6 +576,11 @@ export default {
   object-fit: contain;
   cursor: pointer;
 }
+.large-image {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+}
 .ivu-col {
   transition: width .1s ease-in-out;
 }
@@ -541,5 +592,11 @@ export default {
   .emoji-mart-preview {
     display: none;
   }
+}
+.ivu-modal {
+  top: 20px;
+}
+.ivu-modal-body {
+  height: 80vh;
 }
 </style>
