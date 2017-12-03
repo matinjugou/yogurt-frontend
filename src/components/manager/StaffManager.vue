@@ -195,6 +195,7 @@
             companyId: 1
           }
         }).then(function (response) {
+          console.log(response)
           let tmpstaffdata = []
           for (let staff of response.data.data) {
             tmpstaffdata.push({
@@ -224,6 +225,7 @@
           companyId: 1
         }
       }).then(function (response) {
+        console.log('response=', response)
         let tmpstaffdata = []
         for (let staff of response.data.data) {
           tmpstaffdata.push({
