@@ -9,6 +9,7 @@ import 'iview/dist/styles/iview.css'
 
 Vue.use(iView)
 Vue.use(Vuetify)
+Vue.component()
 
 Vue.config.productionTip = false
 

@@ -4,6 +4,7 @@ import HelloWorld from '@/components/HelloWorld'
 import StaffManager from '@/components/manager/StaffManager'
 import QuickReplyManager from '@/components/manager/QuickReplyManager'
 import RobotManager from '@/components/manager/RobotManager'
+import ManagerInfo from '@/components/manager/ManagerInfo'
 
 Vue.use(Router)
 
@@ -28,6 +29,11 @@ export default new Router({
       path: '/settings-robot',
       name: 'robotmanager',
       component: RobotManager
+    },
+    {
+      path: '/mgninfo',
+      name: 'managerinfo',
+      component: ManagerInfo
     }
   ]
 })

@@ -190,6 +190,27 @@
           console.log(error)
           self.$Message.info('Clicked cancel')
         })
+        axios.get('http://yogurt.magichc7.com/api/manager/staff', {
+          params: {
+            companyId: 1
+          }
+        }).then(function (response) {
+          let tmpstaffdata = []
+          for (let staff of response.data.data) {
+            tmpstaffdata.push({
+              staffId: staff.staffId,
+              name: staff.name,
+              nickname: staff.nickname,
+              email: staff.email,
+              phonenumber: staff.tel,
+              status: staff.onlineStatus,
+              role: staff.role
+            })
+          }
+          self.staffdata = tmpstaffdata
+        }).catch(function (error) {
+          console.log(error)
+        })
         self.$Message.info('Clicked ok')
       },
       newStaffModalCancel () {
