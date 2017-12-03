@@ -6,6 +6,7 @@ import router from './router'
 import iView from 'iview'
 import 'iview/dist/styles/iview.css'
 import { Picker } from 'emoji-mart-vue'
+import store from './store'
 // import axios from 'axios'
 // import VueSocketio from 'vue-socket.io'
 
@@ -18,6 +19,7 @@ Vue.component('picker', Picker)
 new Vue({
   el: '#app',
   router,
+  store,
   template: '<App/>',
   components: { App }
 })

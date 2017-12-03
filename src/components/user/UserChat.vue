@@ -236,6 +236,7 @@
   }
 </style>
 <script>
+  import axios from 'axios'
   let enableScroll = true
   export default {
     name: 'UserChat',
@@ -313,14 +314,6 @@
             type: 'text',
             time: '2017-11-19 15:39:15'
           }]
-//      let newMsgs = []
-//      let url = '/char-record?userId=' + this.userId + '&staffId=' + this.staffId + '&index=' + this.earlistRecordIndex
-//      this.$http.get(url).then((response) => {
-//        let data = response.json()
-//        newMsgs = data['records']
-//        this.earlistRecordIndex = data['index']
-//      }, (response) => {
-//      })
         setTimeout(() => {
           for (let i = 0; i < 2; i++) {
             this.contentList.unshift(newMsgs[i])
@@ -332,8 +325,8 @@
       },
       sendMessage () {
         // debug
-        console.log('Sent userTextMsg')
-        this.socket.emit('userTextMsg', {staffId: this.staffId, userId: this.userId, token: this.token, msg: this.inputText})
+        console.log('Sent userMsg')
+        this.socket.emit('userMsg', {staffId: this.staffId, userId: this.userId, token: this.token, msg: this.inputText})
         let curDate = new Date()
         this.cachedMsg = {
           msg: this.inputText, // TODO: how to get this?
@@ -365,15 +358,12 @@
         }
         for (let i = 0; i < len; i++) {
           let file = files[i]
-          // debug
-//          console.log('filetype: ' + file.type)
           let curDate = new Date()
           let fileRecord = {
             fileName: file.name.length <= 15 ? file.name : file.name.slice(0, 15) + '...',
             from: this.userId,
             to: this.staffId,
             type: 'file',
-//            filetype: file.type,
             size: file.size + ' KB',
             suffix: file.name.substr(file.name.lastIndexOf('.') + 1),
             time: curDate.getFullYear() + '-' + curDate.getMonth() + '-' + curDate.getDay() + ' ' + curDate.getHours() + ':' + curDate.getMinutes() + ':' + curDate.getSeconds()
@@ -384,17 +374,35 @@
           } else {
             this.modifyFileSuffix(fileRecord)
           }
-//          let postData = {'fileType': 'text', 'validTime': 1, 'file': file}
-//          this.$http.post('http://123.206.22.71/api/v1/file/', postData)
-//            .then(function (response) {
-//              // debug
-//              console.log(response)
-//              fileRecord.fileUrl = response
-//            })
-          this.contentList.push(fileRecord)
-          this.scrollToBottom()
+          let formData = new FormData()
+          formData.append('file', file)
+          formData.append('fileType', 'text') // TO DO: fix this
+          formData.append('validTime', '1')
+          let config = {
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
+          }
+          let self = this
           // debug
-          console.log('scrollheight: ' + this.$refs.userChatContent.scrollHeight)
+          console.log('Uploading file...')
+          axios.post(this.$store.state.fileUploadUrl, formData, config)
+            .then(function (res) {
+              // debug
+              console.log(res)
+              if (res.data.code === 0) {
+                fileRecord.fileUrl = res.data.data
+                self.contentList.push(fileRecord)
+                self.scrollToBottom()
+              } else {
+                // debug
+                console.log('Failed to upload file')
+              }
+            })
+          // this.contentList.push(fileRecord)
+          // this.scrollToBottom()
+          // debug
+          // console.log('scrollheight: ' + this.$refs.userChatContent.scrollHeight)
         }
       },
       modifyFileSuffix (record) {
@@ -429,14 +437,11 @@
         let chatwindow = this.$refs.userChatContent
         chatwindow.addEventListener('drop', (e) => {
           e.preventDefault()
-//          if (this.readonly) return false
-//          this.errText = ''
           let fileList = e.dataTransfer.files
           if (fileList.length === 0) {
             return false
           }
           if (fileList.length > 1) {
-//            this.errText = '暂不支持多文件'
             return false
           }
           this.handleChosenFiles(fileList)
@@ -453,9 +458,9 @@
         // debug
         console.log('Register result: code: ' + data['code'] + ', msg: ' + data['msg'])
       })
-      this.socket.on('staffTextMsg', (data) => {
+      this.socket.on('staffMsg', (data) => {
         // debug
-        console.log('receive staffTextMsg: msg: ' + data['msg'] + ', from' + data['from'] + ', type: ' + data['type'] + ', time: ' + data['time'])
+        console.log('receive staffMsg: msg: ' + data['msg'] + ', from' + data['from'] + ', type: ' + data['type'] + ', time: ' + data['time'])
         let newMsg = {
           msg: data['msg'],
           from: data['from'],
@@ -469,7 +474,7 @@
       this.socket.on('sendResult', (data) => {
         // debug
         console.log('receive sendResult: code: ' + data['code'] + ', msg: ' + data['msg'])
-        if (data['code'] === 1) {
+        if (data['code'] === 0) {
           this.contentList.push(this.cachedMsg)
           this.scrollToBottom()
         }
@@ -483,9 +488,6 @@
             if (el.scrollTop === 0 && enableScroll) {
               let fnc = binding.value
               fnc()
-
-              // debug
-//              console.log('scrollheight: ' + this.$refs.userChatContent.scrollHeight)
             }
           })
         }

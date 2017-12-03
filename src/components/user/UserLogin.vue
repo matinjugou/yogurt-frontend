@@ -8,9 +8,6 @@
           <Col span="8">
             <Input v-model="formItem.userId" placeholder="Enter userid here"></Input>
           </Col>
-          <!--<Col span="2">-->
-            <!--<Button type="primary" @click="submit">Submit</Button>-->
-          <!--</Col>-->
         </FormItem>
         <FormItem label="Staff ID">
           <Col span="8">
@@ -50,13 +47,15 @@
           console.log('invalid intpus: userid=' + this.formItem.userId + ', staffid=' + this.formItem.staffId)
           return
         }
-        axios.post('http://yogurt.magichc7.com/api/user/login', {
+        axios.post(this.$store.state.userLoginUrl, {
           'userId': this.formItem.userId,
           'password': 'pass'
         }).then(response => {
           let body = response.data.data
           if (body.code === 0) {
             window.localStorage.setItem('token', body.token)
+            this.$store.state.userId = this.formItem.userId
+            this.$store.state.staffId = this.formItem.staffId
             this.$router.push({name: 'chat', userId: this.formItem.userId, staffId: this.formItem.staffId})
           }
         })
@@ -69,13 +68,16 @@
       }
     },
     created () {
+      // debug
+      // console.log(this.$store.state.userLoginUrl)
       let token = window.localStorage.getItem('token')
-      axios.get('/login', {
+      axios.get(this.$store.state.userLoginUrl, {
         'token': token
       }).then(response => {
         let body = response.data.data
         if (body.code === 0) {
           // TO DO
+          this.$router.push({name: 'chat', userId: this.$store.state.userId, staffId: this.$store.state.staffId})
         }
       })
     }
