@@ -1,36 +1,42 @@
 <template>
   <div class="right-content">
-    <link href="https://cdn.bootcss.com/vuetify/0.17.0/vuetify.min.css" rel="stylesheet">
     <div class="layout-header">
       <Row type="flex" justify="start" style="padding-left: 10px;padding-top: 10px">
-        <h1 style="padding-left: 5px;border-left: 5px solid #2baee9">机器人设置
+        <h1 style="padding-left: 5px;border-left: 5px solid #2baee9">管理员信息设置
         </h1>
       </Row>
     </div>
     <div class="layout-content">
       <div class="layout-content-main">
         <Row type="flex">
-          <!--div-- class="img-container" style="width: 307px;height: 307px">
-            <img src="http://pic.58pic.com/58pic/13/19/78/59U58PICDad_1024.jpg" center width="300px" height="300px">
-          </div-->
           <my-avatar btnName="修改头像">
+            <!--vue-core-image-upload
+              slot="uploadBtn"
+              class="btn btn-primary my-avatar-button"
+              :crop="false"
+              text="修改头像"
+              inputOfFile="file"
+              @imageuploaded="avatarLoaded"
+              :max-file-size="5242880"
+              :data="avatarData"
+              url="http://123.206.22.71/api/v1/file/"
+              >
+            </vue-core-image-upload-->
           </my-avatar>
           <div style="padding-left: 20px">
             <Card style="width: 500px; height:210px">
               <h2 slot="title">
-                {{ robotName }}
+                {{ managerName }}
               </h2>
               <a href="#" slot="extra" @click.prevent="changeRobotName">
-                <Icon type="edit"></Icon>
                 修改昵称
               </a>
+              <a href="#" slot="extra" @click.prevent="changeRobotName">
+                修改密码
+              </a>
               <div style="max-height:130px; overflow: auto">
-                <h5>基本信息</h5>
-                <p>XXX公司专属客服机器人</p>
-                <h5>诞生日期</h5>
-                <p>2017年11月22日</p>
-                <h5>专攻领域</h5>
-                <p>软件工程</p>
+                <p style="padding-bottom: 3px"><b>管理员ID:&nbsp;</b>{{ managerID }}</p>
+                <p style="padding-bottom: 3px"><b>所属公司:&nbsp;</b>{{ companyName }}</p>
               </div>
             </Card>
           </div>
@@ -40,34 +46,12 @@
     <div style="margin: 15px">
       <Row type="flex" style="padding-bottom: 7px; margin-bottom: 10px;border-bottom: 1px solid #e9eaec">
         <h3 style="padding-left: 5px;border-left: 5px solid orange">
-          消息设置
+          其他信息
         </h3>
       </Row>
       <Row>
-        <h4 style="margin-bottom: 7px">
-          接入时显示的消息
-        </h4>
-        <Input v-model="inMessage"
-               type="textarea"
-               placeholder="Enter something..."
-               style="margin-bottom: 10px"/>
-      </Row>
-      <Row>
-        <h4 style="margin-bottom: 7px">
-          结束服务时显示的消息
-        </h4>
-        <Input v-model="leaveMessage"
-               type="textarea"
-               placeholder="Enter something..."
-               style="margin-bottom: 10px"/>
-      </Row>
-      <Row>
-        <h4 style="margin-bottom: 7px">
-          转接时显示的消息
-        </h4>
-        <Input v-model="transMessage"
-               type="textarea"
-               placeholder="Enter something..."/>
+        <h5 style="padding-bottom: 5px">个人邮箱</h5>
+        <p>thss15_huangc@163.com</p>
       </Row>
     </div>
     <div class="layout-copy">
@@ -75,20 +59,27 @@
     </div>
   </div>
 </template>
-
 <script>
   import MyAvatar from '@/components/public/MyAvatar'
+
   export default {
-    name: 'robotmanager',
+    name: 'managerinfo',
     data () {
       return {
-        robotName: 'Yogurt',
-        inMessage: '',
-        leaveMessage: '',
-        transMessage: ''
+        avatarSrc: 'http://img1.vued.vanthink.cn/vued0a233185b6027244f9d43e653227439a.png',
+        managerName: 'Yogurt',
+        managerID: '1_m1',
+        companyName: '清华大学软件学院',
+        avatarData: {
+          fileType: 'avatar',
+          validTime: 1
+        },
+        avatarCropRatio: '1:1'
       }
     },
     methods: {
+      avatarLoaded: function () {
+      },
       changeRobotName: function () {
       }
     },
@@ -97,7 +88,6 @@
     }
   }
 </script>
-
 <style scoped>
   .right-content {
     min-height: 100vh;
@@ -120,7 +110,7 @@
   .layout-content-main{
     padding: 10px;
   }
-  .layout-copy{
+  .layout-copy {
     text-align: center;
     padding: 10px 0 20px;
     color: #9ea7b4;
