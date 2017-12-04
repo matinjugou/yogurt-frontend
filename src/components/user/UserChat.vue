@@ -282,12 +282,68 @@
   .layout-hide-text .layout-text{
     display: none;
   }
-  .ivu-col{
-    transition: width .2s ease-in-out;
-  }
   .chat-emoji-panel {
     position: absolute;
     bottom: 225px;
+  }
+  .chat-window-upload-file-list {
+    width: calc(100% - 2px);
+    box-shadow: 0 1px 1px rgba(0,0,0,.1);
+    background: #ffffff;
+    padding: 5px 10px 5px 10px;
+  }
+  .upload-single-file {
+    position: relative;
+    display: inline-flex;
+    box-shadow: 0 3px 3px rgba(0,0,0,.1);
+    border-radius: 4px;
+    padding: 5px 5px 5px 5px;
+    margin-right: 10px;
+    cursor: pointer;
+  }
+  .upload-single-file-progress, .upload-single-file-cover {
+    position: absolute;
+    left: 0;
+    top:0;
+    height: 100%;
+    width: 100%;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.5);
+  }
+  .upload-single-file-progress {
+    display: block;
+    padding: 15px 10px;
+  }
+  .upload-single-file-cover {
+    display: none;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.8);
+    padding-top: 15px;
+  }
+  .upload-single-file:hover .upload-single-file-cover{
+    display: block;
+  }
+  .list-file-element {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 5px;
+  }
+  .list-file-prepend
+  {
+    max-width: 40px;
+    max-height: 40px;
+  }
+  .list-file-image, .list-file-icon {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    cursor: pointer;
+  }
+  .list-file-name {
+    font-size: 14px;
+  }
+  .ivu-col{
+    transition: width .2s ease-in-out;
   }
 </style>
 <script>
@@ -296,9 +352,6 @@
     name: 'UserChat',
     data () {
       return {
-        userId: '1_u1', // companyid + '_' + u + userid
-        staffId: '1_s1',
-        token: '12345678',
         inputText: '',
         earlistRecordIndex: '',
         showEmojiPanel: false,
@@ -378,27 +431,127 @@
     },
     computed: {
       currentChatRecord () {
-        return this.contentList
+        return this.$store.state.chatRecordList
       },
       fileServerUrl () {
         return this.$store.state.fileServerUrl
+      },
+      fileCompressUrl () {
+        return this.$store.state.fileCompressUrl
+      },
+      userId () {
+        return this.$store.state.userId
+      },
+      staffId () {
+        return this.$store.state.staffId
+      },
+      socket () {
+        return this.$store.state.socket
+      },
+      token () {
+        return window.localStorage.getItem('token')
+      },
+      readyToSend () {
+        for (let file of this.uploadList) {
+          if (file.status !== 'finished') {
+            return false
+          }
+        }
+        return true
       }
     },
     methods: {
       sendMessage () {
-        // debug
-        let time = this.getCurrentTime()
-        let msg = {
-          msg: this.inputText,
-          from: this.userId,
-          to: this.staffId,
-          type: 'text',
-          time: time
+        if (!this.readyToSend) {
+          this.$Notice.error({
+            title: '文件传送完毕之前不可发送'
+          })
+          return
         }
-        this.cachedMsg = msg
-//        console.log('Sent userMsg')
-        this.socket.emit('userMsg', {from: this.userId, msg: this.inputText, type: 'text', 'time': time})
-        this.inputText = ''
+        let sendMsg = this.inputText
+        if (sendMsg === '' && this.uploadList.length === 0) {
+          this.$Notice.warning({
+            title: '不可以发送空消息！'
+          })
+          return
+        }
+        let time = this.getCurrentTime()
+        // send text msg
+        if (sendMsg !== '') {
+          this.$store.commit({
+            type: 'addChatRecord',
+            content: {
+              'from': this.userId,
+              'to': this.staffId,
+              'token': this.token,
+              'msg': sendMsg,
+              'type': 'text',
+              'time': time
+              // 'hasSent': false
+            }
+          })
+          this.socket.emit('userMsg', {
+            'staffId': this.staffId,
+            'userId': this.userId,
+            'token': this.token,
+            'msg': sendMsg,
+            'type': 'text',
+          })
+          // clear input
+          this.inputText = ''
+        }
+        // send files
+        if (this.uploadList.length) {
+          for (let index of this.uploadList.keys()) {
+            let fileType = this.uploadList[index].response.type.startsWith('image') ? 'image' : 'file'
+            if (fileType === 'image') {
+              // get compressed image's url
+              let compressedUrl = ''
+              axios.post(this.fileCompressUrl, {'fileUrl': this.uploadList[index].response.data.fileUrl})
+                .then(function (res) {
+                  compressedUrl = res.data.newFileUrl
+                })
+              this.$store.commit({
+                type: 'addChatRecord',
+                content: {
+                  'from': this.userId,
+                  'to': this.staffId,
+                  'url': this.uploadList[index].response.data.fileUrl,
+                  // TODO: change it with compressed url
+                  'compressedUrl': compressedUrl,
+                  'type': fileType,
+                  'time': time
+                  // 'hasSent': false
+                }
+              })
+            } else {
+              this.$store.commit({
+                type: 'addChatRecord',
+                content: {
+                  'from': this.userId,
+                  'to': this.staffId,
+                  'url': this.uploadList[index].response.data.fileUrl,
+                  'name': this.uploadList[index].name,
+                  'size': (this.uploadList[index].size > 1024) ? (this.uploadList[index].size >> 10) : 1,
+                  'mimeType': this.uploadList[index].response.type,
+                  'type': fileType,
+                  'time': time
+                  // 'hasSent': false
+                }
+              })
+            }
+            this.socket.emit('staffMsg', {
+              'staffId': this.staffId,
+              'userId': this.chatUserId,
+              'token': this.token,
+              'msg': this.uploadList[index].response.data,
+              'type': fileType
+            })
+          }
+          // clear files
+          this.$refs.upload.clearFiles()
+          this.uploadList = this.$refs.upload.fileList
+        }
       },
       getCurrentTime () {
         let curDate = new Date()
@@ -436,71 +589,16 @@
         this.$Notice.success({
           title: '文件 ' + file.name + ' 上传成功'
         })
+        // debug
+        console.log('uploadList length: ' + this.uploadList.length)
         console.log(this.uploadList)
       },
-      handleChosenFiles (files) {
-        let len = files.length
-        if (len === 0) {
-          return
-        }
-        for (let i = 0; i < len; i++) {
-          // create file record and modify its suffix
-          let file = files[i]
-          let fileRecord = {
-            fileName: file.name.length <= 15 ? file.name : file.name.slice(0, 15) + '...',
-            from: this.userId,
-            to: this.staffId,
-            type: 'file',
-            size: file.size + ' KB',
-            suffix: file.name.substr(file.name.lastIndexOf('.') + 1),
-            time: this.getCurrentTime()
-          }
-          if ((fileRecord.suffix === 'jpg' || fileRecord.suffix === 'jpeg' || fileRecord.suffix === 'png' || fileRecord.suffix === 'JPG' || fileRecord.suffix === 'JPEG' || fileRecord.suffix === 'PNG') && URL.createObjectURL) {
-            fileRecord.type = 'image'
-          } else {
-            this.modifyFileSuffix(fileRecord)
-          }
-          // upload to server
-          let formData = new FormData()
-          formData.append('file', file)
-          formData.append('fileType', 'text') // TO DO: fix this
-          formData.append('validTime', '1')
-          let config = {
-            headers: {
-              'Content-Type': 'multipart/form-data'
-            }
-          }
-          let self = this
-          axios.post(this.$store.state.fileUploadUrl, formData, config)
-            .then(function (res) {
-              if (res.data.code === 0) {
-                fileRecord.fileUrl = res.data.data
-                self.contentList.push(fileRecord)
-//                self.scrollToBottom()
-              } else {
-                // debug
-                console.log('Failed to upload file')
-              }
-            })
-          // send message through socketio
-          let data = {staffId: this.staffId, userId: this.userId, token: window.localStorage.getItem('token'), msg: '', type: fileRecord.type, url: fileRecord.fileUrl}
-          if (fileRecord.type === 'file') {
-            data.suffix = fileRecord.suffix
-            data.fileName = fileRecord.fileName
-          }
-          this.socket.emit('userMsg', data)
-        }
-      },
-      modifyFileSuffix (record) {
-        if (record.suffix.startsWith('doc') || record.suffix.startsWith('ppt') || record.suffix.startsWith('xls')) {
-          record.suffix = record.suffix.slice(0, 3)
-        }
-        if (record.suffix === 'json') {
-          record.suffix = 'json-file'
-        }
-        if (['css', 'dbf', 'zip-1', 'dwg', 'fla', 'rtf', 'iso', 'exe', 'svg', 'file', 'avi', 'ai', 'search', 'mp4', 'xml', 'zip', 'mp3', 'txt', 'json-file', 'csv', 'psd', 'javascript', 'xls', 'ppt', 'html', 'doc', 'pdf'].indexOf(record.suffix) < 0) {
-          record.suffix = 'file'
-        }
+      handleRemove (file) {
+        const fileList = this.$refs.upload.fileList
+        this.$refs.upload.fileList.splice(fileList.indexOf(file), 1)
+        this.$Notice.success({
+          title: '文件 ' + file.name + ' 已从发送中清除'
+        })
       },
       downloadFile () {
         // debug
@@ -628,6 +726,9 @@
 //          this.scrollToBottom()
         }
       })
+    },
+    mounted () {
+      this.uploadList = this.$refs.upload.fileList
     },
     updated () {
       this.scrollToBottom()
