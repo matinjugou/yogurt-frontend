@@ -860,7 +860,7 @@ export default {
 .chat-window-upload-file-list {
   width: calc(100% - 2px);
   box-shadow: 0 1px 1px rgba(0,0,0,.1);
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.5);
   padding: 5px 10px 5px 10px;
 }
 .upload-single-file {
@@ -871,6 +871,7 @@ export default {
   padding: 5px 5px 5px 5px;
   margin-right: 10px;
   cursor: pointer;
+  background: #fff;
 }
 .upload-single-file-progress, .upload-single-file-cover {
   position: absolute;

@@ -103,14 +103,15 @@ export default {
       } else if (type === 'manager') {
         url = this.$store.state.managerLoginUrl
       }
+      let reqBody = {}
+      reqBody[type + 'Id'] = username
+      reqBody['password'] = password
       // TODO: encrypted the password
       // TODO: Use axios to send http request
       // TODO: handle response
       // else pop wrong message
-      axios.post(url, {
-        'staffId': username,
-        'password': password
-      }).then(response => {
+      axios.post(url, reqBody).then(response => {
+        console.log(response)
         let body = response.data.data
         console.log(body)
         if (body.code === 0) {
@@ -123,20 +124,18 @@ export default {
           } else if (type === 'manager') {
             window.location.href = this.managerBackUrl
           }
+        } else if (body.code === 2 && type === 'staff') {
+          window.location.href = 'staff-first-login?staffId=' + username + '&token=' + body.token
         } else {
           // error login
           this.$Notice.error({
-            content: '用户名或密码错误',
-            duration: 3,
-            closable: true
+            title: '用户名或密码错误'
           })
         }
       }).catch(error => {
         console.log(error)
         this.$Notice.error({
-          content: '服务器发生错误，请稍后再试...',
-          duration: 3,
-          closable: true
+          title: '服务器发生错误，请稍后再试...'
         })
       })
     },
@@ -203,7 +202,6 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
-  background-size: 100%;
   background: url(assets/login_bg.png) fixed no-repeat;
   background-size: 100% 100%;
 }
@@ -232,6 +230,7 @@ export default {
   background: rgba(255, 255, 255, 0.7);
   border-radius: 10px;
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(3px);
 }
 .login-tab-vertical-space {
   height: 50px;
