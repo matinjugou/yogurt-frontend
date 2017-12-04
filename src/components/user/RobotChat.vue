@@ -33,13 +33,13 @@
                 <div v-if="singleRecord.type === 'text'" class="content chat-single-record">
                   {{ singleRecord.msg }}
                 </div>
-                <div v-else-if="singleRecord.type === 'image'" @click="singleRecord.from === staffId ? downloadFile() : showLocalFile()" class="content chat-single-record" style="cursor: pointer">
-                  <img class="chat-image" :src="singleRecord.fileUrl" alt="聊天图片"/>
+                <div v-else-if="singleRecord.type === 'image'" class="content chat-single-record" style="cursor: pointer">
+                  <img class="chat-image" :src="singleRecord.fileUrl" alt="聊天图片" @click="showLargeImage(singleRecord.fileUrl)"/>
                 </div>
                 <div v-else-if="singleRecord.type === 'file'" @click="singleRecord.from === staffId ? downloadFile() : showLocalFile()" style="cursor: pointer" class="content chat-single-record">
-                    <svg class="file-icon">
-                      <use :xlink:href="getFileIconName(singleRecord.fileName)" />
-                    </svg>
+                  <svg class="file-icon">
+                    <use :xlink:href="getFileIconName(singleRecord.fileName)" />
+                  </svg>
                   <div style="float: right">
                     <div class="file-name">
                       {{ singleRecord.fileName }}
@@ -130,6 +130,12 @@
         </div>
         </Col>
       </Row>
+      <Modal v-model="showLargeImageModal" width="80%" title="查看图片">
+        <div class="large-image">
+          <img :src="largeImageSrc" />
+        </div>
+        <div slot="footer"></div>
+      </Modal>
     </div>
   </div>
 </template>
@@ -355,6 +361,8 @@
         inputText: '',
         earlistRecordIndex: '',
         showEmojiPanel: false,
+        showLargeImageModal: false,
+        largeImageSrc: ''
         cachedMsg: {},
         uploadList: [],
         maxFileSize: 204800, // KB
@@ -682,6 +690,12 @@
         } else {
           return '#file'
         }
+      },
+      showLargeImage (src) {
+        // debug
+        console.log('showLargeImage')
+        this.showLargeImageModal = true
+        this.largeImageSrc = src
       }
     },
     created () {

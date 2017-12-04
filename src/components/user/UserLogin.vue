@@ -56,8 +56,8 @@
           console.log(body.token)
           if (body.code === 0) {
             window.localStorage.setItem('token', body.token)
-            self.$store.state.userId = self.formItem.userId
-            self.$store.state.staffId = self.formItem.staffId
+            window.localStorage.setItem('userId', self.formItem.userId)
+            window.localStorage.setItem('staffId', self.formItem.staffId)
             self.$router.push({name: 'chat', userId: self.formItem.userId, staffId: self.formItem.staffId})
           }
         })
@@ -73,12 +73,15 @@
       // debug
       // console.log(this.$store.state.userLoginUrl)
       let token = window.localStorage.getItem('token')
-      // debug
-      console.log(token)
       const self = this
+      let userId = window.localStorage.getItem('userId')
+      let staffId = window.localStorage.getItem('staffId')
+      // debug
+      console.log('userId in user-login: ' + userId)
+      console.log('token in user-login: ' + token)
       axios.get(self.$store.state.userLoginUrl, {
         params: {
-          'userId': self.$store.state.userId,
+          'userId': userId,
           'token': token
         }
       }).then(response => {
@@ -87,7 +90,7 @@
         console.log(body)
         if (body.code === 0) {
           // TO DO
-          this.$router.push({name: 'chat', userId: self.$store.state.userId, staffId: self.$store.state.staffId})
+          this.$router.push({name: 'chat', userId: userId, staffId: staffId})
         }
       })
     }
