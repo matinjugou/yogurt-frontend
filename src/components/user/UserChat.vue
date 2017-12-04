@@ -33,8 +33,8 @@
                 <div v-if="singleRecord.type === 'text'" class="content chat-single-record">
                   {{ singleRecord.msg }}
                 </div>
-                <div v-else-if="singleRecord.type === 'image'" @click="singleRecord.from === staffId ? downloadFile() : showLocalFile()" class="content chat-single-record" style="cursor: pointer">
-                  <img class="chat-image" :src="singleRecord.fileUrl" alt="聊天图片"/>
+                <div v-else-if="singleRecord.type === 'image'" class="content chat-single-record" style="cursor: pointer">
+                  <img class="chat-image" :src="singleRecord.fileUrl" alt="聊天图片" @click="">
                 </div>
                 <div v-else-if="singleRecord.type === 'file'" @click="singleRecord.from === staffId ? downloadFile() : showLocalFile()" style="cursor: pointer" class="content chat-single-record">
                     <svg class="file-icon">
@@ -564,10 +564,6 @@
           // clear files
           this.$refs.upload.clearFiles()
           this.uploadList = this.$refs.upload.fileList
-          // debug
-//          for (let item of this.currentChatRecord) {
-//            console.log(item)
-//          }
         }
       },
       getCurrentTime () {
