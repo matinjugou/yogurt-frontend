@@ -15,7 +15,8 @@ export default new Vuex.Store({
         {
           'from': '1_u1',
           'to': '1_s1',
-          'msg': 'http://s1.picswalls.com/wallpapers/2015/09/20/wallpaper-2015_111528356_269.jpg',
+          'url': 'http://s1.picswalls.com/wallpapers/2015/09/20/wallpaper-2015_111528356_269.jpg',
+          'compressedUrl': 'http://s1.picswalls.com/wallpapers/2015/09/20/wallpaper-2015_111528356_269.jpg',
           'type': 'image',
           'time': 'test_image'
         }
