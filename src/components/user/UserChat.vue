@@ -26,7 +26,7 @@
               <p class="chat-msg-time">
                 <span>{{ singleRecord.time }}</span>
               </p>
-              <div class="chat-msg-body" :class="[{'from-me': singleRecord.from.startsWith('1_u')}]">
+              <div class="chat-msg-body" :class="[{'from-me': singleRecord.from.indexOf('_u') >= 0}]">
                 <div class="avatar chat-single-record">
                   <Avatar shape="square" icon="person"/>
                 </div>
@@ -34,7 +34,7 @@
                   {{ singleRecord.msg }}
                 </div>
                 <div v-else-if="singleRecord.type === 'image'" class="content chat-single-record" style="cursor: pointer">
-                  <img class="chat-image" :src="singleRecord.fileUrl" alt="聊天图片" @click="">
+                  <img class="chat-image" :src="singleRecord.fileUrl" alt="聊天图片" @click="showLargeImage(singleRecord.fileUrl)">
                 </div>
                 <div v-else-if="singleRecord.type === 'file'" @click="singleRecord.from === staffId ? downloadFile() : showLocalFile()" style="cursor: pointer" class="content chat-single-record">
                     <svg class="file-icon">
@@ -130,6 +130,12 @@
         </div>
         </Col>
       </Row>
+      <Modal v-model="showLargeImageModal" width="80%" title="查看图片">
+        <div class="large-image">
+          <img :src="largeImageSrc" />
+        </div>
+        <div slot="footer"></div>
+      </Modal>
     </div>
   </div>
 </template>
@@ -342,6 +348,12 @@
   .list-file-name {
     font-size: 14px;
   }
+  .large-image {
+    text-align: center;
+    width: 100%;
+    height: 100%;
+    overflow: scroll;
+  }
   .ivu-col{
     transition: width .2s ease-in-out;
   }
@@ -355,6 +367,8 @@
         inputText: '',
         earlistRecordIndex: '',
         showEmojiPanel: false,
+        showLargeImageModal: false,
+        largeImageSrc: '',
         cachedMsg: {},
         uploadList: [],
         maxFileSize: 204800, // KB
@@ -514,7 +528,6 @@
                   'from': this.userId,
                   'to': this.staffId,
                   'fileUrl': this.uploadList[index].response.data,
-                  // TODO: change it with compressed url
                   'compressedUrl': compressedUrl,
                   'type': fileType,
                   'time': time
@@ -678,6 +691,10 @@
         } else {
           return '#file'
         }
+      },
+      showLargeImage (src) {
+        this.showLargeImageModal = true
+        this.largeImageSrc = src
       }
     },
     created () {

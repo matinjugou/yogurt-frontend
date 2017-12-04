@@ -130,13 +130,13 @@
         </div>
         </Col>
       </Row>
-      <Modal v-model="showLargeImageModal" width="80%" title="查看图片">
-        <div class="large-image">
-          <img :src="largeImageSrc" />
-        </div>
-        <div slot="footer"></div>
-      </Modal>
     </div>
+    <Modal v-model="showLargeImageModal" width="80%" title="查看图片">
+      <div class="large-image">
+        <img :src="largeImageSrc" />
+      </div>
+      <div slot="footer"></div>
+    </Modal>
   </div>
 </template>
 <style scoped>
@@ -348,6 +348,12 @@
   .list-file-name {
     font-size: 14px;
   }
+  .large-image {
+    text-align: center;
+    width: 100%;
+    height: 100%;
+    overflow: scroll;
+  }
   .ivu-col{
     transition: width .2s ease-in-out;
   }
@@ -362,8 +368,7 @@
         earlistRecordIndex: '',
         showEmojiPanel: false,
         showLargeImageModal: false,
-        largeImageSrc: ''
-        cachedMsg: {},
+        largeImageSrc: '',
         uploadList: [],
         maxFileSize: 204800, // KB
         emojiLocalization: {
