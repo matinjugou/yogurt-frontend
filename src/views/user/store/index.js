@@ -6,6 +6,6 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     userLoginUrl: 'http://yogurt.magichc7.com/api/user/login',
-    fileUploadUrl: 'http://123.206.22.71/api/v1/file/'
+    fileServerUrl: 'http://123.206.22.71/api/v1/file/'
   }
 })

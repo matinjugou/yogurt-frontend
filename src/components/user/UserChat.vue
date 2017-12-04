@@ -18,7 +18,9 @@
             售后
           </div>
         </div>
-        <div class="chat-content" v-scroll="getMoreMessage" ref="userChatContent">
+
+        <!-- chat records -->
+        <div class="chat-content" id="user-chat-content">
           <ul>
             <li v-for="(singleRecord, index) in currentChatRecord">
               <p class="chat-msg-time">
@@ -32,7 +34,7 @@
                   {{ singleRecord.msg }}
                 </div>
                 <div v-else-if="singleRecord.type === 'image'" @click="singleRecord.from === staffId ? downloadFile() : showLocalFile()" class="content chat-single-record" style="cursor: pointer">
-                  <img v-bind:src=singleRecord.fileUrl class="chat-image" />
+                  <img class="chat-image" :src="singleRecord.fileUrl" alt="聊天图片"/>
                 </div>
                 <div v-else-if="singleRecord.type === 'file'" @click="singleRecord.from === staffId ? downloadFile() : showLocalFile()" style="cursor: pointer" class="content chat-single-record">
                   <svg class="file-icon">
@@ -51,6 +53,8 @@
             </li>
           </ul>
         </div>
+
+        <!-- emoji panel -->
         <div class="chat-emoji-panel" v-show="showEmojiPanel">
           <picker
             ref="emoji-mart"
@@ -61,13 +65,61 @@
             @click="insertEmoji"
           ></picker>
         </div>
+
+        <!-- file to be uploaded -->
+        <transition name="slide-fade">
+          <div class="chat-window-upload-file-list" v-show="uploadList.length">
+            <div class="upload-single-file" v-for="(file, index) in uploadList" :key="file.uid">
+              <div class="list-file-element list-file-prepend">
+                <svg class="list-file-icon">
+                  <use :xlink:href="getFileIconName(file.name)" />
+                </svg>
+              </div>
+              <div class="list-file-element list-file-name">
+                {{ file.name.length > 15 ? file.name.slice(0, 15) + '...' : file.name }}
+              </div>
+              <div class="upload-single-file-progress" v-show="file.status !== 'finished'">
+                <div class="upload-progress" v-if="file.showProgress">
+                  <Progress :percent="file.percentage" hide-info status="active"></Progress>
+                </div>
+                <div class="upload-progress" v-else>
+                  正在上传...
+                </div>
+              </div>
+              <div class="upload-single-file-cover" @click="handleRemove(file)">
+                <Icon type="close-round" size="20"></Icon>
+              </div>
+            </div>
+          </div>
+        </transition>
+
+        <!-- input buttons -->
         <div class="chat-input-actions">
-          <div class="chat-input-media">
-            <input type="file" ref="uploadFile" style="display:none" @change="handleUploadChange">
-            <Button type="ghost" icon="document" @click="clickUploadFile">文件</Button>
-            <Button type="ghost" icon="happy" @click="() => {showEmojiPanel = !showEmojiPanel}">表情</Button>
-            <Button type="ghost file">历史消息</Button>
-            <Button type="ghost" icon="monitor">截图</Button>
+          <div class="chat-window-input-media">
+            <div class="media-button">
+              <Upload
+                multiple
+                ref="upload"
+                :max-size="maxFileSize"
+                :show-upload-list="false"
+                :action="fileServerUrl"
+                :data="{validTime: 7}"
+                :before-upload="handleBeforeUpload"
+                :on-success="handleSuccess"
+                :on-error="handleError"
+                :on-exceeded-size="handleMaxSize">
+                <Button type="ghost" icon="document">文件</Button>
+              </Upload>
+            </div>
+            <div class="media-button">
+              <Button type="ghost" icon="happy" @click="() => {showEmojiPanel = !showEmojiPanel}">表情</Button>
+            </div>
+            <div class="media-button">
+              <Button type="ghost" icon="monitor">截图</Button>
+            </div>
+            <div class="media-button">
+              <Button type="ghost" icon="chatboxes">历史消息</Button>
+            </div>
           </div>
           <div class="chat-input-send">
             <Button type="success" icon="paper-airplane" @click="sendMessage">发送</Button>
@@ -221,6 +273,9 @@
     align-items: center;
     justify-content: space-between;
   }
+  .chat-window-input-media > .media-button{
+    display: inline-flex;
+  }
   .layout-ceiling-msg a{
     color: #9ba7b5;
   }
@@ -237,7 +292,6 @@
 </style>
 <script>
   import axios from 'axios'
-  let enableScroll = true
   export default {
     name: 'UserChat',
     data () {
@@ -249,6 +303,8 @@
         earlistRecordIndex: '',
         showEmojiPanel: false,
         cachedMsg: {},
+        uploadList: [],
+        maxFileSize: 204800, // KB
         emojiLocalization: {
           search: '搜索',
           notfound: '没有找到表情',
@@ -284,45 +340,51 @@
             time: '2017-11-19 15:39:15'
           }
         ],
-        imgFileIndex: -1
+        imgFileIndex: -1,
+        fileIconMap: {
+          // compressed file
+          'application/zip': '#zip-1',
+          'application/x-zip-compressed': '#zip-1',
+          'application/x-rar-compressed': '#zip-1',
+          'application/x-7z-compressed': '#zip-1',
+          // word
+          'application/msword': '#doc',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '#doc',
+          // powerpoint
+          'application/vnd.ms-powerpoint': '#ppt',
+          'application/vnd.openxmlformats-officedocument.presentationml.presentation': '#ppt',
+          // excel
+          'application/application/vnd.ms-excel': '#xls',
+          'application/application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': '#xls',
+          // javascript
+          'application/javascript': '#javascript',
+          // css
+          'text/css': '#css',
+          // mp3
+          'audio/mpeg3': '#mp3',
+          'audio/x-mpeg-3': '#mp3',
+          // mp4
+          'video/mpeg': '#mp4',
+          'video/x-mpeg': '#mp4',
+          // avi
+          'application/x-troff-msvideo': '#avi',
+          'video/avi': '#avi',
+          'video/msvideo': '#avi',
+          'video/x-msvideo': '#avi',
+          // flash
+          'application/x-shockwave-flash': '#fla'
+        }
       }
     },
     computed: {
       currentChatRecord () {
         return this.contentList
+      },
+      fileServerUrl () {
+        return this.$store.state.fileServerUrl
       }
     },
     methods: {
-      getMoreMessage () {
-        enableScroll = false
-
-        // debug
-        console.log('get more message')
-        let newMsgs = [
-          {
-            msg: 'Hello, I\'m staff_1.',
-            from: '1_s1',
-            to: '1_u1',
-            type: 'text',
-            time: '2017-11-19 15:39:14'
-          },
-          {
-            id: '4',
-            msg: 'Hello, I\'m user.',
-            from: '1_u1',
-            to: '1_s1',
-            type: 'text',
-            time: '2017-11-19 15:39:15'
-          }]
-        setTimeout(() => {
-          for (let i = 0; i < 2; i++) {
-            this.contentList.unshift(newMsgs[i])
-          }
-          let el = this.$refs.userChatContent
-          el.scrollTop = 400
-          enableScroll = true
-        }, 200)
-      },
       sendMessage () {
         // debug
         let time = this.getCurrentTime()
@@ -340,21 +402,41 @@
       },
       getCurrentTime () {
         let curDate = new Date()
-        return curDate.getFullYear() + '-' + curDate.getMonth() + '-' + curDate.getDay() + ' ' + curDate.getHours() + ':' + curDate.getMinutes() + ':' + curDate.getSeconds()
+        return curDate.toLocaleTimeString('zh-Hans-CN')
       },
       scrollToBottom () {
-        this.$nextTick(() => {
-          let el = this.$refs.userChatContent
-          el.scrollTop = el.scrollHeight
-        })
+        let el = document.getElementById('user-chat-content')
+        el.scrollTop = el.scrollHeight
       },
       clickUploadFile () {
         this.$refs.uploadFile.click()
       },
-      handleUploadChange () {
-        let inputDOM = this.$refs.uploadFile
-        let files = inputDOM.files
-        this.handleChosenFiles(files)
+      handleBeforeUpload (file) {
+        const check = this.uploadList.length < 5
+        if (!check) {
+          this.$Notice.warning({
+            title: '每次最多仅能传输5个文件'
+          })
+        }
+        return check
+      },
+      handleMaxSize (file) {
+        this.$Notice.warning({
+          title: '超出上传文件大小限制',
+          desc: '文件  ' + file.name + ' 过大，不应该超过 ' + this.maxFileSize + ' KB.'
+        })
+      },
+      handleError (error, file) {
+        this.$Notice.error({
+          title: '文件 ' + file.name + ' 上传失败，请重试',
+          desc: '错误原因：' + error
+        })
+      },
+      handleSuccess (response, file) {
+        this.$Notice.success({
+          title: '文件 ' + file.name + ' 上传成功'
+        })
+        console.log(this.uploadList)
       },
       handleChosenFiles (files) {
         let len = files.length
@@ -394,7 +476,7 @@
               if (res.data.code === 0) {
                 fileRecord.fileUrl = res.data.data
                 self.contentList.push(fileRecord)
-                self.scrollToBottom()
+//                self.scrollToBottom()
               } else {
                 // debug
                 console.log('Failed to upload file')
@@ -432,28 +514,59 @@
         this.inputText += emoji.native
         console.log(this.inputText)
       },
-      preventDefaultEvent (eventName) {
-        document.addEventListener(eventName, function (e) {
-          e.preventDefault()
-        }, false)
-      },
-      addDropSupport () {
-        let chatwindow = this.$refs.userChatContent
-        chatwindow.addEventListener('drop', (e) => {
-          e.preventDefault()
-          let fileList = e.dataTransfer.files
-          if (fileList.length === 0) {
-            return false
-          }
-          if (fileList.length > 1) {
-            return false
-          }
-          this.handleChosenFiles(fileList)
-        })
-      },
-      beforeunloadHandler (e) {
-        console.log('user-chat destroyed')
-        window.localStorage.clear()
+      getFileIconName (fileName) {
+        let array = fileName.split('.')
+        let suffix = array[array.length - 1]
+        let map = new Map([
+          // compressed file
+          ['zip', '#zip-1'],
+          ['rar', '#zip-1'],
+          ['7z', '#zip-1'],
+          // image
+          ['jpg', '#jpg'],
+          ['jpeg', '#jpg'],
+          ['png', '#png'],
+          // word
+          ['doc', '#doc'],
+          ['docx', '#doc'],
+          // powerpoint
+          ['ppt', '#ppt'],
+          ['pptx', '#ppt'],
+          // excel
+          ['xls', '#xls'],
+          ['xlsx', '#xls'],
+          // pdf
+          ['pdf', '#pdf'],
+          // exe
+          ['exe', '#exe'],
+          // psd
+          ['psd', '#psd'],
+          // txt
+          ['txt', '#txt'],
+          // html
+          ['html', '#html'],
+          ['htm', '#html'],
+          // javascript
+          ['js', '#javascript'],
+          // css
+          ['css', '#css'],
+          // json
+          ['json', '#json-file'],
+          // mp3
+          ['mp3', '#mp3'],
+          // mp4
+          ['mp4', '#mp4'],
+          // avi
+          ['avi', '#avi'],
+          // flash
+          ['swf', '#fla']
+        ])
+        let iconName = map.get(suffix)
+        if (iconName) {
+          return iconName
+        } else {
+          return '#file'
+        }
       }
     },
     created () {
@@ -505,39 +618,19 @@
           newMsg.fileUrl = data['url']
         }
         this.contentList.push(newMsg)
-        this.scrollToBottom()
+//        this.scrollToBottom()
       })
       this.socket.on('sendResult', (data) => {
         // debug
 //        console.log('receive sendResult: code: ' + data['code'] + ', msg: ' + data['msg'])
         if (data['code'] === 0) {
           this.contentList.push(this.cachedMsg)
-          this.scrollToBottom()
+//          this.scrollToBottom()
         }
       })
     },
-    directives: {
-      scroll: {
-        bind: function (el, binding) {
-          el.addEventListener('scroll', () => {
-            console.log('scrolly: ' + el.scrollTop)
-            if (el.scrollTop === 0 && enableScroll) {
-              let fnc = binding.value
-              fnc()
-            }
-          })
-        }
-      }
-    },
-    mounted () {
-      ['dragleave', 'drop', 'dragenter', 'dragover'].forEach(e => {
-        this.preventDefaultEvent(e)
-      })
-      this.addDropSupport()
-      window.addEventListener('beforeunload', e => this.beforeunloadHandler(e))
-    },
-    destroyed () {
-      window.removeEventListener('beforeunload', e => this.beforeunloadHandler(e))
+    updated () {
+      this.scrollToBottom()
     }
   }
 </script>
