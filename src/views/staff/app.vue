@@ -76,6 +76,9 @@ export default {
     },
     isLogin () {
       return this.$store.state.isLogin
+    },
+    socket () {
+      return this.$store.state.socket
     }
   },
   methods: {
@@ -100,6 +103,7 @@ export default {
     }
   },
   created () {
+    this.$store.commit('buildSocketConnect')
     // check if the token is valid
     let storeType = window.localStorage.getItem('type')
     let storeId = window.localStorage.getItem('id')
@@ -119,6 +123,10 @@ export default {
           this.$store.commit({
             type: 'changeStaffId',
             staffId: storeId
+          })
+          this.socket.emit('staffReg', {
+            staffId: this.$store.state.staffId,
+            token: this.$store.state.token
           })
         } else {
           window.location.href = 'login?backUrl=' + window.location.href
