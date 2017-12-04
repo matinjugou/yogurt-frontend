@@ -47,16 +47,18 @@
           console.log('invalid intpus: userid=' + this.formItem.userId + ', staffid=' + this.formItem.staffId)
           return
         }
-        axios.post(this.$store.state.userLoginUrl, {
-          'userId': this.formItem.userId,
-          'password': 'pass'
+        const self = this
+        axios.post(self.$store.state.userLoginUrl, {
+          'userId': self.formItem.userId
         }).then(response => {
           let body = response.data.data
+          // debug
+          console.log(body.token)
           if (body.code === 0) {
             window.localStorage.setItem('token', body.token)
-            this.$store.state.userId = this.formItem.userId
-            this.$store.state.staffId = this.formItem.staffId
-            this.$router.push({name: 'chat', userId: this.formItem.userId, staffId: this.formItem.staffId})
+            self.$store.state.userId = self.formItem.userId
+            self.$store.state.staffId = self.formItem.staffId
+            self.$router.push({name: 'chat', userId: self.formItem.userId, staffId: self.formItem.staffId})
           }
         })
       },
@@ -71,13 +73,21 @@
       // debug
       // console.log(this.$store.state.userLoginUrl)
       let token = window.localStorage.getItem('token')
-      axios.get(this.$store.state.userLoginUrl, {
-        'token': token
+      // debug
+      console.log(token)
+      const self = this
+      axios.get(self.$store.state.userLoginUrl, {
+        params: {
+          'userId': self.$store.state.userId,
+          'token': token
+        }
       }).then(response => {
         let body = response.data.data
+        // debug
+        console.log(body)
         if (body.code === 0) {
           // TO DO
-          this.$router.push({name: 'chat', userId: this.$store.state.userId, staffId: this.$store.state.staffId})
+          this.$router.push({name: 'chat', userId: self.$store.state.userId, staffId: self.$store.state.staffId})
         }
       })
     }

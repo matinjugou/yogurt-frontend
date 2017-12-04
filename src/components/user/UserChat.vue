@@ -31,7 +31,7 @@
                 <div v-if="singleRecord.type === 'text'" class="content chat-single-record">
                   {{ singleRecord.msg }}
                 </div>
-                <div v-else-if="singleRecord.type === 'pic'" @click="singleRecord.from === staffId ? downloadFile() : showLocalFile()" class="content chat-single-record" style="cursor: pointer">
+                <div v-else-if="singleRecord.type === 'image'" @click="singleRecord.from === staffId ? downloadFile() : showLocalFile()" class="content chat-single-record" style="cursor: pointer">
                   <img v-bind:src=singleRecord.fileUrl class="chat-image" />
                 </div>
                 <div v-else-if="singleRecord.type === 'file'" @click="singleRecord.from === staffId ? downloadFile() : showLocalFile()" style="cursor: pointer" class="content chat-single-record">
@@ -173,6 +173,12 @@
     color: #ffffff;
     background-color: #2d8cf0;
   }
+  .from-me > .content::before {
+    right: inherit;
+    left: 100%;
+    border-right-color: transparent;
+    border-left-color: #2d8cf0;
+  }
   .chat-image {
     max-width: 300px;
     width: expression(this.width>100px?"300px":this.width);
@@ -197,12 +203,6 @@
     height: 30px;
     width: 140px;
     overflow: hidden;
-  }
-  .from-me > .content::before {
-    right: inherit;
-    left: 100%;
-    border-right-color: transparent;
-    border-left-color: #2d8cf0;
   }
   .file-icon
   {
@@ -325,17 +325,22 @@
       },
       sendMessage () {
         // debug
-        console.log('Sent userMsg')
-        this.socket.emit('userMsg', {staffId: this.staffId, userId: this.userId, token: this.token, msg: this.inputText})
-        let curDate = new Date()
-        this.cachedMsg = {
-          msg: this.inputText, // TODO: how to get this?
+        let time = this.getCurrentTime()
+        let msg = {
+          msg: this.inputText,
           from: this.userId,
           to: this.staffId,
           type: 'text',
-          time: curDate.getFullYear() + '-' + curDate.getMonth() + '-' + curDate.getDay() + ' ' + curDate.getHours() + ':' + curDate.getMinutes() + ':' + curDate.getSeconds()
+          time: time
         }
+        this.cachedMsg = msg
+//        console.log('Sent userMsg')
+        this.socket.emit('userMsg', {from: this.userId, msg: this.inputText, type: 'text', 'time': time})
         this.inputText = ''
+      },
+      getCurrentTime () {
+        let curDate = new Date()
+        return curDate.getFullYear() + '-' + curDate.getMonth() + '-' + curDate.getDay() + ' ' + curDate.getHours() + ':' + curDate.getMinutes() + ':' + curDate.getSeconds()
       },
       scrollToBottom () {
         this.$nextTick(() => {
@@ -357,8 +362,8 @@
           return
         }
         for (let i = 0; i < len; i++) {
+          // create file record and modify its suffix
           let file = files[i]
-          let curDate = new Date()
           let fileRecord = {
             fileName: file.name.length <= 15 ? file.name : file.name.slice(0, 15) + '...',
             from: this.userId,
@@ -366,14 +371,14 @@
             type: 'file',
             size: file.size + ' KB',
             suffix: file.name.substr(file.name.lastIndexOf('.') + 1),
-            time: curDate.getFullYear() + '-' + curDate.getMonth() + '-' + curDate.getDay() + ' ' + curDate.getHours() + ':' + curDate.getMinutes() + ':' + curDate.getSeconds()
+            time: this.getCurrentTime()
           }
           if ((fileRecord.suffix === 'jpg' || fileRecord.suffix === 'jpeg' || fileRecord.suffix === 'png' || fileRecord.suffix === 'JPG' || fileRecord.suffix === 'JPEG' || fileRecord.suffix === 'PNG') && URL.createObjectURL) {
-            fileRecord.type = 'pic'
-//            fileRecord.imgUrl = URL.createObjectURL(file)
+            fileRecord.type = 'image'
           } else {
             this.modifyFileSuffix(fileRecord)
           }
+          // upload to server
           let formData = new FormData()
           formData.append('file', file)
           formData.append('fileType', 'text') // TO DO: fix this
@@ -384,12 +389,8 @@
             }
           }
           let self = this
-          // debug
-          console.log('Uploading file...')
           axios.post(this.$store.state.fileUploadUrl, formData, config)
             .then(function (res) {
-              // debug
-              console.log(res)
               if (res.data.code === 0) {
                 fileRecord.fileUrl = res.data.data
                 self.contentList.push(fileRecord)
@@ -399,10 +400,13 @@
                 console.log('Failed to upload file')
               }
             })
-          // this.contentList.push(fileRecord)
-          // this.scrollToBottom()
-          // debug
-          // console.log('scrollheight: ' + this.$refs.userChatContent.scrollHeight)
+          // send message through socketio
+          let data = {staffId: this.staffId, userId: this.userId, token: window.localStorage.getItem('token'), msg: '', type: fileRecord.type, url: fileRecord.fileUrl}
+          if (fileRecord.type === 'file') {
+            data.suffix = fileRecord.suffix
+            data.fileName = fileRecord.fileName
+          }
+          this.socket.emit('userMsg', data)
         }
       },
       modifyFileSuffix (record) {
@@ -446,21 +450,45 @@
           }
           this.handleChosenFiles(fileList)
         })
+      },
+      beforeunloadHandler (e) {
+        console.log('user-chat destroyed')
+        window.localStorage.clear()
       }
     },
     created () {
+      // if haven't login, show login page instead
+      let token = window.localStorage.getItem('token')
+      const self = this
+//      // debug
+//      console.log('userid in user-chat: ' + self.$store.state.userId)
+//      console.log('token in user-chat: ' + token)
+      axios.get(self.$store.state.userLoginUrl, {
+        params: {
+          'userId': self.$store.state.userId,
+          'token': token
+        }
+      }).then(response => {
+        // debug
+//        console.log('response in user-chat: ' + response)
+        let body = response.data.data
+        if (body.code !== 0) {
+          this.$router.push('login')
+        }
+      })
+      // send userreg message
       const io = require('socket.io-client')
       this.socket = io('http://yogurt.magichc7.com')
       this.socket.emit('userReg', {userId: this.userId, token: this.userId + '_token'})
       // debug
-      console.log('Sent userReg.')
+//      console.log('Sent userReg.')
       this.socket.on('regResult', (data) => {
         // debug
-        console.log('Register result: code: ' + data['code'] + ', msg: ' + data['msg'])
+//        console.log('Register result: code: ' + data['code'] + ', msg: ' + data['msg'])
       })
       this.socket.on('staffMsg', (data) => {
         // debug
-        console.log('receive staffMsg: msg: ' + data['msg'] + ', from' + data['from'] + ', type: ' + data['type'] + ', time: ' + data['time'])
+//        console.log('receive staffMsg: msg: ' + data['msg'] + ', from' + data['from'] + ', type: ' + data['type'] + ', time: ' + data['time'])
         let newMsg = {
           msg: data['msg'],
           from: data['from'],
@@ -468,12 +496,20 @@
           type: data['type'],
           time: data['time']
         }
+        if (data['type'] === 'file') {
+          newMsg.fileName = data['fileName']
+          newMsg.size = data['size']
+          newMsg.suffix = data['suffix']
+          newMsg.fileUrl = data['url']
+        } else if (data['type'] === 'image') {
+          newMsg.fileUrl = data['url']
+        }
         this.contentList.push(newMsg)
         this.scrollToBottom()
       })
       this.socket.on('sendResult', (data) => {
         // debug
-        console.log('receive sendResult: code: ' + data['code'] + ', msg: ' + data['msg'])
+//        console.log('receive sendResult: code: ' + data['code'] + ', msg: ' + data['msg'])
         if (data['code'] === 0) {
           this.contentList.push(this.cachedMsg)
           this.scrollToBottom()
@@ -498,6 +534,10 @@
         this.preventDefaultEvent(e)
       })
       this.addDropSupport()
+      window.addEventListener('beforeunload', e => this.beforeunloadHandler(e))
+    },
+    destroyed () {
+      window.removeEventListener('beforeunload', e => this.beforeunloadHandler(e))
     }
   }
 </script>
