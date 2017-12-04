@@ -58,7 +58,7 @@
             window.localStorage.setItem('token', body.token)
             window.localStorage.setItem('userId', self.formItem.userId)
             window.localStorage.setItem('staffId', self.formItem.staffId)
-            self.$router.push({name: 'chat', userId: self.formItem.userId, staffId: self.formItem.staffId})
+            self.$router.push({name: 'chat', userId: self.formItem.userId})
           }
         })
       },
@@ -75,7 +75,6 @@
       let token = window.localStorage.getItem('token')
       const self = this
       let userId = window.localStorage.getItem('userId')
-      let staffId = window.localStorage.getItem('staffId')
       // debug
       console.log('userId in user-login: ' + userId)
       console.log('token in user-login: ' + token)
@@ -90,7 +89,7 @@
         console.log(body)
         if (body.code === 0) {
           // TO DO
-          this.$router.push({name: 'chat', userId: userId, staffId: staffId})
+          this.$router.push({name: 'robot', userId: userId})
         }
       })
     }

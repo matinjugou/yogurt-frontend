@@ -358,6 +358,20 @@
     transition: width .2s ease-in-out;
   }
 </style>
+<style lang="less">
+  .emoji-mart-bar, .emoji-mart-search, .emoji-mart-category {
+    font-family: "Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif;
+    .emoji-mart-preview {
+      display: none;
+    }
+  }
+  .ivu-modal {
+    top: 20px;
+  }
+  .ivu-modal-body {
+    height: 80vh;
+  }
+</style>
 <script>
   import axios from 'axios'
   export default {
