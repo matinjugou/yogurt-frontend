@@ -203,7 +203,6 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
-  background-size: 100%;
   background: url(assets/login_bg.png) fixed no-repeat;
   background-size: 100% 100%;
 }
@@ -232,6 +231,7 @@ export default {
   background: rgba(255, 255, 255, 0.7);
   border-radius: 10px;
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(3px);
 }
 .login-tab-vertical-space {
   height: 50px;
