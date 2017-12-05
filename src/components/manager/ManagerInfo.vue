@@ -11,6 +11,13 @@
         <Row type="flex">
           <my-avatar btnName="修改头像" :imgsrc="avatarSrc" @avatarChanged="avatarChanged">
           </my-avatar>
+          <Spin fix v-if="avatarLoading">
+            <div class="loader">
+              <svg class="circular" viewBox="25 25 50 50">
+                <circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="5" stroke-miterlimit="10"></circle>
+              </svg>
+            </div>
+          </Spin>
           <div style="padding-left: 20px">
             <Card style="width: 500px; height:210px">
               <h2 slot="title">
@@ -55,6 +62,7 @@
     data () {
       return {
         avatarSrc: '',
+        avatarLoading: true,
         managerName: 'Yogurt',
         managerID: '1_m1',
         companyName: '清华大学软件学院',
@@ -97,6 +105,7 @@
         console.log(res)
         const data = res.data.data
         self.avatarSrc = data.picUrl
+        self.avatarLoading = false
       }).catch(function (error) {
         console.log(error)
       })
@@ -129,5 +138,18 @@
     text-align: center;
     padding: 10px 0 20px;
     color: #9ea7b4;
+  }
+  .demo-spin-icon-load{
+    animation: ani-demo-spin 1s linear infinite;
+  }
+  @keyframes ani-demo-spin {
+    from { transform: rotate(0deg);}
+    50%  { transform: rotate(180deg);}
+    to   { transform: rotate(360deg);}
+  }
+  .demo-spin-col{
+    height: 100px;
+    position: relative;
+    border: 1px solid #eee;
   }
 </style>
