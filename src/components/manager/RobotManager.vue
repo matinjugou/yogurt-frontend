@@ -13,7 +13,8 @@
           <!--div-- class="img-container" style="width: 307px;height: 307px">
             <img src="http://pic.58pic.com/58pic/13/19/78/59U58PICDad_1024.jpg" center width="300px" height="300px">
           </div-->
-          <my-avatar btnName="修改头像">
+          <my-avatar btnName="修改头像" :imgsrc="robotAvatar"
+                     @picUploaded="avatarUploaded">
           </my-avatar>
           <div style="padding-left: 20px">
             <Card style="width: 500px; height:210px">
@@ -90,6 +91,12 @@
     },
     methods: {
       changeRobotName: function () {
+      },
+      avatarUploaded: function () {}
+    },
+    computed: {
+      robotAvatar () {
+        return this.$store.state.companyRobotAvatar
       }
     },
     components: {

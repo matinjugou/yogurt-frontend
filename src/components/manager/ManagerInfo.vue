@@ -9,7 +9,8 @@
     <div class="layout-content">
       <div class="layout-content-main">
         <Row type="flex">
-          <my-avatar btnName="修改头像" :imgsrc="avatarSrc" @avatarChanged="avatarChanged">
+          <my-avatar btnName="修改头像" :imgsrc="avatarSrc"
+                     @picUploaded="avatarUploaded">
           </my-avatar>
           <Spin fix v-if="avatarLoading">
             <div class="loader">
@@ -74,19 +75,27 @@
       }
     },
     methods: {
-      avatarChanged: function () {
-        console.log('excuted')
+      avatarUploaded: function (picUrl) {
         const self = this
-        axios.get(self.$store.state.httpServerUrl + '/account-info', {
-          params: {
-            managerId: self.$store.state.managerId
-          }
-        }).then(function (res) {
-          console.log(res)
-          const data = res.data.data
-          self.avatarSrc = data.picUrl
-        }).catch(function (error) {
-          console.log(error)
+        axios.put(self.$store.state.httpServerUrl + '/account-info', {
+          managerId: self.$store.state.managerId,
+          picUrl: picUrl
+        }).then(function () {
+          axios.get(self.$store.state.httpServerUrl + '/account-info', {
+            params: {
+              managerId: self.$store.state.managerId
+            }
+          }).then(function (res) {
+            console.log(res)
+            const data = res.data.data
+            self.avatarSrc = data.picUrl
+            self.$store.commit({
+              type: 'changeManagerAvatar',
+              picUrl: data.picUrl
+            })
+          }).catch(function (error) {
+            console.log(error)
+          })
         })
       },
       changeRobotName: function () {
