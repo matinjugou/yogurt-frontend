@@ -41,6 +41,7 @@
 </template>
 
 <script>
+import axios from 'axios'
 export default {
   name: 'EmailValidate',
   data () {
@@ -57,20 +58,42 @@ export default {
     }
   },
   computed: {
+    staffId () {
+      return this.$store.state.staffId
+    },
     email () {
       return this.$store.state.email
+    },
+    httpServerUrl () {
+      return this.$store.state.httpServerUrl
     }
   },
   methods: {
     sendValidateEmail () {
-      // TODO: send validation email
       if (!this.tempEmail) {
         this.$Notice.error({
           title: '请先填写邮箱'
         })
         return
       }
-      this.sendEmailCoolDown = 60
+      // TODO: send validation email
+      axios.get(this.httpServerUrl + '/validation/validate', {
+        params: {
+          staffId: this.staffId,
+          emailAddress: this.tempEmail
+        }
+      }).then(response => {
+        console.log(response)
+        this.$Notice.success({
+          title: '邮件已发送，请查收'
+        })
+      }).catch(error => {
+        this.$Notice.error({
+          title: '邮件发送失败，请稍后再试'
+        })
+        console.log(error)
+      })
+      // this.sendEmailCoolDown = 60
     },
     validate () {
       // TODO: check if the email is validated

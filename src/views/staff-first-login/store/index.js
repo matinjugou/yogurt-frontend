@@ -5,6 +5,7 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
+    httpServerUrl: 'http://yogurt.magichc7.com/api/staff',
     staffId: '',
     current: 0,
     name: '',

@@ -125,7 +125,7 @@ export default {
             window.location.href = this.managerBackUrl
           }
         } else if (body.code === 2 && type === 'staff') {
-          window.location.href = window.location.origin + '/staff-first-login?staffId=' + username + '&token=' + body.token
+          window.location.href = window.location.origin + '/staff-first-login?staffId=' + username
         } else {
           // error login
           this.$Notice.error({
