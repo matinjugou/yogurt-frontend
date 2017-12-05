@@ -47,6 +47,9 @@ export default {
     // handle url params
     let params = lib.getUrlParams(window.location.href)
     if (typeof params.staffId === 'string') {
+      if (params.staffId.indexOf('#') >= 0) {
+        params.staffId = params.staffId.slice(0, params.staffId.indexOf('#'))
+      }
       this.$store.commit({
         type: 'changeStaffId',
         staffId: params.staffId
@@ -54,6 +57,7 @@ export default {
     } else {
       // TODO: illegal visit
       // jump to login page
+      window.location.href = window.location.origin + '/login'
     }
   }
 }

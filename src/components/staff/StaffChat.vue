@@ -195,7 +195,7 @@
             <Input
               v-model="inputText" 
               type="textarea" 
-              :rows="8" 
+              :rows="4" 
               placeholder="在这里输入信息，按Ctrl+Enter发送" 
               @on-keyup.ctrl.enter="sendMessage"
               @on-focus="getFocus"
@@ -350,20 +350,6 @@ export default {
   },
   methods: {
     socketListenInit () {
-      this.socket.on('regResult', (data) => {
-        console.log('Register result: code ' + data.code + ' & msg ' + data.msg)
-        if (data.code === 0) {
-          this.$Notice.success({
-            title: '连接消息服务器成功！',
-            desc: '开始和用户聊天吧~'
-          })
-        } else {
-          this.$Notice.error({
-            title: '连接消息服务器失败！',
-            desc: '程序会自动尝试重新连接'
-          })
-        }
-      })
       // TODO: deal with send failure
       // also timeout affair should be taken care of
       this.socket.on('sendResult', (data) => {
@@ -428,7 +414,7 @@ export default {
         if (data.from !== this.chatUserId) {
           this.$store.commit({
             type: 'addUserUnread',
-            userId: data.from
+            userId: data.userId
           })
         }
       })
@@ -740,7 +726,8 @@ export default {
         for (let value of body.queue.waiting) {
           arr.push({
             userId: value,
-            status: 'waiting'
+            status: 'waiting',
+            unread: 0
           })
         }
         this.$store.commit({
@@ -811,7 +798,7 @@ export default {
   font-weight: Bold;
 }
 .chat-window-content {
-  height: calc(100vh - 290px);
+  height: calc(100vh - 207px);
   padding: 10px 15px;
   overflow: auto;
 }
@@ -915,7 +902,7 @@ export default {
 }
 .chat-emoji-panel, .chat-window-upload-file-list {
   position: absolute;
-  bottom: 225px;
+  bottom: 142px;
 }
 .chat-window-upload-file-list {
   width: calc(100% - 2px);

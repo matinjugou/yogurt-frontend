@@ -128,6 +128,20 @@ export default {
             staffId: this.$store.state.staffId,
             token: this.$store.state.token
           })
+          this.socket.on('regResult', (data) => {
+            console.log('Register result: code ' + data.code + ' & msg ' + data.msg)
+            if (data.code === 0) {
+              this.$Notice.success({
+                title: '连接消息服务器成功！',
+                desc: '开始和用户聊天吧~'
+              })
+            } else {
+              this.$Notice.error({
+                title: '连接消息服务器失败！',
+                desc: '程序会自动尝试重新连接'
+              })
+            }
+          })
         } else {
           window.location.href = window.location.origin + '/login?backUrl=' + window.location.href
         }
