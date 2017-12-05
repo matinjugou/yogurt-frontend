@@ -41,7 +41,7 @@ exports.htmlPlugins = function () {
   let plugins = []
   Object.keys(entries).forEach(function (name) {
     let conf = {
-      filename: name + '.html',
+      filename: name + '/index.html',
       template: entries[name].slice(0, -3) + '.html',
       inject: true,
       chunks: ['manifest', 'vendor', name]

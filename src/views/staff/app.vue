@@ -92,7 +92,7 @@ export default {
       window.localStorage.removeItem('id')
       window.localStorage.removeItem('type')
       window.localStorage.removeItem('token')
-      window.location.href = 'login'
+      window.location.href = window.location.origin + '/login'
     },
     menuAction (name) {
       if (name === 'burger-button') {
@@ -129,14 +129,14 @@ export default {
             token: this.$store.state.token
           })
         } else {
-          window.location.href = 'login?backUrl=' + window.location.href
+          window.location.href = window.location.origin + '/login?backUrl=' + window.location.href
         }
       }).catch(error => {
         console.log(error)
-        window.location.href = 'login?backUrl=' + window.location.href
+        window.location.href = window.location.origin + '/login?backUrl=' + window.location.href
       })
     } else {
-      window.location.href = 'login?backUrl=' + window.location.href
+      window.location.href = window.location.origin + '/login?backUrl=' + window.location.href
     }
   }
 }
