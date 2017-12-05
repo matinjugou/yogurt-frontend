@@ -350,8 +350,8 @@
   }
   .large-image {
     text-align: center;
-    /*width: 100%;*/
-    /*height: 100%;*/
+    width: 100%;
+    height: 100%;
     overflow: scroll;
   }
   .slide-fade-enter-active {
@@ -541,36 +541,41 @@
             // image
             if (fileType === 'image') {
               // get compressed image's url
+              let fileUrl = this.uploadList[index].response.data
               let compressedUrl = ''
-              axios.post(this.fileCompressUrl, {'fileUrl': this.uploadList[index].response.data})
+              axios.post(this.fileCompressUrl, {'fileUrl': fileUrl})
                 .then(function (res) {
-                  compressedUrl = res.data.newFileUrl
+                  compressedUrl = res.data.data
+                  // debug
+//                  console.log('compressedUrl: ')
+//                  console.log(compressedUrl)
                 })
+              compressedUrl = (compressedUrl.length > 0) ? compressedUrl : fileUrl
               this.$store.commit({
                 type: 'addChatRecord',
                 content: {
                   'from': this.userId,
                   'to': this.staffId,
-                  'fileUrl': this.uploadList[index].response.data,
+                  'fileUrl': fileUrl,
                   'compressedUrl': compressedUrl,
                   'type': fileType,
                   'time': time
                   // 'hasSent': false
                 }
               })
+              // debug
+              console.log('compressedurl: ' + compressedUrl)
               this.socket.emit('userMsg', {
                 time: time,
                 staffId: this.staffId,
                 userId: this.userId,
                 token: this.token,
                 type: fileType,
-                url: this.uploadList[index].response.data,
+                url: fileUrl,
                 compressedUrl: compressedUrl
               })
             } else {
               // file
-              // debug
-//              console.log(this.uploadList[index].response)
               this.$store.commit({
                 type: 'addChatRecord',
                 content: {
@@ -585,18 +590,18 @@
                   // 'hasSent': false
                 }
               })
+              this.socket.emit('userMsg', {
+                time: time,
+                staffId: this.staffId,
+                userId: this.userId,
+                token: this.token,
+                type: fileType,
+                url: this.uploadList[index].response.data,
+                name: this.uploadList[index].name,
+                size: (this.uploadList[index].size > 1024) ? (this.uploadList[index].size >> 10) : 1,
+                mimeType: this.uploadList[index].response.type
+              })
             }
-            this.socket.emit('userMsg', {
-              time: time,
-              staffId: this.staffId,
-              userId: this.userId,
-              token: this.token,
-              type: fileType,
-              url: this.uploadList[index].response.data,
-              name: this.uploadList[index].name,
-              size: (this.uploadList[index].size > 1024) ? (this.uploadList[index].size >> 10) : 1,
-              mimeType: this.uploadList[index].response.type
-            })
           }
           // clear files
           this.$refs.upload.clearFiles()
