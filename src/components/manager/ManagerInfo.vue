@@ -9,19 +9,7 @@
     <div class="layout-content">
       <div class="layout-content-main">
         <Row type="flex">
-          <my-avatar btnName="修改头像">
-            <!--vue-core-image-upload
-              slot="uploadBtn"
-              class="btn btn-primary my-avatar-button"
-              :crop="false"
-              text="修改头像"
-              inputOfFile="file"
-              @imageuploaded="avatarLoaded"
-              :max-file-size="5242880"
-              :data="avatarData"
-              url="http://123.206.22.71/api/v1/file/"
-              >
-            </vue-core-image-upload-->
+          <my-avatar btnName="修改头像" :imgsrc="avatarSrc" @avatarChanged="avatarChanged">
           </my-avatar>
           <div style="padding-left: 20px">
             <Card style="width: 500px; height:210px">
@@ -61,12 +49,12 @@
 </template>
 <script>
   import MyAvatar from '@/components/public/MyAvatar'
-
+  import axios from 'axios'
   export default {
     name: 'managerinfo',
     data () {
       return {
-        avatarSrc: 'http://img1.vued.vanthink.cn/vued0a233185b6027244f9d43e653227439a.png',
+        avatarSrc: '',
         managerName: 'Yogurt',
         managerID: '1_m1',
         companyName: '清华大学软件学院',
@@ -78,13 +66,40 @@
       }
     },
     methods: {
-      avatarLoaded: function () {
+      avatarChanged: function () {
+        console.log('excuted')
+        const self = this
+        axios.get(self.$store.state.httpServerUrl + '/account-info', {
+          params: {
+            managerId: self.$store.state.managerId
+          }
+        }).then(function (res) {
+          console.log(res)
+          const data = res.data.data
+          self.avatarSrc = data.picUrl
+        }).catch(function (error) {
+          console.log(error)
+        })
       },
       changeRobotName: function () {
       }
     },
     components: {
       'my-avatar': MyAvatar
+    },
+    mounted () {
+      const self = this
+      axios.get(self.$store.state.httpServerUrl + '/account-info', {
+        params: {
+          managerId: self.$store.state.managerId
+        }
+      }).then(function (res) {
+        console.log(res)
+        const data = res.data.data
+        self.avatarSrc = data.picUrl
+      }).catch(function (error) {
+        console.log(error)
+      })
     }
   }
 </script>
