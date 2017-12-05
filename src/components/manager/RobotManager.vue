@@ -66,7 +66,7 @@
         <h4 style="margin-bottom: 7px">
           转接时显示的消息
         </h4>
-        <Input v-model="transMessage"
+        <Input v-model="transMnpessage"
                type="textarea"
                placeholder="Enter something..."/>
       </Row>
