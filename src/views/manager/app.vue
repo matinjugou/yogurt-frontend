@@ -15,7 +15,7 @@
         <Menu id="left-menu" theme="dark" accordion width="auto">
           <Row id="avatar-block" type="flex" justify="center">
             <Col>
-              <Avatar :style="{background: 'orange'}" size="large">USER</Avatar>
+              <Avatar :style="{background: 'orange'}" size="large" @click.native="jump('/mgninfo')">USER</Avatar>
               <h3 style="color: white">企业名称</h3>
               <span style="color: white">管理员姓名</span>
             </Col>
@@ -30,25 +30,32 @@
           <Submenu name="2">
             <template slot="title">
               <Icon type="ios-paper"></Icon>
-              客服管理
+              留言管理
             </template>
-            <MenuItem name="2-1" @click.native="jump('/stfmgn')">
-              客服管理
-            </MenuItem>
+            <MenuItem name="2-1">留言管理</MenuItem>
           </Submenu>
           <Submenu name="3">
             <template slot="title">
               <Icon type="ios-paper"></Icon>
+              客服管理
+            </template>
+            <MenuItem name="3-1" @click.native="jump('/stfmgn')">
+              客服管理
+            </MenuItem>
+          </Submenu>
+          <Submenu name="4">
+            <template slot="title">
+              <Icon type="ios-paper"></Icon>
               设置
             </template>
-            <MenuItem name="3-1" @click.native="jump('/settings-robot')">
+            <MenuItem name="4-1" @click.native="jump('/settings-robot')">
               机器人设置
             </MenuItem>
-            <MenuItem name="3-2" @click.native="jump('/settings-quickrly')">
+            <MenuItem name="4-2" @click.native="jump('/settings-quickrly')">
               快捷回复设置
             </MenuItem>
-            <MenuItem name="3-3">购买设置</MenuItem>
-            <MenuItem name="3-4">企业信息设置</MenuItem>
+            <MenuItem name="4-3">购买设置</MenuItem>
+            <MenuItem name="4-4">企业信息设置</MenuItem>
           </Submenu>
         </Menu>
       </Col>

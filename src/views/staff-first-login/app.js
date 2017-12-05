@@ -3,15 +3,12 @@
 import Vue from 'vue'
 import App from './app.vue'
 import router from './router'
-import iView from 'iview'
-import Vuetify from 'vuetify'
 import store from './store'
+import iView from 'iview'
 import 'iview/dist/styles/iview.css'
 
-Vue.use(iView)
-Vue.use(Vuetify)
-
 Vue.config.productionTip = false
+Vue.use(iView)
 
 /* eslint-disable no-new */
 new Vue({

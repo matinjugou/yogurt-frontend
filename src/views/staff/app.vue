@@ -76,6 +76,9 @@ export default {
     },
     isLogin () {
       return this.$store.state.isLogin
+    },
+    socket () {
+      return this.$store.state.socket
     }
   },
   methods: {
@@ -89,7 +92,7 @@ export default {
       window.localStorage.removeItem('id')
       window.localStorage.removeItem('type')
       window.localStorage.removeItem('token')
-      window.location.href = 'login'
+      window.location.href = window.location.origin + '/login'
     },
     menuAction (name) {
       if (name === 'burger-button') {
@@ -100,6 +103,7 @@ export default {
     }
   },
   created () {
+    this.$store.commit('buildSocketConnect')
     // check if the token is valid
     let storeType = window.localStorage.getItem('type')
     let storeId = window.localStorage.getItem('id')
@@ -120,15 +124,19 @@ export default {
             type: 'changeStaffId',
             staffId: storeId
           })
+          this.socket.emit('staffReg', {
+            staffId: this.$store.state.staffId,
+            token: this.$store.state.token
+          })
         } else {
-          window.location.href = 'login?backUrl=' + window.location.href
+          window.location.href = window.location.origin + '/login?backUrl=' + window.location.href
         }
       }).catch(error => {
         console.log(error)
-        window.location.href = 'login?backUrl=' + window.location.href
+        window.location.href = window.location.origin + '/login?backUrl=' + window.location.href
       })
     } else {
-      window.location.href = 'login?backUrl=' + window.location.href
+      window.location.href = window.location.origin + '/login?backUrl=' + window.location.href
     }
   }
 }

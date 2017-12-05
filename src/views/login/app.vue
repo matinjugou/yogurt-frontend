@@ -1,8 +1,9 @@
 <template>
   <div id="app">
     <Row type="flex">
-      <Col :span="15"> 
+      <Col :span="15">
         <div class="login-left">
+          <!--img src="./assets/logo.png" width="400px" /-->
           {{ msg }}
         </div>
       </Col>
@@ -89,7 +90,7 @@ export default {
       let username = this.username
       let password = this.password
       if ((username === '') || (password === '')) {
-        this.$Message.error({
+        this.$Notice.error({
           content: '用户名和密码不能为空！',
           duration: 3,
           closable: true
@@ -102,14 +103,15 @@ export default {
       } else if (type === 'manager') {
         url = this.$store.state.managerLoginUrl
       }
+      let reqBody = {}
+      reqBody[type + 'Id'] = username
+      reqBody['password'] = password
       // TODO: encrypted the password
       // TODO: Use axios to send http request
       // TODO: handle response
       // else pop wrong message
-      axios.post(url, {
-        'staffId': username,
-        'password': password
-      }).then(response => {
+      axios.post(url, reqBody).then(response => {
+        console.log(response)
         let body = response.data.data
         console.log(body)
         if (body.code === 0) {
@@ -122,20 +124,18 @@ export default {
           } else if (type === 'manager') {
             window.location.href = this.managerBackUrl
           }
+        } else if (body.code === 2 && type === 'staff') {
+          window.location.href = window.location.origin + '/staff-first-login?staffId=' + username + '&token=' + body.token
         } else {
           // error login
-          this.$Message.error({
-            content: '用户名或密码错误',
-            duration: 3,
-            closable: true
+          this.$Notice.error({
+            title: '用户名或密码错误'
           })
         }
       }).catch(error => {
         console.log(error)
-        this.$Message.error({
-          content: '服务器发生错误，请稍后再试...',
-          duration: 3,
-          closable: true
+        this.$Notice.error({
+          title: '服务器发生错误，请稍后再试...'
         })
       })
     },
@@ -146,7 +146,10 @@ export default {
     }
   },
   created () {
+    this.staffBackUrl = window.location.origin + '/' + this.staffBackUrl
+    this.managerBackUrl = window.location.origin + '/' + this.managerBackUrl
     // handle url params
+    // window.localStorage.setItem('token', '')
     let params = lib.getUrlParams(window.location.href)
     if (typeof params.backUrl === 'string') {
       if (params.backUrl.indexOf('staff') >= 0) {
@@ -202,9 +205,8 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
-  background-size: 100%;
-  background: url(assets/login_bg.png) fixed no-repeat;
-  background-size: 100% 100%;
+  background: url(assets/login_bg.svg) fixed no-repeat;
+  background-size: cover;
 }
 .login-left {
   width: 100%;
@@ -213,7 +215,7 @@ export default {
   align-items: center;
   justify-content: center;
   font-size: 36px;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.8);
 }
 .login-right {
   width: 100%;
@@ -231,6 +233,7 @@ export default {
   background: rgba(255, 255, 255, 0.7);
   border-radius: 10px;
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(3px);
 }
 .login-tab-vertical-space {
   height: 50px;
@@ -267,7 +270,7 @@ export default {
   transition: all .3s cubic-bezier(1.0, 0.5, 0.8, 1.0);
 }
 .slide-fade-enter, .slide-fade-leave-to {
-  transform: translateY(10px);
+  transform: translateY(20px);
   opacity: 0;
 }
 </style>
