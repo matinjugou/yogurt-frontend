@@ -1,8 +1,8 @@
 <template>
   <div id="app" class="staff">
     <Row type="flex">
-      <Col :span="spanLeft" class="staff-menu-left">
-        <Menu active-name="1" theme="dark" width="auto" @on-select="menuAction" v-if="spanLeft">
+      <Col :span="spanLeft" class="staff-menu-left" v-if="spanLeft">
+        <Menu active-name="1" theme="dark" width="auto" @on-select="menuAction">
           <!-- here may have a logo -->
           <div class="menu-header"></div>
           <div class="menu-burger-button">
@@ -13,57 +13,58 @@
           <div class="menu-items">
           <MenuItem name="chat">
             <Icon type="chatboxes" :size="iconSize"></Icon>
-            <span class="staff-text" v-if="showText">会话页面</span>
+            <span class="staff-text" v-show="showMenuText">会话页面</span>
           </MenuItem>
           <MenuItem name="info">
             <Icon type="person-stalker" :size="iconSize"></Icon>
-            <span class="staff-text" v-if="showText">个人信息</span>
+            <span class="staff-text" v-show="showMenuText">个人信息</span>
           </MenuItem>
           <MenuItem name="quick-reply">
             <Icon type="reply-all" :size="iconSize"></Icon>
-            <span class="staff-text" v-if="showText">快捷回复</span>
+            <span class="staff-text" v-show="showMenuText">快捷回复</span>
           </MenuItem>
           <MenuItem name="feedback">
             <Icon type="paper-airplane" :size="iconSize"></Icon>
-            <span class="staff-text" v-if="showText">客户反馈</span>
+            <span class="staff-text" v-show="showMenuText">客户反馈</span>
           </MenuItem>
+          <!--TODO: let all the actions in here-->
           </div>
-
           <div class="menu-vertical-spacing"></div>
           <Button :type="restAction" shape="circle" icon="coffee" size="large" @click="changeRestStatus">
-            <span v-if="showText">{{ restCaption }}</span>
+            <span v-show="showMenuText">{{ restCaption }}</span>
           </Button>
           <div class="menu-button-space"></div>
           <Button type="error" shape="circle" icon="log-out" size="large" @click="logout">
-            <span v-if="showText" @click="logout">&nbsp;&nbsp;登&nbsp;&nbsp;出&nbsp;&nbsp;</span>
+            <span class="menu-button-logout-text" v-show="showMenuText">登出</span>
           </Button>
           <div class="menu-button-space"></div>
           <footer class="staff-copy">
-            Yogurt
+            &copy; Yogurt
           </footer>
         </Menu>
       </Col>
       <Col :span="spanRight">
-        <transition name = "fade" mode="out-in">
-          <router-view/>
-        </transition>  
+        <router-view/>
       </Col>
     </Row>
   </div>
 </template>
 
 <script>
+import axios from 'axios'
 export default {
   name: 'app',
   data () {
     return {
-      spanLeft: 0,
+      spanLeft: 3,
       iconSize: 25,
-      showText: true,
       restStatus: false
     }
   },
   computed: {
+    showMenuText () {
+      return this.spanLeft >= 3
+    },
     restAction () {
       return this.restStatus ? 'success' : 'primary'
     },
@@ -72,6 +73,12 @@ export default {
     },
     spanRight () {
       return 24 - this.spanLeft
+    },
+    isLogin () {
+      return this.$store.state.isLogin
+    },
+    socket () {
+      return this.$store.state.socket
     }
   },
   methods: {
@@ -81,23 +88,69 @@ export default {
     },
     logout () {
       // TODO: logout
-
+      this.$store.commit('logout')
+      window.localStorage.removeItem('id')
+      window.localStorage.removeItem('type')
+      window.localStorage.removeItem('token')
+      window.location.href = window.location.origin + '/login'
     },
     menuAction (name) {
       if (name === 'burger-button') {
         this.spanLeft = this.spanLeft === 3 ? 1 : 3
-        this.showText = !this.showText
       } else {
         this.$router.push('/' + name)
       }
     }
   },
   created () {
-    if (this.$store.state.isLogin === false) {
-      this.$router.push('/login')
+    this.$store.commit('buildSocketConnect')
+    // check if the token is valid
+    let storeType = window.localStorage.getItem('type')
+    let storeId = window.localStorage.getItem('id')
+    let storeToken = window.localStorage.getItem('token')
+    if (storeType === 'staff' && storeId) {
+      axios.get(this.$store.state.httpServerUrl + '/login', {
+        params: {
+          staffId: storeId,
+          token: storeToken
+        }
+      }).then(response => {
+        let body = response.data.data
+        console.log(body)
+        if (body.code === 0) {
+          // successfully login
+          this.$store.commit('login')
+          this.$store.commit({
+            type: 'changeStaffId',
+            staffId: storeId
+          })
+          this.socket.emit('staffReg', {
+            staffId: this.$store.state.staffId,
+            token: this.$store.state.token
+          })
+          this.socket.on('regResult', (data) => {
+            console.log('Register result: code ' + data.code + ' & msg ' + data.msg)
+            if (data.code === 0) {
+              this.$Notice.success({
+                title: '连接消息服务器成功！',
+                desc: '开始和用户聊天吧~'
+              })
+            } else {
+              this.$Notice.error({
+                title: '连接消息服务器失败！',
+                desc: '程序会自动尝试重新连接'
+              })
+            }
+          })
+        } else {
+          window.location.href = window.location.origin + '/login?backUrl=' + window.location.href
+        }
+      }).catch(error => {
+        console.log(error)
+        window.location.href = window.location.origin + '/login?backUrl=' + window.location.href
+      })
     } else {
-      this.spanLeft = 3
-      this.$router.push('/index')
+      window.location.href = window.location.origin + '/login?backUrl=' + window.location.href
     }
   }
 }
@@ -139,10 +192,14 @@ export default {
 .menu-button-space {
   height: 20px;
 }
+.menu-button-logout-text {
+  padding: 0 4px 0 4px;
+  letter-spacing: 9px;
+}
 .menu-vertical-spacing {
-   height: calc(100vh - 461px);
+  height: calc(100vh - 460px);
 }
 .ivu-col {
-  transition: width .2s ease-in-out;
+  transition: width 0.2s ease-in-out;
 }
 </style>

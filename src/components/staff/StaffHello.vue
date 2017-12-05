@@ -1,5 +1,5 @@
 <template>
-  <div class="staff-quick-reply">
+  <div class="staff-hello">
     {{ msg }}
   </div>
 </template>
@@ -7,16 +7,14 @@
 <script>
 
 export default {
-  name: 'StaffQuickReply',
+  name: 'StaffHello',
   data () {
     return {
-      msg: '这里是快捷回复界面'
+      msg: '欢迎使用Yogurt客服系统~'
     }
   },
   created () {
-    if (this.$store.state.isLogin === false) {
-      this.$router.push('/login')
-    }
+    // TODO: If not login, jump to login page
   }
 }
 </script>

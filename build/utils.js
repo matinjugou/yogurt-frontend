@@ -47,6 +47,7 @@ exports.htmlPlugins = function () {
       chunks: ['manifest', 'vendor', name]
     }
     if (process.env.NODE_ENV === 'production') {
+      conf.filename = name + '/index.html'
       conf = merge(conf, {
         minify: {
           removeComments: true,
