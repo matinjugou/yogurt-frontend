@@ -354,6 +354,16 @@
     height: 100%;
     overflow: scroll;
   }
+  .slide-fade-enter-active {
+    transition: all .3s ease;
+  }
+  .slide-fade-leave-active {
+    transition: all .3s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+  }
+  .slide-fade-enter, .slide-fade-leave-to {
+    transform: translateY(10px);
+    opacity: 0;
+  }
   .ivu-col{
     transition: width .2s ease-in-out;
   }
