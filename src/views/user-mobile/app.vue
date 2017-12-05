@@ -4,7 +4,7 @@
       <v-toolbar-title>xxx公司</v-toolbar-title>
     </v-toolbar>
     <v-content>
-      <v-container :class="{'no-function-panel': functionPanelVisible, 'with-function-panel': !functionPanelVisible}">
+      <v-container :class="{'no-function-panel': !functionPanelVisible, 'with-function-panel': functionPanelVisible}">
           <ul style="list-style: none">
             <li v-for="(singleRecord, index) in currentChatRecord">
               <p class="chat-msg-time">
@@ -12,7 +12,7 @@
               </p>
               <div class="chat-msg-body" :class="[{'from-me': singleRecord.from.startsWith('1_u')}]">
                 <div class="avatar chat-single-record">
-                  <v-avatar class="indigo">
+                  <v-avatar size="40px" class="indigo">
                     <v-icon dark>account_circle</v-icon>
                   </v-avatar>
                 </div>
@@ -23,7 +23,7 @@
             </li>
           </ul>
       </v-container>
-      <v-container style="height: 106px">
+      <v-container class="input-container">
         <v-layout row>
           <v-flex p>
             <v-btn flat icon color="indigo" @click="showFunctionPanel()">
@@ -43,9 +43,9 @@
         </v-layout>
       </v-container>
       <trainsition name="function-panel-slide">
-        <container v-show="functionPanelVisible" style="height: 80px">
-          <v-layout style="text-align: center">
-            <v-flex p>
+        <container v-show="functionPanelVisible" class="function-panel-container">
+          <v-layout>
+            <v-flex p style="text-align: left">
               <v-btn flat>
                 <v-icon>tag_faces</v-icon>表情
               </v-btn>
@@ -67,8 +67,11 @@
   </v-app>
 </template>
 <style>
+  .container {
+    padding: 8px;
+  }
   .chat-msg-time {
-    margin: 7px 0;
+    margin: 4px 0;
     text-align: center;
   }
   .chat-msg-time > span {
@@ -80,10 +83,10 @@
     background-color: #dcdcdc;
   }
   .with-function-panel {
-    height: calc(100vh - 162px);
+    height: calc(100vh - 179px);
   }
   .no-function-panel {
-    height: calc(100vh - 242px);
+    height: calc(100vh - 121px);
   }
   .chat-single-record {
     display: inline-flex;
@@ -92,11 +95,12 @@
   }
   .chat-msg-body > .content {
     position: relative;
-    padding: 0 10px;
-    max-width: 40vw;
-    min-height: 30px;
-    line-height: 2.5;
+    padding: 7px;
+    max-width: 65vw;
+    /*min-height: 30px;*/
+    min-height: 36px;
     font-size: 16px;
+    line-height: 20px;
     text-align: left;
     word-break: break-all;
     word-wrap: break-word;
@@ -107,7 +111,7 @@
   .chat-msg-body > .content::before {
     content: " ";
     position: absolute;
-    top: 9px;
+    top: 12px;
     right: 100%;
     border: 6px solid transparent;
     border-right-color: #ffffff;
@@ -130,6 +134,14 @@
     border-right-color: transparent;
     border-left-color: #2d8cf0;
   }
+  .input-container {
+    padding: 0;
+    height: 65px;
+    overflow: hidden;
+  }
+  .function-panel-container {
+    height: 58px;
+  }
 </style>
 <script>
   export default {
@@ -149,7 +161,7 @@
           },
           {
             id: '2',
-            msg: 'Hello, I\'m user.',
+            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
             from: '1_u1',
             to: '1_s1',
             type: 'text',
