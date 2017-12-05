@@ -350,8 +350,8 @@
   }
   .large-image {
     text-align: center;
-    width: 100%;
-    height: 100%;
+    /*width: 100%;*/
+    /*height: 100%;*/
     overflow: scroll;
   }
   .slide-fade-enter-active {
@@ -525,11 +525,11 @@
             }
           })
           this.socket.emit('userMsg', {
-            'staffId': this.staffId,
-            'userId': this.userId,
-            'token': this.token,
-            'msg': sendMsg,
-            'type': 'text'
+            staffId: this.staffId,
+            userId: this.userId,
+            token: this.token,
+            msg: sendMsg,
+            type: 'text'
           })
           // clear input
           this.inputText = ''
@@ -559,13 +559,13 @@
                 }
               })
               this.socket.emit('userMsg', {
-                'time': time,
-                'staffId': this.staffId,
-                'userId': this.chatUserId,
-                'token': this.token,
-                'type': fileType,
-                'url': this.uploadList[index].response.data,
-                'compressedUrl': compressedUrl
+                time: time,
+                staffId: this.staffId,
+                userId: this.userId,
+                token: this.token,
+                type: fileType,
+                url: this.uploadList[index].response.data,
+                compressedUrl: compressedUrl
               })
             } else {
               // file
@@ -587,15 +587,15 @@
               })
             }
             this.socket.emit('userMsg', {
-              'time': time,
-              'staffId': this.staffId,
-              'userId': this.chatUserId,
-              'token': this.token,
-              'type': fileType,
-              'url': this.uploadList[index].response.data,
-              'name': this.uploadList[index].name,
-              'size': (this.uploadList[index].size > 1024) ? (this.uploadList[index].size >> 10) : 1,
-              'mimeType': this.uploadList[index].response.type
+              time: time,
+              staffId: this.staffId,
+              userId: this.userId,
+              token: this.token,
+              type: fileType,
+              url: this.uploadList[index].response.data,
+              name: this.uploadList[index].name,
+              size: (this.uploadList[index].size > 1024) ? (this.uploadList[index].size >> 10) : 1,
+              mimeType: this.uploadList[index].response.type
             })
           }
           // clear files
@@ -769,11 +769,13 @@
         this.currentChatRecord.push(newMsg)
       })
       this.socket.on('sendResult', (data) => {
-        // TO DO
+        // debug
+        console.log(data)
       })
     },
     mounted () {
       this.uploadList = this.$refs.upload.fileList
+      this.scrollToBottom()
     },
     updated () {
       this.scrollToBottom()

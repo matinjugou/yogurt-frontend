@@ -58,7 +58,7 @@
             window.localStorage.setItem('token', body.token)
             window.localStorage.setItem('userId', self.formItem.userId)
             window.localStorage.setItem('staffId', self.formItem.staffId)
-            self.$router.push({name: 'chat', userId: self.formItem.userId})
+            self.$router.push({name: 'robot'})
           }
         })
       },

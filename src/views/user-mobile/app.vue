@@ -1,10 +1,11 @@
 <template>
-  <v-app>
+  <v-app style="height: 100vh; overflow: hidden">
     <v-toolbar color="indigo" dark fixed app height="56px">
       <v-toolbar-title>xxx公司</v-toolbar-title>
     </v-toolbar>
-    <v-content>
-      <v-container :class="{'no-function-panel': !functionPanelVisible, 'with-function-panel': functionPanelVisible}">
+    <v-content style="overflow: hidden">
+      <v-container :style="{height: chatRecordContainerHeight + 'px', overflow: 'scroll'}" id="chat-record-container">
+      <!--<v-container :class="{'no-function-panel': !functionPanelVisible, 'with-function-panel': functionPanelVisible}" id="chat-record-container">-->
           <ul style="list-style: none">
             <li v-for="(singleRecord, index) in currentChatRecord">
               <p class="chat-msg-time">
@@ -31,12 +32,12 @@
             </v-btn>
           </v-flex>
           <v-flex xs12>
-            <v-text-field id="text-field"
+            <v-text-field id="text-field" @click="textFieldClicked()"
               label="在此输入消息"
             ></v-text-field>
           </v-flex>
           <v-flex p>
-            <v-btn flat icon color="indigo">
+            <v-btn flat icon color="indigo" @click="sendMessage()">
               <v-icon>send</v-icon>
             </v-btn>
           </v-flex>
@@ -45,7 +46,7 @@
       <trainsition name="function-panel-slide">
         <container v-show="functionPanelVisible" class="function-panel-container">
           <v-layout>
-            <v-flex p style="text-align: left">
+            <v-flex p>
               <v-btn flat>
                 <v-icon>tag_faces</v-icon>表情
               </v-btn>
@@ -66,7 +67,7 @@
     </v-content>
   </v-app>
 </template>
-<style>
+<style scoped>
   .container {
     padding: 8px;
   }
@@ -84,9 +85,11 @@
   }
   .with-function-panel {
     height: calc(100vh - 179px);
+    overflow: scroll;
   }
   .no-function-panel {
     height: calc(100vh - 121px);
+    overflow: scroll;
   }
   .chat-single-record {
     display: inline-flex;
@@ -126,21 +129,24 @@
   .from-me > .content {
     margin-right: 0;
     color: #ffffff;
-    background-color: #2d8cf0;
+    background-color: #5687f0;
   }
   .from-me > .content::before {
     right: inherit;
     left: 100%;
     border-right-color: transparent;
-    border-left-color: #2d8cf0;
+    border-left-color: #5687f0;
   }
   .input-container {
+    /*position: fixed;*/
+    /*bottom: 0;*/
     padding: 0;
     height: 65px;
     overflow: hidden;
   }
   .function-panel-container {
     height: 58px;
+    text-align: center;
   }
 </style>
 <script>
@@ -149,7 +155,8 @@
     data () {
       return {
         functionPanelVisible: false,
-//        chatRecordContainerHeight: 'calc(100vh-178px)',
+//        keyboardVisible: false,
+//        inputting: false,
         contentList: [
           {
             id: '1',
@@ -166,6 +173,102 @@
             to: '1_s1',
             type: 'text',
             time: '2017-11-19 15:39:15'
+          },
+          {
+            id: '3',
+            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+            from: '1_u1',
+            to: '1_s1',
+            type: 'text',
+            time: '2017-11-19 15:39:15'
+          },
+          {
+            id: '4',
+            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+            from: '1_u1',
+            to: '1_s1',
+            type: 'text',
+            time: '2017-11-19 15:39:15'
+          },
+          {
+            id: '3',
+            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+            from: '1_u1',
+            to: '1_s1',
+            type: 'text',
+            time: '2017-11-19 15:39:15'
+          },
+          {
+            id: '4',
+            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+            from: '1_u1',
+            to: '1_s1',
+            type: 'text',
+            time: '2017-11-19 15:39:15'
+          },
+          {
+            id: '3',
+            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+            from: '1_u1',
+            to: '1_s1',
+            type: 'text',
+            time: '2017-11-19 15:39:15'
+          },
+          {
+            id: '4',
+            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+            from: '1_u1',
+            to: '1_s1',
+            type: 'text',
+            time: '2017-11-19 15:39:15'
+          },
+          {
+            id: '3',
+            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+            from: '1_u1',
+            to: '1_s1',
+            type: 'text',
+            time: '2017-11-19 15:39:15'
+          },
+          {
+            id: '4',
+            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+            from: '1_u1',
+            to: '1_s1',
+            type: 'text',
+            time: '2017-11-19 15:39:15'
+          },
+          {
+            id: '3',
+            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+            from: '1_u1',
+            to: '1_s1',
+            type: 'text',
+            time: '2017-11-19 15:39:15'
+          },
+          {
+            id: '4',
+            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+            from: '1_u1',
+            to: '1_s1',
+            type: 'text',
+            time: '2017-11-19 15:39:15'
+          },
+          {
+            id: '3',
+            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+            from: '1_u1',
+            to: '1_s1',
+            type: 'text',
+            time: '2017-11-19 15:39:15'
+          },
+          {
+            id: '4',
+            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+            from: '1_u1',
+            to: '1_s1',
+            type: 'text',
+            time: '2017-11-19 15:39:15'
           }
         ]
       }
@@ -173,6 +276,12 @@
     computed: {
       currentChatRecord () {
         return this.contentList
+      },
+      chatRecordContainerHeight () {
+        return (this.vh - (this.functionPanelVisible ? 179 : 121))
+      },
+      vh () {
+        return window.innerHeight
       }
     },
     methods: {
@@ -180,11 +289,58 @@
         if (!this.functionPanelVisible) {
           this.functionPanelVisible = true
         } else {
-//          let el = document.getElementById('text-field')
-//          el.focus()
           this.functionPanelVisible = false
         }
+      },
+      textFieldClicked () {
+        this.functionPanelVisible = false
+      },
+      scrollToBottom () {
+        let el = document.getElementById('chat-record-container')
+        if (el) {
+          el.scrollTop = el.scrollHeight
+        }
+      },
+      sendMessage () {
+        let sendMsg = this.inputText
+        if (sendMsg === '' && this.uploadList.length === 0) {
+          this.$Notice.warning({
+            title: '不可以发送空消息！'
+          })
+          return
+        }
+        let time = this.getCurrentTime()
+        // send text msg
+        if (sendMsg !== '') {
+          this.$store.commit({
+            type: 'addChatRecord',
+            content: {
+              'from': this.userId,
+              'to': this.staffId,
+              'msg': sendMsg,
+              'type': 'text',
+              'time': time
+              // 'hasSent': false
+            }
+          })
+          this.socket.emit('userMsg', {
+            staffId: this.staffId,
+            userId: this.userId,
+            token: this.token,
+            msg: sendMsg,
+            type: 'text'
+          })
+          // clear input
+          this.inputText = ''
+        }
+      },
+      getCurrentTime () {
+        let curDate = new Date()
+        return curDate.toLocaleTimeString('zh-Hans-CN')
       }
+    },
+    mounted () {
+      this.scrollToBottom()
     }
   }
 </script>

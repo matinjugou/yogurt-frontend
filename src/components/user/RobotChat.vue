@@ -262,17 +262,20 @@
         let self = this
         axios.get(self.$store.state.apiServerUrl + '/queue', {
           params: {
-            'userId': self.formItem.userId,
-            'staffType': self.formItem.staffType
+            'userId': self.userId,
+            'tags': self.formItem.staffType
           }
         }).then(response => {
           let body = response.data.data
-          if (body.code === 0) {
-            window.localStorage.setItem('staffId', body.staffId)
+          // debug
+          console.log(body)
+          if (!body || body.code !== 0) {
+            this.$Message.info('抱歉，暂时没有空闲的人工客服，请您耐心等待。')
+          } else {
+            window.localStorage.setItem('staffId', body.msg)
             self.$router.push({name: 'chat', userId: self.userId, staffId: self.staffId})
           }
         })
-        this.$Message.info('抱歉，暂时没有空闲的人工客服，请您耐心等待。')
       }
     },
     created () {
