@@ -70,51 +70,19 @@
             title: '状态',
             key: 'status',
             render: (h, params) => {
-              if (params.row.status === 1) {
-                return h('div', [
-                  h('Tag', {
-                    props: {
-                      color: 'green'
-                    },
-                    style: {
-                      marginRight: '5px'
-                    }
-                  }, '在线')
-                ])
-              } else if (params.row.status === 0) {
-                return h('div', [
-                  h('Tag', {
-                    props: {
-                      color: 'red'
-                    },
-                    style: {
-                      marginRight: '5px'
-                    }
-                  }, '离线')
-                ])
-              } else if (params.row.status === 2) {
-                return h('div', [
-                  h('Tag', {
-                    props: {
-                      color: 'yellow'
-                    },
-                    style: {
-                      marginRight: '5px'
-                    }
-                  }, '休息')
-                ])
-              } else {
-                return h('div', [
-                  h('Tag', {
-                    props: {
-                      color: 'blue'
-                    },
-                    style: {
-                      marginRight: '5px'
-                    }
-                  }, '未知')
-                ])
-              }
+              const row = params.row
+              const color = row.status === 1 ? 'green' : row.status === 2 ? 'blue' : row.status === 0 ? 'red' : 'orange'
+              const text = row.status === 1 ? '在线' : row.status === 2 ? '休息' : row.status === 0 ? '离线' : '未知'
+              return h('div', [
+                h('Tag', {
+                  props: {
+                    color: color
+                  },
+                  style: {
+                    marginRight: '5px'
+                  }
+                }, text)
+              ])
             }
           },
           {
@@ -195,6 +163,7 @@
             companyId: 1
           }
         }).then(function (response) {
+          console.log(response)
           let tmpstaffdata = []
           for (let staff of response.data.data) {
             tmpstaffdata.push({
@@ -224,6 +193,7 @@
           companyId: 1
         }
       }).then(function (response) {
+        console.log('response=', response)
         let tmpstaffdata = []
         for (let staff of response.data.data) {
           tmpstaffdata.push({

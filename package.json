@@ -24,6 +24,7 @@
     "less-loader": "^4.0.5",
     "node-emoji": "^1.8.1",
     "qs": "^6.5.1",
+    "socket.io": "^2.0.4",
     "socket.io-client": "^2.0.4",
     "vue": "^2.5.2",
     "vue-core-image-upload": "^2.3.10",
