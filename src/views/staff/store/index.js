@@ -8,6 +8,7 @@ export default new Vuex.Store({
     socketServerUrl: 'http://yogurt.magichc7.com',
     httpServerUrl: 'http://yogurt.magichc7.com/api/staff',
     fileServerUrl: 'http://123.206.22.71/api/v2/file/',
+    imageCompressUrl: 'http://123.206.22.71/api/v1/image/',
     isLogin: false,
     staffId: '',
     chatRecordList: {

@@ -327,8 +327,14 @@ export default {
     socket () {
       return this.$store.state.socket
     },
+    httpServerUrl () {
+      return this.$store.state.httpServerUrl
+    },
     fileServerUrl () {
       return this.$store.state.fileServerUrl
+    },
+    imageCompressUrl () {
+      return this.$store.state.imageCompressUrl
     },
     staffId () {
       return this.$store.state.staffId
@@ -374,19 +380,51 @@ export default {
       // TODO: update format of different types of msg
       // TODO: update time to time in userMsg
       this.socket.on('userMsg', (data) => {
-        console.log('User message: from ' + data.from + ' & msg ' + data.msg)
+        console.log('User message: from ' + data.userId + ' & msg type is ' + data.type)
         let date = new Date()
-        this.$store.commit({
-          type: 'addChatRecord',
-          userId: data.from,
-          content: {
-            'from': data.from,
-            'to': this.$store.state.staffId,
-            'msg': data.msg,
-            'type': data.type,
-            'time': date.toLocaleTimeString('zh-Hans-CN')
-          }
-        })
+        if (data.type === 'file') {
+          this.$store.commit({
+            type: 'addChatRecord',
+            userId: data.userId,
+            content: {
+              'from': data.userId,
+              'to': this.staffId,
+              'url': data.url,
+              'name': data.name,
+              'size': data.size,
+              'mimeType': data.mimeType,
+              'type': data.type,
+              'time': date.toLocaleTimeString('zh-Hans-CN')
+            }
+          })
+        } else if (data.type === 'image') {
+          this.$store.commit({
+            type: 'addChatRecord',
+            userId: data.userId,
+            content: {
+              'from': data.userId,
+              'to': this.staffId,
+              'url': data.url,
+              'compressedUrl': data.compressedUrl,
+              'type': data.type,
+              'time': date.toLocaleTimeString('zh-Hans-CN')
+            }
+          })
+        } else {
+          // type === 'text'
+          this.$store.commit({
+            type: 'addChatRecord',
+            userId: data.userId,
+            content: {
+              'from': data.userId,
+              'to': this.staffId,
+              'msg': data.msg,
+              'type': data.type,
+              'time': date.toLocaleTimeString('zh-Hans-CN')
+            }
+          })
+        }
+        // update notification badge
         if (data.from !== this.chatUserId) {
           this.$store.commit({
             type: 'addUserUnread',
@@ -508,8 +546,9 @@ export default {
       }
       // send files
       if (this.uploadList.length) {
-        for (let index of this.uploadList.keys()) {
-          let fileType = this.uploadList[index].response.type.startsWith('image') ? 'image' : 'file'
+        for (const index of this.uploadList.keys()) {
+          const file = this.uploadList[index]
+          let fileType = file.response.type.startsWith('image') ? 'image' : 'file'
           if (fileType === 'image') {
             this.$store.commit({
               type: 'addChatRecord',
@@ -517,13 +556,20 @@ export default {
               content: {
                 'from': this.staffId,
                 'to': this.chatUserId,
-                'url': this.uploadList[index].response.data,
-                // TODO: change it with compressed url
-                'compressedUrl': this.uploadList[index].response.data,
+                'url': file.response.data,
+                'compressedUrl': file.response.compressedUrl ? file.response.compressedUrl : file.response.data,
                 'type': fileType,
                 'time': date.toLocaleTimeString('zh-Hans-CN')
                 // 'hasSent': false
               }
+            })
+            this.socket.emit('staffMsg', {
+              'staffId': this.staffId,
+              'userId': this.chatUserId,
+              'token': window.localStorage.getItem('token'),
+              'type': fileType,
+              'url': file.response.data,
+              'compressedUrl': file.response.compressedUrl ? file.response.compressedUrl : file.response.data
             })
           } else {
             this.$store.commit({
@@ -532,24 +578,26 @@ export default {
               content: {
                 'from': this.staffId,
                 'to': this.chatUserId,
-                'url': this.uploadList[index].response.data,
-                'name': this.uploadList[index].name,
-                'size': (this.uploadList[index].size > 1024) ? (this.uploadList[index].size >> 10) : 1,
-                'mimeType': this.uploadList[index].response.type,
+                'url': file.response.data,
+                'name': file.name,
+                'size': (file.size > 1024) ? (file.size >> 10) : 1,
+                'mimeType': file.response.type,
                 'type': fileType,
                 'time': date.toLocaleTimeString('zh-Hans-CN')
                 // 'hasSent': false
               }
             })
+            this.socket.emit('staffMsg', {
+              'staffId': this.staffId,
+              'userId': this.chatUserId,
+              'token': window.localStorage.getItem('token'),
+              'type': fileType,
+              'url': file.response.data,
+              'name': file.name,
+              'size': (file.size > 1024) ? (file.size >> 10) : 1,
+              'mimeType': file.response.type
+            })
           }
-          // TODO: update socket api
-          this.socket.emit('staffMsg', {
-            'staffId': this.staffId,
-            'userId': this.chatUserId,
-            'token': window.localStorage.getItem('token'),
-            'msg': this.uploadList[index].response.data,
-            'type': fileType
-          })
         }
         // clear files
         this.$refs.upload.clearFiles()
@@ -589,6 +637,18 @@ export default {
       this.$Notice.success({
         title: '文件 ' + file.name + ' 上传成功'
       })
+      if (response.type.startsWith('image')) {
+        console.log(response.data)
+        axios.post(this.imageCompressUrl, {
+          fileUrl: response.data
+        }).then(response => {
+          file.response['compressedUrl'] = response.data.data
+          console.log(response)
+        }).catch(error => {
+          console.log('Get compressed image url failed!')
+          console.log(error)
+        })
+      }
       console.log(this.uploadList)
     },
     getFocus () {
@@ -659,7 +719,7 @@ export default {
   },
   created () {
     // update user queue
-    axios.get(this.$store.state.httpServerUrl + '/queue', {
+    axios.get(this.httpServerUrl + '/queue', {
       params: {
         staffId: window.localStorage.getItem('id'),
         token: window.localStorage.getItem('token')

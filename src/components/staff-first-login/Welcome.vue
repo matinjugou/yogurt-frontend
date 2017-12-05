@@ -25,8 +25,15 @@ export default {
   methods: {
     gotoNextStep () {
       this.$store.commit('addCurrent')
+      this.$store.commit('rightDirection')
       this.$router.push('/add-info')
     }
+  },
+  created () {
+    this.$store.commit({
+      type: 'changeCurrent',
+      current: 0
+    })
   }
 }
 </script>
@@ -38,7 +45,10 @@ export default {
   text-align: center;
 }
 .welcome-message {
-  margin: 20% 0 20% 0;
+  height: 45vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .bottom-button {
   display: flex;
