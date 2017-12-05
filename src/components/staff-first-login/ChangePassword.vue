@@ -1,17 +1,17 @@
 <template>
-  <div class="email-verify">
-    <h1>这里是邮件验证界面</h1>
+  <div class="change-password">
+    <h1>这里是修改登录密码界面</h1>
     <div class="bottom-button">
       <Button type="error" icon="chevron-left" @click="gotoPrevStep">上一步</Button>
       <div class="horizontal-spacing"></div>
-      <Button type="success" icon="chevron-right" @click="gotoNextStep">下一步</Button>
+      <Button type="success" icon="chevron-right" @click="gotoNextStep">注册</Button>
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'EmailVerify',
+  name: 'ChangePassword',
   data () {
     return {
       msg: 'Welcome to Your Vue.js App'
@@ -20,19 +20,27 @@ export default {
   methods: {
     gotoPrevStep () {
       this.$store.commit('subCurrent')
-      this.$router.push('/upload-avatar')
+      this.$store.commit('leftDirection')
+      this.$router.push('/email-validate')
     },
     gotoNextStep () {
       this.$store.commit('addCurrent')
+      this.$store.commit('rightDirection')
       this.$router.push('/success')
     }
+  },
+  created () {
+    this.$store.commit({
+      type: 'changeCurrent',
+      current: 4
+    })
   }
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.email-verify {
+.change-password{
   width: 100%;
   text-align: center;
 }

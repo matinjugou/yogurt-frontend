@@ -205,7 +205,7 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
-  background: url(assets/login_bg.svg) fixed no-repeat;
+  background: url(/static/login_bg.png) fixed no-repeat;
   background-size: cover;
 }
 .login-left {
