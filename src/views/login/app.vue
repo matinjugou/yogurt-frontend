@@ -125,7 +125,7 @@ export default {
             window.location.href = this.managerBackUrl
           }
         } else if (body.code === 2 && type === 'staff') {
-          window.location.href = 'staff-first-login?staffId=' + username + '&token=' + body.token
+          window.location.href = window.location.origin + '/staff-first-login?staffId=' + username + '&token=' + body.token
         } else {
           // error login
           this.$Notice.error({
@@ -146,7 +146,10 @@ export default {
     }
   },
   created () {
+    this.staffBackUrl = window.location.origin + '/' + this.staffBackUrl
+    this.managerBackUrl = window.location.origin + '/' + this.managerBackUrl
     // handle url params
+    // window.localStorage.setItem('token', '')
     let params = lib.getUrlParams(window.location.href)
     if (typeof params.backUrl === 'string') {
       if (params.backUrl.indexOf('staff') >= 0) {
@@ -202,8 +205,8 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
-  background: url(assets/login_bg.png) fixed no-repeat;
-  background-size: 100% 100%;
+  background: url(assets/login_bg.svg) fixed no-repeat;
+  background-size: cover;
 }
 .login-left {
   width: 100%;

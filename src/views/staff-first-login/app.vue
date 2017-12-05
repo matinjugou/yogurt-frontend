@@ -75,8 +75,8 @@ export default {
   left: 0;
   width: 100%;
   height: 100vh;
-  background: url(assets/login_bg.png) fixed no-repeat;
-  background-size: 100% 100%;
+  background: url(assets/login_bg.svg) fixed no-repeat;
+  background-size: cover;
   filter: blur(15px);
 }
 .first-login-bg-cover {
