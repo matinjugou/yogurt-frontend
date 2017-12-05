@@ -2,8 +2,11 @@
   <div class="success">
     <h1>这里是注册成功界面</h1>
     <div class="bottom-button">
+      <!-- only for debug use -->
       <Button type="error" icon="chevron-left" @click="gotoPrevStep">上一步</Button>
       <div class="horizontal-spacing"></div>
+      <!-- only for debug use -->
+
       <Button type="success" icon="chevron-right" @click="gotoLoginPage">返回登录页面</Button>
     </div>
   </div>
@@ -20,11 +23,18 @@ export default {
   methods: {
     gotoPrevStep () {
       this.$store.commit('subCurrent')
-      this.$router.push('/email-verify')
+      this.$store.commit('leftDirection')
+      this.$router.push('/change-password')
     },
     gotoLoginPage () {
       // TODO: return to login page
     }
+  },
+  created () {
+    this.$store.commit({
+      type: 'changeCurrent',
+      current: 5
+    })
   }
 }
 </script>
