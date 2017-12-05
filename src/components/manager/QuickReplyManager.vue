@@ -28,8 +28,32 @@
                    placeholder="Enter something..."
                    style="margin-bottom: 10px"/>
           </Modal>
+          <Modal
+            v-model="changePhraseModal"
+            title="修改短语"
+            @on-ok="changePhraseModalOk"
+            @on-cancel="changePhraseModalCancel">
+            <h4 style="margin-bottom: 7px">
+              短语
+            </h4>
+            <span><b>当前短语：</b>{{ oldPhrase }}</span>
+            <Input v-model="newPhrase"
+                   placeholder="Enter something..."
+                   style="margin-bottom: 10px"
+            />
+            <h4 style="margin-bottom: 7px">
+              句子
+            </h4>
+            <span><b>当前句子：</b>{{ oldSentence }}</span>
+            <Input v-model="newSentence"
+                   ref="changeNewSentenceInput"
+                   placeholder="Enter something..."
+                   style="margin-bottom: 10px"/>
+          </Modal>
         </Row>
-        <Table border :columns="tablecolumns" :data="replies"></Table>
+        <Table border ref="selection" :columns="tablecolumns" :data="replies"
+               @on-selection-change="changeSelected"></Table>
+        <Button :disabled="selectedEmpty" type="error" style="margin-top: 7px" @click="deleteSelected">删除</Button>
       </div>
     </div>
     <div class="layout-copy">
@@ -39,14 +63,24 @@
 </template>
 
 <script>
+  import axios from 'axios'
   export default {
     name: 'quickreplymanager',
     data () {
       return {
         newPhraseModal: false,
+        changePhraseModal: false,
         newPhrase: '',
         newSentence: '',
+        oldPhrase: '',
+        oldSentence: '',
+        selected: [],
         tablecolumns: [
+          {
+            type: 'selection',
+            width: 60,
+            align: 'center'
+          },
           {
             title: '短语',
             key: 'phrase'
@@ -67,12 +101,22 @@
                   },
                   style: {
                     marginRight: '5px'
+                  },
+                  on: {
+                    click: () => {
+                      this.editPair(params.index)
+                    }
                   }
                 }, '编辑'),
                 h('Button', {
                   props: {
                     type: 'error',
                     size: 'small'
+                  },
+                  on: {
+                    click: () => {
+                      this.deletePair(params.index)
+                    }
                   }
                 }, '删除')
               ])
@@ -80,30 +124,181 @@
           }
         ],
         replies: [
-          {
-            phrase: '#久等',
-            sentence: '对不起，让您久等了'
-          },
-          {
-            phrase: '#再见',
-            sentence: '谢谢您对我们的支持，祝您生活愉快'
-          }
         ]
+      }
+    },
+    computed: {
+      selectedEmpty: function () {
+        return this.selected.length === 0
       }
     },
     methods: {
       newPhraseModalOk () {
         this.$Message.info('Clicked ok')
         if (this.newPhrase !== '' && this.newSentence !== '') {
-          this.replies.push({
-            phrase: this.newPhrase,
-            sentence: this.newSentence
+          const self = this
+          axios.post('http://yogurt.magichc7.com/api/manager/quick-reply/public', {
+            companyId: 1,
+            phrase: self.newPhrase,
+            sentence: self.newSentence
+          }).then(function (response) {
+            axios.get('http://yogurt.magichc7.com/api/manager/quick-reply/public', {
+              params: {
+                companyId: 1
+              }
+            }).then(function (response) {
+              self.replies = []
+              for (const reply of response.data.data) {
+                self.replies.push({
+                  phrase: reply.phrase,
+                  sentence: reply.sentence
+                })
+              }
+            }).catch(function (error) {
+              self.$Message.error(error)
+            })
+          }).catch(function (error) {
+            self.$Message.error(error)
           })
         }
       },
       newPhraseModalCancel () {
+        self.$Message.info('Clicked cancel')
+      },
+      changePhraseModalOk () {
+        if (this.newPhrase !== '' && this.newSentence !== '') {
+          const self = this
+          axios.put('http://yogurt.magichc7.com/api/manager/quick-reply/public', {
+            companyId: 1,
+            oldPhrase: self.oldPhrase,
+            oldSentence: self.oldSentence,
+            newPhrase: self.newPhrase,
+            newSentence: self.newSentence
+          }).then(function (response) {
+            console.log(response)
+            axios.get('http://yogurt.magichc7.com/api/manager/quick-reply/public', {
+              params: {
+                companyId: 1
+              }
+            }).then(function (response) {
+              self.replies = []
+              for (const reply of response.data.data) {
+                self.replies.push({
+                  phrase: reply.phrase,
+                  sentence: reply.sentence
+                })
+              }
+              self.$Message.info('修改成功！')
+            }).catch(function (error) {
+              self.$Message.error(error)
+            })
+          }).catch(function (error) {
+            self.$Message.error(error)
+          })
+        }
+      },
+      changePhraseModalCancel () {
         this.$Message.info('Clicked cancel')
+      },
+      changeSelected (selection, row) {
+        this.selected = selection
+        console.log(this.selected)
+      },
+      deleteSelected () {
+        const pairs = []
+        const self = this
+        for (let select of this.selected) {
+          pairs.push({
+            phrase: select.phrase,
+            sentence: select.sentence
+          })
+        }
+        axios({
+          method: 'delete',
+          url: 'http://yogurt.magichc7.com/api/manager/quick-reply/public',
+          data: {
+            companyId: 1,
+            pairs: pairs
+          }
+        }).then(function (response) {
+          axios.get('http://yogurt.magichc7.com/api/manager/quick-reply/public', {
+            params: {
+              companyId: 1
+            }
+          }).then(function (response) {
+            self.replies = []
+            for (const reply of response.data.data) {
+              self.replies.push({
+                phrase: reply.phrase,
+                sentence: reply.sentence
+              })
+            }
+          }).catch(function () {
+            self.$Message.error('服务出现故障，请重试一下~')
+          })
+          self.$Message.info('删除成功！')
+        }).catch(function () {
+          self.$Message.error('服务出现故障，请重试一下~')
+        })
+      },
+      editPair (index) {
+        this.oldPhrase = this.replies[index].phrase
+        this.oldSentence = this.replies[index].sentence
+        this.changePhraseModal = true
+      },
+      deletePair (index) {
+        const pairs = []
+        const self = this
+        pairs.push({
+          phrase: self.replies[index].phrase,
+          sentence: self.replies[index].sentence
+        })
+        axios({
+          method: 'delete',
+          url: 'http://yogurt.magichc7.com/api/manager/quick-reply/public',
+          data: {
+            companyId: 1,
+            pairs: pairs
+          }
+        }).then(function (response) {
+          axios.get('http://yogurt.magichc7.com/api/manager/quick-reply/public', {
+            params: {
+              companyId: 1
+            }
+          }).then(function (response) {
+            self.replies = []
+            for (const reply of response.data.data) {
+              self.replies.push({
+                phrase: reply.phrase,
+                sentence: reply.sentence
+              })
+            }
+          }).catch(function () {
+            self.$Message.error('服务出现故障，请重试一下~')
+          })
+          self.$Message.info('删除成功！')
+        }).catch(function () {
+          self.$Message.error('服务出现故障，请重试一下~')
+        })
       }
+    },
+    mounted: function () {
+      const self = this
+      axios.get('http://yogurt.magichc7.com/api/manager/quick-reply/public', {
+        params: {
+          companyId: 1
+        }
+      }).then(function (response) {
+        self.replies = []
+        for (const reply of response.data.data) {
+          self.replies.push({
+            phrase: reply.phrase,
+            sentence: reply.sentence
+          })
+        }
+      }).catch(function (error) {
+        self.$Message.error(error)
+      })
     }
   }
 </script>

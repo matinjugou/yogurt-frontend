@@ -23,27 +23,31 @@
     name: 'myavatar',
     data () {
       return {
-        hovered: false,
-        imgsrc: 'http://b.hiphotos.baidu.com/image/pic/item/a6efce1b9d16fdfa56117f9dbe8f8c5494ee7b40.jpg'
+        hovered: false
       }
     },
-    props: ['btnName', 'src'],
+    props: ['btnName', 'imgsrc'],
     methods: {
       uploadAvatar (file) {
-        let formData = new FormData()
+        const formData = new FormData()
         formData.append('file', file)
-        formData.append('fileType', 'avatar')
-        formData.append('validTime', '1')
-        let config = {
+        formData.append('validTime', -1)
+        const config = {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
         }
-        let self = this
-        axios.post('http://123.206.22.71/api/v1/file/', formData, config)
+        const self = this
+        axios.post(this.$store.state.fileServerUrl, formData, config)
           .then(function (res) {
             console.log(res)
-            self.imgsrc = res.data.data
+            const data = res.data.data
+            axios.put(self.$store.state.httpServerUrl + '/account-info', {
+              managerId: self.$store.state.managerId,
+              picUrl: data
+            }).then(function () {
+              self.$emit('avatarChanged')
+            })
           })
         return false
       }
