@@ -85,18 +85,6 @@
                     </div>
                   </TabPane>
                 </Tabs>
-                
-                <!-- <div class="login-button"> -->
-                  <!-- <div class="login-button-item"> -->
-                    <!-- TODO: add forget password page and link to it-->
-                    <!-- <a class="login-link-text" href="#">忘记密码？</a> -->
-                  <!-- </div> -->
-                  <!-- <div class="login-button-item "> -->
-                    <!-- <Button type="success" size="large" @click="login"> -->
-                      <!-- <span class="login-button-text">登录系统</span> -->
-                    <!-- </Button> -->
-                  <!-- </div> -->
-                <!-- </div> -->
               </div>
             </div>
           </transition>
@@ -145,7 +133,6 @@ export default {
   },
   methods: {
     login (name) {
-      console.log(this[name])
       this.$refs[name].validate((valid) => {
         if (valid) {
           let type = this.type

@@ -1,28 +1,22 @@
 <template>
   <div class="add-info">
+    
     <div class="info-input">
-      <div class="single-input">
-        <div class="single-input-element title ">姓名*：</div>
-        <div class="single-input-element content" :class="{'wrong': wrongInput.indexOf('name') >= 0}">
-          <Input autofocus v-model="name" size="large" placeholder="你的姓名" @on-keyup.enter="gotoNextStep"></Input>
-        </div>
-        <div class="single-input-element single-input-wrong" v-if="wrongInput.indexOf('name') >= 0">姓名为必填项</div>
-      </div>
-      <div class="single-input">
-        <div class="single-input-element title">昵称*：</div>
-        <div class="single-input-element content" :class="{'wrong': wrongInput.indexOf('nickName') >= 0}">
-          <Input v-model="nickName" size="large" placeholder="你的昵称" @on-keyup.enter="gotoNextStep"></Input>
-        </div>
-        <div class="single-input-element single-input-wrong" v-if="wrongInput.indexOf('nickName') >= 0">昵称为必填项</div>
-      </div>
-      <div class="single-input">
-        <div class="single-input-element title">手机号*：</div>
-        <div class="single-input-element content" :class="{'wrong': wrongInput.indexOf('phoneNumber') >= 0}">
-          <Input v-model="phoneNumber" size="large" placeholder="你的手机号" @on-keyup.enter="gotoNextStep"></Input>
-        </div>
-        <div class="single-input-element single-input-wrong" v-if="wrongInput.indexOf('phoneNumber') >= 0">手机号为必填项</div>
+      <div class="info-input-content">
+        <Form ref="formInfo" label-position="right" :label-width="100" :model="formInfo" :rules="ruleInfo">
+          <FormItem prop="name" label="姓名">
+            <Input autofocus v-model="formInfo.name" size="large" placeholder="你的姓名" @on-keyup.enter="gotoNextStep"></Input>
+          </FormItem>
+          <FormItem prop="nickName" label="昵称">
+            <Input v-model="formInfo.nickName" size="large" placeholder="你的昵称" @on-keyup.enter="gotoNextStep"></Input>
+          </FormItem>
+          <FormItem prop="phoneNumber" label="手机号">
+            <Input v-model="formInfo.phoneNumber" size="large" placeholder="你的手机号" @on-keyup.enter="gotoNextStep"></Input>
+          </FormItem>
+        </Form>
       </div>
     </div>
+
     <div class="bottom-button">
       <Button type="error" icon="chevron-left" @click="gotoPrevStep">上一步</Button>
       <div class="horizontal-spacing"></div>
@@ -36,48 +30,63 @@ export default {
   name: 'AddInfo',
   data () {
     return {
-      name: '',
-      nickName: '',
-      phoneNumber: '',
-      wrongInput: []
+      formInfo: {
+        name: '',
+        nickName: '',
+        phoneNumber: ''
+      },
+      ruleInfo: {
+        name: [
+          {
+            required: true,
+            message: '姓名不能为空',
+            trigger: 'blur'
+          }
+        ],
+        nickName: [
+          {
+            required: true,
+            message: '昵称不能为空',
+            trigger: 'blur'
+          }
+        ],
+        phoneNumber: [
+          {
+            required: true,
+            message: '手机号不能为空',
+            trigger: 'blur'
+          },
+          {
+            pattern: '^1\\d{10}$',
+            message: '手机号格式有误',
+            trigger: 'blur'
+          }
+        ]
+      }
     }
   },
   methods: {
-    checkInputValid () {
-      this.wrongInput = []
-      let flag = 0
-      if (this.name === '') {
-        this.wrongInput.push('name')
-        flag++
-      }
-      if (this.nickName === '') {
-        this.wrongInput.push('nickName')
-        flag++
-      }
-      if (this.phoneNumber === '') {
-        this.wrongInput.push('phoneNumber')
-        flag++
-      }
-      return flag === 0
-    },
     gotoPrevStep () {
       this.$store.commit('subCurrent')
       this.$store.commit('leftDirection')
       this.$router.push('/')
     },
     gotoNextStep () {
-      if (!this.checkInputValid()) {
-        return
-      }
-      this.$store.commit({
-        type: 'changeInfo',
-        name: this.name,
-        nickName: this.nickName,
-        phoneNumber: this.phoneNumber
+      this.$refs.formInfo.validate((valid) => {
+        if (valid) {
+          this.$store.commit({
+            type: 'changeInfo',
+            name: this.formInfo.name,
+            nickName: this.formInfo.nickName,
+            phoneNumber: this.formInfo.phoneNumber
+          })
+          this.$store.commit('addCurrent')
+          this.$store.commit('rightDirection')
+          this.$router.push('/upload-avatar')
+        } else {
+          // not satisfy the form format
+        }
       })
-      this.$store.commit('addCurrent')
-      this.$store.commit('rightDirection')
-      this.$router.push('/upload-avatar')
     }
   },
   created () {
@@ -85,9 +94,9 @@ export default {
       type: 'changeCurrent',
       current: 1
     })
-    this.name = this.$store.state.name
-    this.nickName = this.$store.state.nickName
-    this.phoneNumber = this.$store.state.phoneNumber
+    this.formInfo.name = this.$store.state.name
+    this.formInfo.nickName = this.$store.state.nickName
+    this.formInfo.phoneNumber = this.$store.state.phoneNumber
   }
 }
 </script>
@@ -103,26 +112,9 @@ export default {
   height: 45vh;
   padding-top: 10vh;
 }
-.info-input  .wrong{
-  border: 1px solid red;
-  border-radius: 4px;
-}
-.single-input-wrong {
-  color: red;
-  font-size: 14px;
-  width: 7em;
-}
-.single-input {
-  margin-bottom: 35px;
-}
-.single-input-element {
-  display: inline-flex;
-  margin-right: 20px;
-}
-.single-input > .title {
-  font-size: 18px;
-  width: 100px;
-  justify-content: flex-end;
+.info-input-content {
+  width: 100%;
+  padding: 0 30% 0 30%;
 }
 .bottom-button {
   display: flex;
@@ -131,5 +123,11 @@ export default {
 }
 .horizontal-spacing {
   width: 30px;
+}
+</style>
+
+<style>
+.ivu-form .ivu-form-item-label {
+  font-size: 16px;
 }
 </style>
