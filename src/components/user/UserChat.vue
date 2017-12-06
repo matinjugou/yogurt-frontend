@@ -34,19 +34,17 @@
                   {{ singleRecord.msg }}
                 </div>
                 <div v-else-if="singleRecord.type === 'image'" class="content chat-single-record" style="cursor: pointer">
-                  <img class="chat-image" :src="singleRecord.fileUrl" alt="聊天图片" @click="showLargeImage(singleRecord.fileUrl)">
+                  <img class="chat-image" :src="singleRecord.compressedUrl" alt="聊天图片" @click="showLargeImage(singleRecord.url)">
                 </div>
-                <div v-else-if="singleRecord.type === 'file'" @click="singleRecord.from === staffId ? downloadFile() : showLocalFile()" style="cursor: pointer" class="content chat-single-record">
-                    <svg class="file-icon">
-                      <use :xlink:href="getFileIconName(singleRecord.fileName)" />
-                    </svg>
-                  <div style="float: right">
-                    <div class="file-name">
-                      {{ singleRecord.fileName }}
+                <div v-else-if="singleRecord.type === 'file'" :class="singleRecord.type" @click="singleRecord.from === staffId ? downloadFile() : showLocalFile()" style="cursor: pointer" class="content chat-single-record">
+                    <div class="chat-file-prepend">
+                      <svg class="file-icon">
+                        <use :xlink:href="getFileIconName(singleRecord.name)" />
+                      </svg>
                     </div>
-                    <div class="file-size">
-                      {{ singleRecord.size }}KB
-                    </div>
+                  <div class="chat-file-info">
+                    {{ singleRecord.name.length > 15 ? singleRecord.name.slice(0, 15) + '...' : singleRecord.name }} <br />
+                    {{ singleRecord.size}}KB
                   </div>
                 </div>
               </div>
@@ -199,15 +197,15 @@
     margin-right: 10px;
   }
   .chat-msg-body > .content {
-    display: inline-block;
     position: relative;
     padding: 0 10px;
-    max-width: calc(100vw - 40px);
+    max-width: calc(100vw - 50px);
     min-height: 30px;
     line-height: 2.5;
     font-size: 16px;
     text-align: left;
     word-break: break-all;
+    word-wrap: break-word;
     background-color: #FFF;
     border-radius: 4px;
     box-shadow: 0 1px 1px rgba(0,0,0,.1);
@@ -226,6 +224,9 @@
   .from-me > .avatar {
     float: right;
     margin: 0 0 0 10px;
+  }
+  .from-me > .chat-single-record {
+    margin-right: 0;
   }
   .from-me > .content {
     color: #ffffff;
@@ -262,13 +263,27 @@
     width: 140px;
     overflow: hidden;
   }
+  .chat-msg-body > .file {
+    padding: 10px 5px 0px 5px;
+    cursor: pointer;
+    width: 260px;
+  }
+  .chat-file-prepend {
+    max-width: 70px;
+    max-height: 70px;
+    margin-right: 10px;
+  }
   .file-icon
   {
-    width: 60px;
-    height: 60px;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    vertical-align: middle;
+    /*width: 60px;*/
+    /*height: 60px;*/
+    /*margin-top: 10px;*/
+    /*margin-bottom: 10px;*/
+    /*vertical-align: middle;*/
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    cursor: pointer;
   }
   .chat-input-actions{
     height: 50px;
@@ -413,24 +428,24 @@
             custom: '自定义'
           }
         },
-        contentList: [
-          {
-            id: '1',
-            msg: 'Hello, I\'m staff_1.',
-            from: '1_s1',
-            to: '1_u1',
-            type: 'text',
-            time: '2017-11-19 15:39:14'
-          },
-          {
-            id: '2',
-            msg: 'Hello, I\'m user.',
-            from: '1_u1',
-            to: '1_s1',
-            type: 'text',
-            time: '2017-11-19 15:39:15'
-          }
-        ],
+//        contentList: [
+//          {
+//            id: '1',
+//            msg: 'Hello, I\'m staff_1.',
+//            from: '1_s1',
+//            to: '1_u1',
+//            type: 'text',
+//            time: '2017-11-19 15:39:14'
+//          },
+//          {
+//            id: '2',
+//            msg: 'Hello, I\'m user.',
+//            from: '1_u1',
+//            to: '1_s1',
+//            type: 'text',
+//            time: '2017-11-19 15:39:15'
+//          }
+//        ],
         imgFileIndex: -1,
         fileIconMap: {
           // compressed file
@@ -485,6 +500,9 @@
       },
       token () {
         return window.localStorage.getItem('token')
+      },
+      chatState () {
+        return window.localStorage.getItem('chatState')
       },
       readyToSend () {
         for (let file of this.uploadList) {
@@ -556,7 +574,7 @@
                 content: {
                   'from': this.userId,
                   'to': this.staffId,
-                  'fileUrl': fileUrl,
+                  'url': fileUrl,
                   'compressedUrl': compressedUrl,
                   'type': fileType,
                   'time': time
@@ -581,8 +599,8 @@
                 content: {
                   'from': this.userId,
                   'to': this.staffId,
-                  'fileUrl': this.uploadList[index].response.data,
-                  'fileName': this.uploadList[index].name,
+                  'url': this.uploadList[index].response.data,
+                  'name': this.uploadList[index].name,
                   'size': (this.uploadList[index].size > 1024) ? (this.uploadList[index].size >> 10) : 1,
                   'mimeType': this.uploadList[index].response.type,
                   'type': fileType,
@@ -722,6 +740,8 @@
         }
       },
       showLargeImage (src) {
+        // debug
+        console.log('show large image, src: ' + src)
         this.showLargeImageModal = true
         this.largeImageSrc = src
       }
@@ -754,6 +774,9 @@
         console.log('Register result: code: ' + data['code'] + ', msg: ' + data['msg'])
       })
       this.socket.on('staffMsg', (data) => {
+        // debug
+        console.log(data)
+        console.log(self.currentChatRecord)
         let newMsg = {
           'time': data.time,
           'from': data.staffId,
@@ -763,15 +786,20 @@
         if (data.type === 'text') {
           newMsg.msg = data.msg
         } else if (data.type === 'file') {
-          newMsg.fileUrl = data.url
-          newMsg.fileName = data.name
+          newMsg.url = data.url
+          newMsg.name = data.name
           newMsg.size = data.size
           newMsg.mimeType = data.mimeType
         } else {
-          newMsg.fileUrl = data.url
+          newMsg.url = data.url
           newMsg.compressedUrl = data.compressedUrl
         }
-        this.currentChatRecord.push(newMsg)
+        self.$store.commit({
+          type: 'addChatRecord',
+          content: newMsg
+        })
+        // debug
+        console.log(self.currentChatRecord)
       })
       this.socket.on('sendResult', (data) => {
         // debug

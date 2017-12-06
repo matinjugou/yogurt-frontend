@@ -41,6 +41,11 @@
         }
       }
     },
+    computed: {
+      chatState () {
+        return window.localStorage.getItem('chatState')
+      }
+    },
     methods: {
       submit () {
         if (!this.isValidInputs()) {
@@ -81,7 +86,12 @@
 //        } else {
 //          this.$router.push({name: 'mobile'})
 //        }
-        this.$router.push({name: 'robot'})
+        if (this.chatState !== 'chat') {
+          window.localStorage.setItem('chatState', 'robot')
+          this.$router.push({name: 'robot'})
+        } else {
+          this.$router.push({name: 'chat'})
+        }
       }
     },
     created () {

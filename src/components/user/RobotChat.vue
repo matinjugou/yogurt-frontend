@@ -216,6 +216,9 @@
       },
       token () {
         return window.localStorage.getItem('token')
+      },
+      chatState () {
+        return window.localStorage.getItem('chatState')
       }
     },
     methods: {
@@ -259,7 +262,7 @@
         el.scrollTop = el.scrollHeight
       },
       switchToHuman () {
-        let self = this
+        const self = this
         axios.get(self.$store.state.apiServerUrl + '/queue', {
           params: {
             'userId': self.userId,
@@ -272,8 +275,11 @@
           if (!body || body.code !== 0) {
             this.$Message.info('抱歉，暂时没有空闲的人工客服，请您耐心等待。')
           } else {
+            // tell staff to update queue
+            self.socket.emit('updateQueue', {staffId: body.msg, token: self.token})
             window.localStorage.setItem('staffId', body.msg)
-            self.$router.push({name: 'chat', userId: self.userId, staffId: self.staffId})
+            window.localStorage.setItem('chatState', 'chat')
+            self.$router.push({name: 'chat', userId: self.userId, staffId: body.msg})
           }
         })
       }

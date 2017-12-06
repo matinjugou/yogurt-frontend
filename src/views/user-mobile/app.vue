@@ -3,7 +3,7 @@
     <v-toolbar color="indigo" dark fixed app height="56px">
       <v-toolbar-title>xxx公司</v-toolbar-title>
     </v-toolbar>
-    <v-content style="overflow: hidden">
+    <v-content>
       <v-container id="chat-record-container" :class="{'no-function-panel': !functionPanelVisible, 'with-function-panel': functionPanelVisible}">
         <!--<v-container :class="{'no-function-panel': !functionPanelVisible, 'with-function-panel': functionPanelVisible}" id="chat-record-container">-->
         <ul style="list-style: none">
@@ -62,25 +62,6 @@
           </v-flex>
         </v-layout>
       </v-container>
-      <!--<container v-show="functionPanelVisible" class="function-panel-container">-->
-      <!--<v-layout>-->
-      <!--<v-flex p>-->
-      <!--<v-btn flat>-->
-      <!--<v-icon>tag_faces</v-icon>表情-->
-      <!--</v-btn>-->
-      <!--</v-flex>-->
-      <!--<v-flex p>-->
-      <!--<v-btn flat>-->
-      <!--<v-icon>folder_open</v-icon>文件-->
-      <!--</v-btn>-->
-      <!--</v-flex>-->
-      <!--<v-flex p>-->
-      <!--<v-btn flat>-->
-      <!--<v-icon>chat</v-icon>历史-->
-      <!--</v-btn>-->
-      <!--</v-flex>-->
-      <!--</v-layout>-->
-      <!--</container>-->
     </v-content>
   </v-app>
 </template>
@@ -399,14 +380,24 @@
       })
       // socket messages
       this.socket.on('staffMsg', (data) => {
+        // debug
+        console.log(data)
+        console.log(self.currentChatRecord)
         let newMsg = {
           'time': data.time,
           'from': data.staffId,
           'to': data.userId,
-          'type': data.type,
-          'msg': data.msg
+          'type': data.type
         }
-        this.currentChatRecord.push(newMsg)
+        if (data.type === 'text') {
+          newMsg.msg = data.msg
+        }
+        self.$store.commit({
+          type: 'addChatRecord',
+          content: newMsg
+        })
+        // debug
+        console.log(self.currentChatRecord)
       })
       this.socket.on('sendResult', (data) => {
         // TO DO
