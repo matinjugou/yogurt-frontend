@@ -43,7 +43,7 @@ export default {
   methods: {
     // TODO: add methods
   },
-  created () {
+  beforeCreate () {
     // handle url params
     let params = lib.getUrlParams(window.location.href)
     if (typeof params.staffId === 'string') {

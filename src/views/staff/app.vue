@@ -102,7 +102,7 @@ export default {
       }
     }
   },
-  created () {
+  beforeCreate () {
     this.$store.commit('buildSocketConnect')
     // check if the token is valid
     let storeType = window.localStorage.getItem('type')

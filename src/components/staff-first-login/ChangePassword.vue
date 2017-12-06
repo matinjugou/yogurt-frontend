@@ -4,11 +4,15 @@
       <div class="password-input-content">
         <Form ref="formPassword" label-position="right" :label-width="100" :model="formPassword" :rules="rulePassword">
           <FormItem prop="oldPassword" label="旧密码">
-            <Input autofocus type="password" v-model="formPassword.oldPassword" size="large" placeholder="旧密码" @on-keyup.enter="register"></Input>
+            <Input autofocus type="password" v-model="formPassword.oldPassword" size="large" placeholder="旧密码"></Input>
           </FormItem>
           <div class="vertical-spacing"></div>
           <FormItem prop="newPassword" label="新密码">
-            <Input type="password" v-model="formPassword.newPassword" size="large" placeholder="新密码" @on-keyup.enter="register"></Input>
+            <Input type="password" v-model="formPassword.newPassword" size="large" placeholder="新密码"></Input>
+          </FormItem>
+          <div class="vertical-spacing"></div>
+          <FormItem prop="surePassword" label="确认密码">
+            <Input type="password" v-model="formPassword.surePassword" size="large" placeholder="确认密码" @on-keyup.enter="register"></Input>
           </FormItem>
         </Form>
       </div>
@@ -29,7 +33,8 @@ export default {
     return {
       formPassword: {
         oldPassword: '',
-        newPassword: ''
+        newPassword: '',
+        surePassword: ''
       },
       rulePassword: {
         oldPassword: [
@@ -43,6 +48,13 @@ export default {
           {
             required: true,
             message: '新密码不能为空',
+            trigger: 'blur'
+          }
+        ],
+        surePassword: [
+          {
+            required: true,
+            message: '确认密码不能为空',
             trigger: 'blur'
           }
         ]
@@ -74,6 +86,12 @@ export default {
       this.$router.push('/email-validate')
     },
     register () {
+      if (this.formPassword.newPassword !== this.formPassword.surePassword) {
+        this.$Notice.error({
+          title: '确认密码与密码不同'
+        })
+        return
+      }
       this.$refs.formPassword.validate((valid) => {
         if (valid) {
           axios.post(this.httpServerUrl + '/login', {
@@ -83,7 +101,6 @@ export default {
             let body = response.data.data
             if (body.code === 0 || body.code === 2) {
               if (this.checkAllInfoNotEmpty()) {
-                // TODO: post information to server
                 axios.post(this.httpServerUrl + '/account-info', {
                   staffId: this.staffId,
                   name: this.$store.state.name,
@@ -152,14 +169,14 @@ export default {
 .password-input {
   width: 100%;
   height: 45vh;
-  padding-top: 12vh;
+  padding-top: 9vh;
 }
 .password-input-content {
   width: 100%;
   padding: 0 35% 0 35%;
 }
 .vertical-spacing {
-  height: 6vh;
+  height: 2vh;
 }
 .bottom-button {
   display: flex;

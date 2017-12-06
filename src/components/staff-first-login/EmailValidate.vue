@@ -175,6 +175,10 @@ export default {
               this.validateStatus = 'refresh'
             }
           }).catch(error => {
+            this.isValidated = false
+            this.validateButtonType = 'error'
+            this.validateLoading = false
+            this.validateStatus = 'refresh'
             console.log(error)
           })
         } else {
