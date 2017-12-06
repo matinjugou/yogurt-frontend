@@ -1,19 +1,17 @@
+/**
+ * Created by zhaoshangming on 2017/11/28.
+ */
 // The Vue build version to load with the `import` command
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
 import App from './app.vue'
 import router from './router'
-import iView from 'iview'
-import 'iview/dist/styles/iview.css'
-import { Picker } from 'emoji-mart-vue'
+import Vuetify from 'vuetify'
+import 'vuetify/dist/vuetify.min.css'
 import store from './store'
-// import axios from 'axios'
-// import VueSocketio from 'vue-socket.io'
 
 Vue.config.productionTip = false
-Vue.use(iView)
-Vue.component('picker', Picker)
-// Vue.prototype.$http = axios
+Vue.use(Vuetify)
 
 /* eslint-disable no-new */
 new Vue({

@@ -6,8 +6,8 @@
     <Row type="flex">
       <Col :span="spanLeft" class="chat-user-menu vertical-spacing">
         <Menu
-          theme="light" 
-          width="auto" 
+          theme="light"
+          width="auto"
           :open-names="['serving', 'switching', 'waiting']"
           @on-select="openChatWindow"
         >
@@ -97,10 +97,10 @@
                     {{ singleRecord.msg }}
                   </div>
                   <div class="content chat-single-record-element" :class="singleRecord.type" v-if="singleRecord.type === 'image'">
-                    <img 
-                      class="chat-image" 
-                      :src="singleRecord.compressedUrl" 
-                      alt="聊天图片" 
+                    <img
+                      class="chat-image"
+                      :src="singleRecord.compressedUrl"
+                      alt="聊天图片"
                       @click="showLargeImage(singleRecord.url)"
                     />
                   </div>
@@ -123,10 +123,10 @@
 
           <!-- emoji component by emoji-mart-->
           <div class="chat-emoji-panel" v-show="showEmojiPanel">
-            <picker 
+            <picker
               ref="emoji-mart"
-              native 
-              :i18n="emojiLocalization" 
+              native
+              :i18n="emojiLocalization"
               :perLine="10"
               color="#2d8cf0"
               @click="insertEmoji"
@@ -164,7 +164,7 @@
           <div class="chat-window-input-actions">
             <div class="chat-window-input-media">
               <div class="media-button">
-                <Upload 
+                <Upload
                   multiple
                   ref="upload"
                   :max-size="maxFileSize"
@@ -193,10 +193,10 @@
           <!-- text area input -->
           <div class="chat-window-input">
             <Input
-              v-model="inputText" 
-              type="textarea" 
-              :rows="4" 
-              placeholder="在这里输入信息，按Ctrl+Enter发送" 
+              v-model="inputText"
+              type="textarea"
+              :rows="4"
+              placeholder="在这里输入信息，按Ctrl+Enter发送"
               @on-keyup.ctrl.enter="sendMessage"
               @on-focus="getFocus"
             ></Input>
