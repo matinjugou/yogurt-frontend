@@ -9,10 +9,11 @@
               <Step title="个人信息补充"></Step>
               <Step title="上传头像"></Step>
               <Step title="验证邮箱"></Step>
+              <Step title="修改登录密码"></Step>
               <Step title="注册成功"></Step>
           </Steps>
           <div class='first-login-router'>
-            <transition name="slide-fade" mode="out-in">
+            <transition :name="slideFadeDirection" mode="out-in">
               <router-view/>
             </transition>
           </div>
@@ -34,28 +35,29 @@ export default {
   computed: {
     current () {
       return this.$store.state.current
+    },
+    slideFadeDirection () {
+      return 'slide-fade-' + this.$store.state.slideFadeDirection
     }
   },
   methods: {
-    gotoNextStep () {
-      if (this.current === 4) {
-        this.current = 0
-      } else {
-        this.current++
-      }
-    }
+    // TODO: add methods
   },
-  created () {
+  beforeCreate () {
     // handle url params
     let params = lib.getUrlParams(window.location.href)
     if (typeof params.staffId === 'string') {
+      if (params.staffId.indexOf('#') >= 0) {
+        params.staffId = params.staffId.slice(0, params.staffId.indexOf('#'))
+      }
       this.$store.commit({
         type: 'changeStaffId',
         staffId: params.staffId
       })
     } else {
-      // illegal visit
+      // TODO: illegal visit
       // jump to login page
+      window.location.href = window.location.origin + '/login'
     }
   }
 }
@@ -92,7 +94,7 @@ export default {
   justify-content: center;
 }
 .first-login-body {
-  width: 70vw;
+  width: 85vw;
   height: 80vh;
   background: #fff;
   border-radius: 25px;
@@ -105,20 +107,20 @@ export default {
   width: 80%
 }
 .first-login-router {
-  margin: 5% 0 5% 0;
+  margin: 2% 0 5% 0;
 }
-.slide-fade-enter-active {
+.slide-fade-left-enter-active, .slide-fade-right-enter-active {
   transition: all .5s ease;
 }
-.slide-fade-leave-active {
+.slide-fade-left-leave-active, .slide-fade-right-leave-active {
   transition: all .3s cubic-bezier(1.0, 0.5, 0.8, 1.0);
 }
-.slide-fade-enter {
-  transform: translateX(20px);
+.slide-fade-right-enter, .slide-fade-left-leave-to {
+  transform: translateX(100px);
   opacity: 0;
 }
-.slide-fade-leave-to {
-  transform: translateX(-20px);
+.slide-fade-right-leave-to, .slide-fade-left-enter {
+  transform: translateX(-100px);
   opacity: 0;
 }
 </style>
