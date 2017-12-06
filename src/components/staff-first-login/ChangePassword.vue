@@ -4,10 +4,11 @@
       <div class="password-input-content">
         <Form ref="formPassword" label-position="right" :label-width="100" :model="formPassword" :rules="rulePassword">
           <FormItem prop="oldPassword" label="旧密码">
-            <Input autofocus v-model="formPassword.oldPassword" size="large" placeholder="旧密码" @on-keyup.enter="gotoNextStep"></Input>
+            <Input autofocus type="password" v-model="formPassword.oldPassword" size="large" placeholder="旧密码" @on-keyup.enter="register"></Input>
           </FormItem>
+          <div class="vertical-spacing"></div>
           <FormItem prop="newPassword" label="新密码">
-            <Input v-model="formPassword.newPassword" size="large" placeholder="新密码" @on-keyup.enter="gotoNextStep"></Input>
+            <Input type="password" v-model="formPassword.newPassword" size="large" placeholder="新密码" @on-keyup.enter="register"></Input>
           </FormItem>
         </Form>
       </div>
@@ -15,12 +16,13 @@
     <div class="bottom-button">
       <Button type="error" icon="chevron-left" @click="gotoPrevStep">上一步</Button>
       <div class="horizontal-spacing"></div>
-      <Button type="success" icon="chevron-right" @click="gotoNextStep">注册</Button>
+      <Button type="success" icon="chevron-right" @click="register">注册</Button>
     </div>
   </div>
 </template>
 
 <script>
+import axios from 'axios'
 export default {
   name: 'ChangePassword',
   data () {
@@ -47,20 +49,85 @@ export default {
       }
     }
   },
+  computed: {
+    staffId () {
+      return this.$store.state.staffId
+    },
+    httpServerUrl () {
+      return this.$store.state.httpServerUrl
+    }
+  },
   methods: {
+    checkAllInfoNotEmpty () {
+      return (this.$store.state.staffId !== '') &&
+        (this.$store.state.name !== '') &&
+        (this.$store.state.nickName !== '') &&
+        (this.$store.state.phoneNumber !== '') &&
+        (this.$store.state.staffType !== '') &&
+        (this.$store.state.avatarUrl !== '') &&
+        (this.$store.state.email !== '') &&
+        (this.$store.state.token !== '')
+    },
     gotoPrevStep () {
       this.$store.commit('subCurrent')
       this.$store.commit('leftDirection')
       this.$router.push('/email-validate')
     },
-    gotoNextStep () {
+    register () {
       this.$refs.formPassword.validate((valid) => {
         if (valid) {
-          // TODO: submit new password and all information
-          // TODO: check if some information is lost
-          this.$store.commit('addCurrent')
-          this.$store.commit('rightDirection')
-          this.$router.push('/success')
+          axios.post(this.httpServerUrl + '/login', {
+            staffId: this.staffId,
+            password: this.formPassword.oldPassword
+          }).then(response => {
+            let body = response.data.data
+            if (body.code === 0 || body.code === 2) {
+              if (this.checkAllInfoNotEmpty()) {
+                // TODO: post information to server
+                axios.post(this.httpServerUrl + '/account-info', {
+                  staffId: this.staffId,
+                  name: this.$store.state.name,
+                  nickName: this.$store.state.nickName,
+                  email: this.$store.state.email,
+                  tel: this.$store.state.phoneNumber,
+                  picUrl: this.$store.state.avatarUrl,
+                  role: this.$store.state.staffType,
+                  token: this.$store.token,
+                  password: this.formPassword.newPassword
+                }).then(response => {
+                  let body = response.data.data
+                  if (body.code === 0) {
+                    this.$store.commit('addCurrent')
+                    this.$store.commit('rightDirection')
+                    this.$router.push('/success')
+                  } else {
+                    this.$Notice.error({
+                      title: '注册失败，请稍后再试'
+                    })
+                  }
+                }).catch(error => {
+                  this.$Notice.error({
+                    title: '服务器发生错误，请稍后再试'
+                  })
+                  console.log(error)
+                })
+              } else {
+                this.$Notice.error({
+                  title: '还有信息没有填写完全',
+                  desc: '请去之前步骤检查是否还有信息没有填写'
+                })
+              }
+            } else {
+              this.$Notice.error({
+                title: '旧密码错误，请重新输入'
+              })
+            }
+          }).catch(error => {
+            this.$Notice.error({
+              title: '服务器发生错误，请稍后再试'
+            })
+            console.log(error)
+          })
         } else {
           // wrong password format
         }
@@ -85,11 +152,14 @@ export default {
 .password-input {
   width: 100%;
   height: 45vh;
-  padding-top: 10vh;
+  padding-top: 12vh;
 }
 .password-input-content {
   width: 100%;
   padding: 0 35% 0 35%;
+}
+.vertical-spacing {
+  height: 6vh;
 }
 .bottom-button {
   display: flex;

@@ -1,6 +1,8 @@
 <template>
   <div class="success">
-    <h1>注册成功！</h1>
+    <h1 class="success-message">
+      注册成功！
+    </h1>
     <div class="bottom-button">
       <!-- only for debug use -->
       <Button type="error" icon="chevron-left" @click="gotoPrevStep">上一步</Button>
@@ -44,6 +46,12 @@ export default {
 .success {
   width: 100%;
   text-align: center;
+}
+.success-message {
+  height: 45vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .bottom-button {
   display: flex;

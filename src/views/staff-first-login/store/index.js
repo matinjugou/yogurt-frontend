@@ -14,6 +14,7 @@ export default new Vuex.Store({
     staffType: '',
     avatarUrl: '',
     email: '',
+    token: '',
     slideFadeDirection: 'right'
   },
   mutations: {
@@ -58,6 +59,9 @@ export default new Vuex.Store({
     },
     rightDirection (state) {
       state.slideFadeDirection = 'right'
+    },
+    changeToken (state, payload) {
+      state.token = payload.token
     }
   }
 })

@@ -114,7 +114,7 @@ export default {
           axios.get(this.httpServerUrl + '/validation/validate', {
             params: {
               staffId: this.staffId,
-              emailAddress: this.tempEmail
+              emailAddress: this.formEmail.tempEmail
             }
           }).then(response => {
             console.log(response)
@@ -148,21 +148,35 @@ export default {
       this.$refs.formValidate.validate((valid) => {
         if (valid) {
           // TODO: check if the email is validated
-          if (this.formValidate.validateNumber === '123456') {
-            this.isValidated = true
-            this.validateButtonType = 'success'
-            this.validateLoading = false
-            this.validateStatus = 'checkmark-round'
-            this.$store.commit({
-              type: 'changeEmail',
-              email: this.formEmail.tempEmail
-            })
-          } else {
-            this.isValidated = false
-            this.validateButtonType = 'error'
-            this.validateLoading = false
-            this.validateStatus = 'refresh'
-          }
+          this.validateLoading = true
+          axios.post(this.httpServerUrl + '/validation/validateCode', {
+            staffId: this.staffId,
+            emailAddress: this.formEmail.tempEmail,
+            code: this.formValidate.validateNumber
+          }).then(response => {
+            let body = response.data.data
+            if (body.code === 0) {
+              this.isValidated = true
+              this.validateButtonType = 'success'
+              this.validateLoading = false
+              this.validateStatus = 'checkmark-round'
+              this.$store.commit({
+                type: 'changeEmail',
+                email: this.formEmail.tempEmail
+              })
+              this.$store.commit({
+                type: 'changeToken',
+                token: body.token
+              })
+            } else {
+              this.isValidated = false
+              this.validateButtonType = 'error'
+              this.validateLoading = false
+              this.validateStatus = 'refresh'
+            }
+          }).catch(error => {
+            console.log(error)
+          })
         } else {
           // fail to satisfy validate number format
         }
