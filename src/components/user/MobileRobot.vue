@@ -35,6 +35,16 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="showWrongMessage" max-width="290">
+      <v-card>
+        <v-card-title class="headline">客服繁忙</v-card-title>
+        <v-card-text>抱歉，暂时没有空闲的该种类人工客服，请您耐心等待。</v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="green darken-1" flat="flat" @click.native="showWrongMessage = false">好的</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <v-content>
       <v-container id="chat-record-container" :class="{'no-function-panel': !functionPanelVisible, 'with-function-panel': functionPanelVisible}">
         <!--<v-container :class="{'no-function-panel': !functionPanelVisible, 'with-function-panel': functionPanelVisible}" id="chat-record-container">-->
@@ -186,6 +196,7 @@
       return {
         functionPanelVisible: false,
         showDialog: false,
+        showWrongMessage: false,
         inputText: '',
         staffType: { text: '售前', value: '0' },
         items: [
@@ -400,7 +411,7 @@
           // debug
           console.log(body)
           if (!body || body.code !== 0) {
-            this.$Message.info('抱歉，暂时没有空闲的人工客服，请您耐心等待。')
+            self.showWrongMessage = true
           } else {
             // tell staff to update queue
             self.socket.emit('updateQueue', {staffId: body.msg, token: self.token})

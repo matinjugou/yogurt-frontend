@@ -81,16 +81,15 @@
         }
       },
       toChatPage () {
-//        if (this.isPC()) {
-//          this.$router.push({name: 'robot'})
-//        } else {
-//          this.$router.push({name: 'mobile'})
-//        }
-        if (this.chatState !== 'chat') {
-          window.localStorage.setItem('chatState', 'robot')
-          this.$router.push({name: 'robot'})
+        if (this.isPC()) {
+          if (this.chatState !== 'chat') {
+            window.localStorage.setItem('chatState', 'robot')
+            this.$router.push({name: 'robot'})
+          } else {
+            this.$router.push({name: 'chat'})
+          }
         } else {
-          this.$router.push({name: 'chat'})
+          window.location.href = window.location.origin + '/user-mobile'
         }
       }
     },

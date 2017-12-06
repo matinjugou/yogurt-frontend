@@ -273,7 +273,7 @@
           // debug
           console.log(body)
           if (!body || body.code !== 0) {
-            this.$Message.info('抱歉，暂时没有空闲的人工客服，请您耐心等待。')
+            self.$Message.info('抱歉，暂时没有空闲的该种类人工客服，请您耐心等待。')
           } else {
             // tell staff to update queue
             self.socket.emit('updateQueue', {staffId: body.msg, token: self.token})
