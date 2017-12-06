@@ -8,14 +8,18 @@ import App from './app.vue'
 import router from './router'
 import Vuetify from 'vuetify'
 import 'vuetify/dist/vuetify.min.css'
+import store from './store'
+import { Picker } from 'emoji-mart-vue'
 
 Vue.config.productionTip = false
 Vue.use(Vuetify)
+Vue.component('picker', Picker)
 
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
   router,
+  store,
   template: '<App/>',
   components: { App }
 })

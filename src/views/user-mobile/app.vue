@@ -1,75 +1,96 @@
 <template>
-  <v-app style="height: 100vh; overflow: hidden">
+  <v-app>
     <v-toolbar color="indigo" dark fixed app height="56px">
       <v-toolbar-title>xxx公司</v-toolbar-title>
     </v-toolbar>
     <v-content style="overflow: hidden">
-      <v-container :style="{height: chatRecordContainerHeight + 'px', overflow: 'scroll'}" id="chat-record-container">
-      <!--<v-container :class="{'no-function-panel': !functionPanelVisible, 'with-function-panel': functionPanelVisible}" id="chat-record-container">-->
-          <ul style="list-style: none">
-            <li v-for="(singleRecord, index) in currentChatRecord">
-              <p class="chat-msg-time">
-                <span>{{ singleRecord.time }}</span>
-              </p>
-              <div class="chat-msg-body" :class="[{'from-me': singleRecord.from.startsWith('1_u')}]">
-                <div class="avatar chat-single-record">
-                  <v-avatar size="40px" class="indigo">
-                    <v-icon dark>account_circle</v-icon>
-                  </v-avatar>
-                </div>
-                <div v-if="singleRecord.type === 'text'" class="content chat-single-record">
-                  {{ singleRecord.msg }}
-                </div>
+      <v-container id="chat-record-container" :class="{'no-function-panel': !functionPanelVisible, 'with-function-panel': functionPanelVisible}">
+        <!--<v-container :class="{'no-function-panel': !functionPanelVisible, 'with-function-panel': functionPanelVisible}" id="chat-record-container">-->
+        <ul style="list-style: none">
+          <li v-for="(singleRecord, index) in currentChatRecord">
+            <p class="chat-msg-time">
+              <span>{{ singleRecord.time }}</span>
+            </p>
+            <div class="chat-msg-body" :class="[{'from-me': singleRecord.from.indexOf('_u') >= 0}]">
+              <div class="avatar chat-single-record">
+                <v-avatar size="40px" class="indigo">
+                  <v-icon dark>account_circle</v-icon>
+                </v-avatar>
               </div>
-            </li>
-          </ul>
+              <div v-if="singleRecord.type === 'text'" class="content chat-single-record">
+                {{ singleRecord.msg }}
+              </div>
+            </div>
+          </li>
+        </ul>
       </v-container>
-      <v-container class="input-container">
+      <v-container id="input-container">
         <v-layout row>
           <v-flex p>
-            <v-btn flat icon color="indigo" @click="showFunctionPanel()">
+            <v-btn flat icon color="indigo" @click="showFunctionPanel">
               <v-icon>add</v-icon>
             </v-btn>
           </v-flex>
           <v-flex xs12>
-            <v-text-field id="text-field" @click="textFieldClicked()"
-              label="在此输入消息"
+            <v-text-field id="text-field"
+                          @click="textFieldClicked"
+                          label="在此输入消息"
+                          v-model="inputText"
             ></v-text-field>
           </v-flex>
           <v-flex p>
-            <v-btn flat icon color="indigo" @click="sendMessage()">
+            <v-btn flat icon color="indigo" @click="sendMessage">
               <v-icon>send</v-icon>
             </v-btn>
           </v-flex>
         </v-layout>
+        <v-layout v-show="functionPanelVisible" id="function-panel-layout">
+          <v-flex p>
+            <v-btn flat>
+              <v-icon>tag_faces</v-icon>表情
+            </v-btn>
+          </v-flex>
+          <v-flex p>
+            <v-btn flat>
+              <v-icon>folder_open</v-icon>文件
+            </v-btn>
+          </v-flex>
+          <v-flex p>
+            <v-btn flat>
+              <v-icon>chat</v-icon>历史
+            </v-btn>
+          </v-flex>
+        </v-layout>
       </v-container>
-      <trainsition name="function-panel-slide">
-        <container v-show="functionPanelVisible" class="function-panel-container">
-          <v-layout>
-            <v-flex p>
-              <v-btn flat>
-                <v-icon>tag_faces</v-icon>表情
-              </v-btn>
-            </v-flex>
-            <v-flex p>
-              <v-btn flat>
-                <v-icon>folder_open</v-icon>文件
-              </v-btn>
-            </v-flex>
-            <v-flex p>
-              <v-btn flat>
-                <v-icon>chat</v-icon>历史
-              </v-btn>
-            </v-flex>
-          </v-layout>
-        </container>
-      </trainsition>
+      <!--<container v-show="functionPanelVisible" class="function-panel-container">-->
+      <!--<v-layout>-->
+      <!--<v-flex p>-->
+      <!--<v-btn flat>-->
+      <!--<v-icon>tag_faces</v-icon>表情-->
+      <!--</v-btn>-->
+      <!--</v-flex>-->
+      <!--<v-flex p>-->
+      <!--<v-btn flat>-->
+      <!--<v-icon>folder_open</v-icon>文件-->
+      <!--</v-btn>-->
+      <!--</v-flex>-->
+      <!--<v-flex p>-->
+      <!--<v-btn flat>-->
+      <!--<v-icon>chat</v-icon>历史-->
+      <!--</v-btn>-->
+      <!--</v-flex>-->
+      <!--</v-layout>-->
+      <!--</container>-->
     </v-content>
   </v-app>
 </template>
 <style scoped>
   .container {
     padding: 8px;
+  }
+  #chat-record-container {
+    position: relative;
+    overflow: scroll;
   }
   .chat-msg-time {
     margin: 4px 0;
@@ -84,12 +105,10 @@
     background-color: #dcdcdc;
   }
   .with-function-panel {
-    height: calc(100vh - 179px);
-    overflow: scroll;
+    height: calc(100vh - 56px - 74px - 58px);
   }
   .no-function-panel {
-    height: calc(100vh - 121px);
-    overflow: scroll;
+    height: calc(100vh - 56px - 74px);
   }
   .chat-single-record {
     display: inline-flex;
@@ -100,7 +119,6 @@
     position: relative;
     padding: 7px;
     max-width: 65vw;
-    /*min-height: 30px;*/
     min-height: 36px;
     font-size: 16px;
     line-height: 20px;
@@ -137,26 +155,25 @@
     border-right-color: transparent;
     border-left-color: #5687f0;
   }
-  .input-container {
-    /*position: fixed;*/
-    /*bottom: 0;*/
+  #input-container {
     padding: 0;
-    height: 65px;
-    overflow: hidden;
+    position: absolute;
+    bottom: 0;
   }
-  .function-panel-container {
+  #function-panel-layout {
     height: 58px;
     text-align: center;
   }
 </style>
 <script>
+//  import axios from 'axios'
   export default {
     name: 'UserChatMobile',
     data () {
       return {
         functionPanelVisible: false,
-//        keyboardVisible: false,
-//        inputting: false,
+
+        inputText: '',
         contentList: [
           {
             id: '1',
@@ -168,121 +185,130 @@
           },
           {
             id: '2',
-            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-            from: '1_u1',
-            to: '1_s1',
-            type: 'text',
-            time: '2017-11-19 15:39:15'
-          },
-          {
-            id: '3',
-            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-            from: '1_u1',
-            to: '1_s1',
-            type: 'text',
-            time: '2017-11-19 15:39:15'
-          },
-          {
-            id: '4',
-            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-            from: '1_u1',
-            to: '1_s1',
-            type: 'text',
-            time: '2017-11-19 15:39:15'
-          },
-          {
-            id: '3',
-            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-            from: '1_u1',
-            to: '1_s1',
-            type: 'text',
-            time: '2017-11-19 15:39:15'
-          },
-          {
-            id: '4',
-            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-            from: '1_u1',
-            to: '1_s1',
-            type: 'text',
-            time: '2017-11-19 15:39:15'
-          },
-          {
-            id: '3',
-            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-            from: '1_u1',
-            to: '1_s1',
-            type: 'text',
-            time: '2017-11-19 15:39:15'
-          },
-          {
-            id: '4',
-            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-            from: '1_u1',
-            to: '1_s1',
-            type: 'text',
-            time: '2017-11-19 15:39:15'
-          },
-          {
-            id: '3',
-            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-            from: '1_u1',
-            to: '1_s1',
-            type: 'text',
-            time: '2017-11-19 15:39:15'
-          },
-          {
-            id: '4',
-            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-            from: '1_u1',
-            to: '1_s1',
-            type: 'text',
-            time: '2017-11-19 15:39:15'
-          },
-          {
-            id: '3',
-            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-            from: '1_u1',
-            to: '1_s1',
-            type: 'text',
-            time: '2017-11-19 15:39:15'
-          },
-          {
-            id: '4',
-            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-            from: '1_u1',
-            to: '1_s1',
-            type: 'text',
-            time: '2017-11-19 15:39:15'
-          },
-          {
-            id: '3',
-            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-            from: '1_u1',
-            to: '1_s1',
-            type: 'text',
-            time: '2017-11-19 15:39:15'
-          },
-          {
-            id: '4',
-            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+            msg: 'Hello, I\'m user_1.',
             from: '1_u1',
             to: '1_s1',
             type: 'text',
             time: '2017-11-19 15:39:15'
           }
+//          {
+//            id: '3',
+//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+//            from: '1_u1',
+//            to: '1_s1',
+//            type: 'text',
+//            time: '2017-11-19 15:39:15'
+//          },
+//          {
+//            id: '4',
+//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+//            from: '1_u1',
+//            to: '1_s1',
+//            type: 'text',
+//            time: '2017-11-19 15:39:15'
+//          },
+//          {
+//            id: '3',
+//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+//            from: '1_u1',
+//            to: '1_s1',
+//            type: 'text',
+//            time: '2017-11-19 15:39:15'
+//          },
+//          {
+//            id: '4',
+//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+//            from: '1_u1',
+//            to: '1_s1',
+//            type: 'text',
+//            time: '2017-11-19 15:39:15'
+//          },
+//          {
+//            id: '3',
+//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+//            from: '1_u1',
+//            to: '1_s1',
+//            type: 'text',
+//            time: '2017-11-19 15:39:15'
+//          },
+//          {
+//            id: '4',
+//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+//            from: '1_u1',
+//            to: '1_s1',
+//            type: 'text',
+//            time: '2017-11-19 15:39:15'
+//          },
+//          {
+//            id: '3',
+//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+//            from: '1_u1',
+//            to: '1_s1',
+//            type: 'text',
+//            time: '2017-11-19 15:39:15'
+//          },
+//          {
+//            id: '4',
+//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+//            from: '1_u1',
+//            to: '1_s1',
+//            type: 'text',
+//            time: '2017-11-19 15:39:15'
+//          },
+//          {
+//            id: '3',
+//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+//            from: '1_u1',
+//            to: '1_s1',
+//            type: 'text',
+//            time: '2017-11-19 15:39:15'
+//          },
+//          {
+//            id: '4',
+//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+//            from: '1_u1',
+//            to: '1_s1',
+//            type: 'text',
+//            time: '2017-11-19 15:39:15'
+//          },
+//          {
+//            id: '3',
+//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+//            from: '1_u1',
+//            to: '1_s1',
+//            type: 'text',
+//            time: '2017-11-19 15:39:15'
+//          },
+//          {
+//            id: '4',
+//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+//            from: '1_u1',
+//            to: '1_s1',
+//            type: 'text',
+//            time: '2017-11-19 15:39:15'
+//          }
         ]
       }
     },
     computed: {
       currentChatRecord () {
-        return this.contentList
+        return this.$store.state.chatRecordList
       },
-      chatRecordContainerHeight () {
-        return (this.vh - (this.functionPanelVisible ? 179 : 121))
+      userId () {
+        return window.localStorage.getItem('userId')
       },
-      vh () {
-        return window.innerHeight
+      staffId () {
+        return window.localStorage.getItem('staffId')
+      },
+      token () {
+        return window.localStorage.getItem('token')
       }
+//      chatRecordContainerHeight () {
+//        return (this.vh - (this.functionPanelVisible ? 179 : 121))
+//      },
+//      vh () {
+//        return document.documentElement.clientHeight
+//      }
     },
     methods: {
       showFunctionPanel () {
@@ -293,6 +319,7 @@
         }
       },
       textFieldClicked () {
+        this.scrollToBottom()
         this.functionPanelVisible = false
       },
       scrollToBottom () {
@@ -302,11 +329,12 @@
         }
       },
       sendMessage () {
+        // debug
+        console.log('sending message: ' + this.inputText)
         let sendMsg = this.inputText
-        if (sendMsg === '' && this.uploadList.length === 0) {
-          this.$Notice.warning({
-            title: '不可以发送空消息！'
-          })
+        if (sendMsg === '') {
+          // debug
+          console.log('不能发送空消息！')
           return
         }
         let time = this.getCurrentTime()
@@ -339,7 +367,55 @@
         return curDate.toLocaleTimeString('zh-Hans-CN')
       }
     },
+    created () {
+      const self = this
+      window.onresize = () => {
+        self.scrollToBottom()
+      }
+      // TO DO: if haven't logged in, redirect to login page
+//      axios.get(self.$store.state.userLoginUrl, {
+//        params: {
+//          'userId': self.userId,
+//          'token': self.token
+//        }
+//      }).then(response => {
+//        let body = response.data.data
+//        if (body.code !== 0) {
+//          self.$router.push('login')
+//        }
+//      })
+      // for debug
+      window.localStorage.setItem('userId', '1_u1')
+      window.localStorage.setItem('staffId', '1_s1')
+      // send userreg message
+      const io = require('socket.io-client')
+      this.socket = io('http://yogurt.magichc7.com')
+      this.socket.emit('userReg', {userId: this.userId, token: this.token})
+      // debug
+      console.log('Sent userReg.')
+      this.socket.on('regResult', (data) => {
+        // debug
+        console.log('Register result: code: ' + data['code'] + ', msg: ' + data['msg'])
+      })
+      // socket messages
+      this.socket.on('staffMsg', (data) => {
+        let newMsg = {
+          'time': data.time,
+          'from': data.staffId,
+          'to': data.userId,
+          'type': data.type,
+          'msg': data.msg
+        }
+        this.currentChatRecord.push(newMsg)
+      })
+      this.socket.on('sendResult', (data) => {
+        // TO DO
+      })
+    },
     mounted () {
+      this.scrollToBottom()
+    },
+    updated () {
       this.scrollToBottom()
     }
   }

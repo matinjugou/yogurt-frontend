@@ -58,7 +58,7 @@
             window.localStorage.setItem('token', body.token)
             window.localStorage.setItem('userId', self.formItem.userId)
             window.localStorage.setItem('staffId', self.formItem.staffId)
-            self.$router.push({name: 'robot'})
+            self.toChatPage()
           }
         })
       },
@@ -67,6 +67,21 @@
           return false
         }
         return true
+      },
+      isPC () {
+        if ((navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i))) {
+          return false
+        } else {
+          return true
+        }
+      },
+      toChatPage () {
+//        if (this.isPC()) {
+//          this.$router.push({name: 'robot'})
+//        } else {
+//          this.$router.push({name: 'mobile'})
+//        }
+        this.$router.push({name: 'robot'})
       }
     },
     created () {
@@ -89,7 +104,7 @@
         console.log(body)
         if (body.code === 0) {
           // TO DO
-          this.$router.push({name: 'robot', userId: userId})
+          self.toChatPage()
         }
       })
     }
