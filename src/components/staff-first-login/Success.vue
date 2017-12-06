@@ -1,12 +1,13 @@
 <template>
   <div class="success">
-    <h1>这里是注册成功界面</h1>
+    <h1 class="success-message">
+      {{ msg }}
+    </h1>
     <div class="bottom-button">
       <!-- only for debug use -->
-      <Button type="error" icon="chevron-left" @click="gotoPrevStep">上一步</Button>
-      <div class="horizontal-spacing"></div>
+      <!-- <Button type="error" icon="chevron-left" @click="gotoPrevStep">上一步</Button> -->
+      <!-- <div class="horizontal-spacing"></div> -->
       <!-- only for debug use -->
-
       <Button type="success" icon="chevron-right" @click="gotoLoginPage">返回登录页面</Button>
     </div>
   </div>
@@ -17,7 +18,7 @@ export default {
   name: 'Success',
   data () {
     return {
-      msg: 'Welcome to Your Vue.js App'
+      msg: '注册成功！欢迎使用Yogurt客服系统！'
     }
   },
   methods: {
@@ -28,6 +29,7 @@ export default {
     },
     gotoLoginPage () {
       // TODO: return to login page
+      window.location.href = window.location.origin + '/login'
     }
   },
   created () {
@@ -44,6 +46,12 @@ export default {
 .success {
   width: 100%;
   text-align: center;
+}
+.success-message {
+  height: 45vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .bottom-button {
   display: flex;

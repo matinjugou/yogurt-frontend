@@ -26,7 +26,7 @@
               </div>
               <div class="chat-menu-item">
                 用户{{ user.userId.length > 10 ? user.userId.slice(0, 10) + '...' : user.userId }} <br />
-                {{ lastChatRecord[user.userId] }}
+                {{ getLastChatRecord(user.userId) }}
               </div>
             </MenuItem>
           </Submenu>
@@ -315,15 +315,6 @@ export default {
       }
       return sum
     },
-    lastChatRecord () {
-      let obj = {}
-      for (let ele of this.userList) {
-        if (ele.status === 'serving') {
-          obj[ele.userId] = this.getLastChatRecord(ele.userId)
-        }
-      }
-      return obj
-    },
     socket () {
       return this.$store.state.socket
     },
@@ -349,95 +340,6 @@ export default {
     }
   },
   methods: {
-    socketListenInit () {
-      // TODO: deal with send failure
-      // also timeout affair should be taken care of
-      this.socket.on('sendResult', (data) => {
-        console.log('Send result: code ' + data.code + ' & msg ' + data.msg)
-        if (data.code !== 0) {
-          this.$Notice.error({
-            title: '发送失败，请重新发送'
-          })
-        } else {
-          // success
-        }
-      })
-      // receive user message from socket
-      // TODO: update format of different types of msg
-      // TODO: update time to time in userMsg
-      this.socket.on('userMsg', (data) => {
-        console.log('User message: from ' + data.userId + ' & msg type is ' + data.type)
-        let date = new Date()
-        if (data.type === 'file') {
-          this.$store.commit({
-            type: 'addChatRecord',
-            userId: data.userId,
-            content: {
-              'from': data.userId,
-              'to': this.staffId,
-              'url': data.url,
-              'name': data.name,
-              'size': data.size,
-              'mimeType': data.mimeType,
-              'type': data.type,
-              'time': date.toLocaleTimeString('zh-Hans-CN')
-            }
-          })
-        } else if (data.type === 'image') {
-          this.$store.commit({
-            type: 'addChatRecord',
-            userId: data.userId,
-            content: {
-              'from': data.userId,
-              'to': this.staffId,
-              'url': data.url,
-              'compressedUrl': data.compressedUrl,
-              'type': data.type,
-              'time': date.toLocaleTimeString('zh-Hans-CN')
-            }
-          })
-        } else {
-          // type === 'text'
-          this.$store.commit({
-            type: 'addChatRecord',
-            userId: data.userId,
-            content: {
-              'from': data.userId,
-              'to': this.staffId,
-              'msg': data.msg,
-              'type': data.type,
-              'time': date.toLocaleTimeString('zh-Hans-CN')
-            }
-          })
-        }
-        // update notification badge
-        if (data.from !== this.chatUserId) {
-          this.$store.commit({
-            type: 'addUserUnread',
-            userId: data.userId
-          })
-        }
-      })
-      // receive new user notification from socket
-      this.socket.on('newUser', (data) => {
-        console.log('New user: ' + data.userId)
-        this.$store.commit({
-          type: 'addUser',
-          content: {
-            userId: data.userId,
-            status: 'waiting'
-          }
-        })
-      })
-      // receive user stop notification from socket
-      this.socket.on('userServiceStop', (data) => {
-        console.log('User stop: ' + data.from + ' & msg: ' + data.msg)
-        this.$store.commit({
-          type: 'removeUser',
-          userId: data.from
-        })
-      })
-    },
     chatWindowScroll () {
       let element = document.getElementById('chat-window')
       if (element) {
@@ -458,13 +360,14 @@ export default {
         type: 'clearUserUnread',
         userId: this.chatUserId
       })
+      console.log('Switch user: ' + this.chatUserId)
     },
     closeChatWindow () {
       // TODO: close chat with chatUserId
     },
     getLastChatRecord (userId) {
       let chatRecord = this.chatRecordList[userId]
-      if (chatRecord) {
+      if (chatRecord.length > 0) {
         let singleRecord = chatRecord[chatRecord.length - 1]
         if (singleRecord.type === 'text') {
           return singleRecord.msg
@@ -743,8 +646,6 @@ export default {
     }).catch(error => {
       console.log(error)
     })
-    // socket listening initialization
-    this.socketListenInit()
   },
   mounted () {
     this.uploadList = this.$refs.upload.fileList
@@ -846,13 +747,13 @@ export default {
 .chat-msg-body > .image {
   padding: 10px 10px 10px 10px;
   width: 150px;
-  height: 100px;
+  height: 150px;
   cursor: pointer;
 }
 .chat-msg-body > .file {
   padding: 10px 5px 0px 5px;
   cursor: pointer;
-  width: 300px;
+  width: 260px;
 }
 .chat-image{
   border-radius: 4px;
