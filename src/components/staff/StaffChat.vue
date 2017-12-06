@@ -846,13 +846,13 @@ export default {
 .chat-msg-body > .image {
   padding: 10px 10px 10px 10px;
   width: 150px;
-  height: 100px;
+  height: 150px;
   cursor: pointer;
 }
 .chat-msg-body > .file {
   padding: 10px 5px 0px 5px;
   cursor: pointer;
-  width: 300px;
+  width: 260px;
 }
 .chat-image{
   border-radius: 4px;
