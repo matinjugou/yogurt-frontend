@@ -5,13 +5,16 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
+    httpServerUrl: 'http://yogurt.magichc7.com/api/staff',
     staffId: '',
     current: 0,
     name: '',
     nickName: '',
     phoneNumber: '',
+    staffType: '',
     avatarUrl: '',
     email: '',
+    token: '',
     slideFadeDirection: 'right'
   },
   mutations: {
@@ -27,10 +30,14 @@ export default new Vuex.Store({
     changePhoneNumber (state, payload) {
       state.phoneNumber = payload.phoneNumber
     },
+    changeStaffType (state, payload) {
+      state.staffType = payload.staffType
+    },
     changeInfo (state, payload) {
       state.name = payload.name
       state.nickName = payload.nickName
       state.phoneNumber = payload.phoneNumber
+      state.staffType = payload.staffType
     },
     changeAvatarUrl (state, payload) {
       state.avatarUrl = payload.avatarUrl
@@ -52,6 +59,9 @@ export default new Vuex.Store({
     },
     rightDirection (state) {
       state.slideFadeDirection = 'right'
+    },
+    changeToken (state, payload) {
+      state.token = payload.token
     }
   }
 })

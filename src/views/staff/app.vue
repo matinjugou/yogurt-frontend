@@ -77,11 +77,161 @@ export default {
     isLogin () {
       return this.$store.state.isLogin
     },
+    httpServerUrl () {
+      return this.$store.state.httpServerUrl
+    },
     socket () {
       return this.$store.state.socket
     }
   },
   methods: {
+    socketListenInit () {
+      this.socket.on('regResult', (data) => {
+        console.log('Register result: code ' + data.code + ' & msg ' + data.msg)
+        if (data.code === 0) {
+          this.$Notice.success({
+            title: '连接消息服务器成功！',
+            desc: '开始和用户聊天吧~'
+          })
+        } else {
+          this.$Notice.error({
+            title: '连接消息服务器失败！',
+            desc: '程序会自动尝试重新连接'
+          })
+        }
+      })
+
+      // TODO: deal with send failure
+      // also timeout affair should be taken care of
+      this.socket.on('sendResult', (data) => {
+        console.log('Send result: code ' + data.code + ' & msg ' + data.msg)
+        if (data.code !== 0) {
+          this.$Notice.error({
+            title: '发送失败，请重新发送'
+          })
+        } else {
+          // success
+        }
+      })
+
+      // receive user message from socket
+      // TODO: update time to time in userMsg
+      this.socket.on('userMsg', (data) => {
+        console.log('User message: from ' + data.userId + ' & msg type is ' + data.type)
+        let date = new Date()
+        if (data.type === 'file') {
+          this.$store.commit({
+            type: 'addChatRecord',
+            userId: data.userId,
+            content: {
+              'from': data.userId,
+              'to': this.staffId,
+              'url': data.url,
+              'name': data.name,
+              'size': data.size,
+              'mimeType': data.mimeType,
+              'type': data.type,
+              'time': date.toLocaleTimeString('zh-Hans-CN')
+            }
+          })
+        } else if (data.type === 'image') {
+          this.$store.commit({
+            type: 'addChatRecord',
+            userId: data.userId,
+            content: {
+              'from': data.userId,
+              'to': this.staffId,
+              'url': data.url,
+              'compressedUrl': data.compressedUrl,
+              'type': data.type,
+              'time': date.toLocaleTimeString('zh-Hans-CN')
+            }
+          })
+        } else {
+          // type === 'text'
+          this.$store.commit({
+            type: 'addChatRecord',
+            userId: data.userId,
+            content: {
+              'from': data.userId,
+              'to': this.staffId,
+              'msg': data.msg,
+              'type': data.type,
+              'time': date.toLocaleTimeString('zh-Hans-CN')
+            }
+          })
+        }
+        // update notification badge
+        this.$store.commit({
+          type: 'addUserUnread',
+          userId: data.userId
+        })
+      })
+
+      // receive new user notification from socket
+      this.socket.on('newUser', (data) => {
+        console.log('New user: ' + data.userId)
+        this.$store.commit({
+          type: 'addUser',
+          content: {
+            userId: data.userId,
+            status: 'waiting'
+          }
+        })
+      })
+
+      // receive user stop notification from socket
+      this.socket.on('userServiceStop', (data) => {
+        console.log('User stop: ' + data.from + ' & msg: ' + data.msg)
+        this.$store.commit({
+          type: 'removeUser',
+          userId: data.from
+        })
+      })
+
+      // update user queue
+      this.socket.on('updateQueue', (data) => {
+        console.log('Update queue message')
+        axios.get(this.httpServerUrl + '/queue', {
+          params: {
+            staffId: window.localStorage.getItem('id'),
+            token: window.localStorage.getItem('token')
+          }
+        }).then(response => {
+          let body = response.data.data
+          console.log(body)
+          if (body.code === 0) {
+            // successfully get user queue
+            let arr = []
+            for (let value of body.queue.serving) {
+              arr.push({
+                userId: value,
+                status: 'serving',
+                unread: 0
+              })
+            }
+            for (let value of body.queue.waiting) {
+              arr.push({
+                userId: value,
+                status: 'waiting',
+                unread: 0
+              })
+            }
+            this.$store.commit({
+              type: 'refreshUserList',
+              content: arr
+            })
+          } else {
+            // failed to get user queue
+            this.$Notice.error({
+              title: '没能成功获取用户列表，请刷新重试'
+            })
+          }
+        }).catch(error => {
+          console.log(error)
+        })
+      })
+    },
     changeRestStatus () {
       // TODO: give server a message
       this.restStatus = !this.restStatus
@@ -102,7 +252,7 @@ export default {
       }
     }
   },
-  created () {
+  beforeCreate () {
     this.$store.commit('buildSocketConnect')
     // check if the token is valid
     let storeType = window.localStorage.getItem('type')
@@ -128,6 +278,8 @@ export default {
             staffId: this.$store.state.staffId,
             token: this.$store.state.token
           })
+          // socket listening initialization
+          this.socketListenInit()
         } else {
           window.location.href = window.location.origin + '/login?backUrl=' + window.location.href
         }

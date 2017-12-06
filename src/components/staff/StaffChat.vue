@@ -6,8 +6,8 @@
     <Row type="flex">
       <Col :span="spanLeft" class="chat-user-menu vertical-spacing">
         <Menu
-          theme="light" 
-          width="auto" 
+          theme="light"
+          width="auto"
           :open-names="['serving', 'switching', 'waiting']"
           @on-select="openChatWindow"
         >
@@ -26,7 +26,7 @@
               </div>
               <div class="chat-menu-item">
                 用户{{ user.userId.length > 10 ? user.userId.slice(0, 10) + '...' : user.userId }} <br />
-                {{ lastChatRecord[user.userId] }}
+                {{ getLastChatRecord(user.userId) }}
               </div>
             </MenuItem>
           </Submenu>
@@ -97,10 +97,10 @@
                     {{ singleRecord.msg }}
                   </div>
                   <div class="content chat-single-record-element" :class="singleRecord.type" v-if="singleRecord.type === 'image'">
-                    <img 
-                      class="chat-image" 
-                      :src="singleRecord.compressedUrl" 
-                      alt="聊天图片" 
+                    <img
+                      class="chat-image"
+                      :src="singleRecord.compressedUrl"
+                      alt="聊天图片"
                       @click="showLargeImage(singleRecord.url)"
                     />
                   </div>
@@ -123,10 +123,10 @@
 
           <!-- emoji component by emoji-mart-->
           <div class="chat-emoji-panel" v-show="showEmojiPanel">
-            <picker 
+            <picker
               ref="emoji-mart"
-              native 
-              :i18n="emojiLocalization" 
+              native
+              :i18n="emojiLocalization"
               :perLine="10"
               color="#2d8cf0"
               @click="insertEmoji"
@@ -164,7 +164,7 @@
           <div class="chat-window-input-actions">
             <div class="chat-window-input-media">
               <div class="media-button">
-                <Upload 
+                <Upload
                   multiple
                   ref="upload"
                   :max-size="maxFileSize"
@@ -193,10 +193,10 @@
           <!-- text area input -->
           <div class="chat-window-input">
             <Input
-              v-model="inputText" 
-              type="textarea" 
-              :rows="8" 
-              placeholder="在这里输入信息，按Ctrl+Enter发送" 
+              v-model="inputText"
+              type="textarea"
+              :rows="4"
+              placeholder="在这里输入信息，按Ctrl+Enter发送"
               @on-keyup.ctrl.enter="sendMessage"
               @on-focus="getFocus"
             ></Input>
@@ -315,15 +315,6 @@ export default {
       }
       return sum
     },
-    lastChatRecord () {
-      let obj = {}
-      for (let ele of this.userList) {
-        if (ele.status === 'serving') {
-          obj[ele.userId] = this.getLastChatRecord(ele.userId)
-        }
-      }
-      return obj
-    },
     socket () {
       return this.$store.state.socket
     },
@@ -349,109 +340,6 @@ export default {
     }
   },
   methods: {
-    socketListenInit () {
-      this.socket.on('regResult', (data) => {
-        console.log('Register result: code ' + data.code + ' & msg ' + data.msg)
-        if (data.code === 0) {
-          this.$Notice.success({
-            title: '连接消息服务器成功！',
-            desc: '开始和用户聊天吧~'
-          })
-        } else {
-          this.$Notice.error({
-            title: '连接消息服务器失败！',
-            desc: '程序会自动尝试重新连接'
-          })
-        }
-      })
-      // TODO: deal with send failure
-      // also timeout affair should be taken care of
-      this.socket.on('sendResult', (data) => {
-        console.log('Send result: code ' + data.code + ' & msg ' + data.msg)
-        if (data.code !== 0) {
-          this.$Notice.error({
-            title: '发送失败，请重新发送'
-          })
-        } else {
-          // success
-        }
-      })
-      // receive user message from socket
-      // TODO: update format of different types of msg
-      // TODO: update time to time in userMsg
-      this.socket.on('userMsg', (data) => {
-        console.log('User message: from ' + data.userId + ' & msg type is ' + data.type)
-        let date = new Date()
-        if (data.type === 'file') {
-          this.$store.commit({
-            type: 'addChatRecord',
-            userId: data.userId,
-            content: {
-              'from': data.userId,
-              'to': this.staffId,
-              'url': data.url,
-              'name': data.name,
-              'size': data.size,
-              'mimeType': data.mimeType,
-              'type': data.type,
-              'time': date.toLocaleTimeString('zh-Hans-CN')
-            }
-          })
-        } else if (data.type === 'image') {
-          this.$store.commit({
-            type: 'addChatRecord',
-            userId: data.userId,
-            content: {
-              'from': data.userId,
-              'to': this.staffId,
-              'url': data.url,
-              'compressedUrl': data.compressedUrl,
-              'type': data.type,
-              'time': date.toLocaleTimeString('zh-Hans-CN')
-            }
-          })
-        } else {
-          // type === 'text'
-          this.$store.commit({
-            type: 'addChatRecord',
-            userId: data.userId,
-            content: {
-              'from': data.userId,
-              'to': this.staffId,
-              'msg': data.msg,
-              'type': data.type,
-              'time': date.toLocaleTimeString('zh-Hans-CN')
-            }
-          })
-        }
-        // update notification badge
-        if (data.from !== this.chatUserId) {
-          this.$store.commit({
-            type: 'addUserUnread',
-            userId: data.from
-          })
-        }
-      })
-      // receive new user notification from socket
-      this.socket.on('newUser', (data) => {
-        console.log('New user: ' + data.userId)
-        this.$store.commit({
-          type: 'addUser',
-          content: {
-            userId: data.userId,
-            status: 'waiting'
-          }
-        })
-      })
-      // receive user stop notification from socket
-      this.socket.on('userServiceStop', (data) => {
-        console.log('User stop: ' + data.from + ' & msg: ' + data.msg)
-        this.$store.commit({
-          type: 'removeUser',
-          userId: data.from
-        })
-      })
-    },
     chatWindowScroll () {
       let element = document.getElementById('chat-window')
       if (element) {
@@ -472,13 +360,14 @@ export default {
         type: 'clearUserUnread',
         userId: this.chatUserId
       })
+      console.log('Switch user: ' + this.chatUserId)
     },
     closeChatWindow () {
       // TODO: close chat with chatUserId
     },
     getLastChatRecord (userId) {
       let chatRecord = this.chatRecordList[userId]
-      if (chatRecord) {
+      if (chatRecord.length > 0) {
         let singleRecord = chatRecord[chatRecord.length - 1]
         if (singleRecord.type === 'text') {
           return singleRecord.msg
@@ -740,7 +629,8 @@ export default {
         for (let value of body.queue.waiting) {
           arr.push({
             userId: value,
-            status: 'waiting'
+            status: 'waiting',
+            unread: 0
           })
         }
         this.$store.commit({
@@ -756,8 +646,6 @@ export default {
     }).catch(error => {
       console.log(error)
     })
-    // socket listening initialization
-    this.socketListenInit()
   },
   mounted () {
     this.uploadList = this.$refs.upload.fileList
@@ -811,7 +699,7 @@ export default {
   font-weight: Bold;
 }
 .chat-window-content {
-  height: calc(100vh - 290px);
+  height: calc(100vh - 207px);
   padding: 10px 15px;
   overflow: auto;
 }
@@ -859,13 +747,13 @@ export default {
 .chat-msg-body > .image {
   padding: 10px 10px 10px 10px;
   width: 150px;
-  height: 100px;
+  height: 150px;
   cursor: pointer;
 }
 .chat-msg-body > .file {
   padding: 10px 5px 0px 5px;
   cursor: pointer;
-  width: 300px;
+  width: 260px;
 }
 .chat-image{
   border-radius: 4px;
@@ -915,7 +803,7 @@ export default {
 }
 .chat-emoji-panel, .chat-window-upload-file-list {
   position: absolute;
-  bottom: 225px;
+  bottom: 142px;
 }
 .chat-window-upload-file-list {
   width: calc(100% - 2px);

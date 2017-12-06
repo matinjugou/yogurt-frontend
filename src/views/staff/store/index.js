@@ -11,18 +11,7 @@ export default new Vuex.Store({
     imageCompressUrl: 'http://123.206.22.71/api/v1/image/',
     isLogin: false,
     staffId: '',
-    chatRecordList: {
-      '1_u1': [
-        {
-          'from': '1_u1',
-          'to': '1_s1',
-          'url': 'http://s1.picswalls.com/wallpapers/2015/09/20/wallpaper-2015_111528356_269.jpg',
-          'compressedUrl': 'http://s1.picswalls.com/wallpapers/2015/09/20/wallpaper-2015_111528356_269.jpg',
-          'type': 'image',
-          'time': 'test_image'
-        }
-      ]
-    },
+    chatRecordList: {},
     userList: [],
     socket: null
   },
@@ -37,13 +26,17 @@ export default new Vuex.Store({
       state.staffId = payload.staffId
     },
     addChatRecord (state, payload) {
-      if (!state.chatRecordList[payload.userId]) {
+      if (state.chatRecordList[payload.userId] === undefined) {
         state.chatRecordList[payload.userId] = []
       }
       state.chatRecordList[payload.userId].push(payload.content)
+      console.log(state.chatRecordList)
     },
     refreshUserList (state, payload) {
       state.userList = payload.content
+      for (let item of state.userList) {
+        state.chatRecordList[item.userId] = []
+      }
     },
     addUser (state, payload) {
       state.userList.push(payload.content)
@@ -63,9 +56,14 @@ export default new Vuex.Store({
       }).unread = 0
     },
     addUserUnread (state, payload) {
-      state.userList.find(function (user) {
+      let user = state.userList.find(function (user) {
         return user.userId === payload.userId
-      }).unread++
+      })
+      if (user.unread) {
+        user.unread++
+      } else {
+        user['unread'] = 1
+      }
     },
     buildSocketConnect (state) {
       const io = require('socket.io-client')
