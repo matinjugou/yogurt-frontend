@@ -192,7 +192,7 @@ export default {
       this.formLogin.password = ''
     }
   },
-  beforeCreate () {
+  created () {
     this.staffBackUrl = window.location.origin + '/' + this.staffBackUrl
     this.managerBackUrl = window.location.origin + '/' + this.managerBackUrl
     // handle url params
