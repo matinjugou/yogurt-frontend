@@ -14,7 +14,8 @@ export default new Vuex.Store({
     fileCompressUrl: 'http://123.206.22.71/api/v1/image/',
     chatRecordList: [],
     userId: '',
-    staffId: ''
+    staffId: '',
+    chatState: 'robot'
   },
   mutations: {
     addChatRecord (state, payload) {

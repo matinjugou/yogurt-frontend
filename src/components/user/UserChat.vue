@@ -42,10 +42,10 @@
                         <use :xlink:href="getFileIconName(singleRecord.name)" />
                       </svg>
                     </div>
-                  <div class="chat-file-info">
-                    {{ singleRecord.name.length > 15 ? singleRecord.name.slice(0, 15) + '...' : singleRecord.name }} <br />
-                    {{ singleRecord.size}}KB
-                  </div>
+                    <div class="chat-file-info">
+                      {{ singleRecord.name.length > 15 ? singleRecord.name.slice(0, 15) + '...' : singleRecord.name }} <br />
+                      {{ singleRecord.size}}KB
+                    </div>
                 </div>
               </div>
             </li>

@@ -2,15 +2,15 @@
   <div class="user-chat">
     <div class="background">
       <div style="height: 200px"></div>
-      <Col offset="8">
+      <Col offset="4">
       <Form :model="formItem" :label-width="80">
         <FormItem label="User ID">
-          <Col span="8">
+          <Col span="16">
             <Input v-model="formItem.userId" placeholder="Enter userid here"></Input>
           </Col>
         </FormItem>
         <FormItem label="Staff ID">
-          <Col span="8">
+          <Col span="16">
             <Input v-model="formItem.staffId" placeholder="Enter staffid here"></Input>
           </Col>
         </FormItem>
