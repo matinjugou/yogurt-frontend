@@ -18,48 +18,85 @@
                   <TabPane label="客服登录" name="staff">
                     <div class="login-tab-vertical-space"></div>
                     <div class="login-input">
-                      <Input v-model="username" placeholder="客服ID" size="large" autocomplete="on" autofocus @on-keyup.enter="login">
-                        <span class="input-prepend" slot="prepend">
-                          <Icon type="person" size="20"></Icon>
-                        </span>
-                      </Input>
-                      <div class="login-input-vertical-space"></div>
-                      <Input v-model="password" type="password" placeholder="密码" size="large" @on-keyup.enter="login">
-                        <span class="input-prepend" slot="prepend">
-                          <Icon type="locked" size="20"></Icon>
-                        </span>
-                      </Input>
+                      <Form ref="formStaffLogin" :model="formStaffLogin" :rules="ruleLogin">
+                        <FormItem prop="username">
+                          <Input v-model="formStaffLogin.username" placeholder="客服ID" size="large" autocomplete="on" autofocus @on-keyup.enter="login('formStaffLogin')">
+                            <span class="input-prepend" slot="prepend">
+                              <Icon type="person" size="20"></Icon>
+                            </span>
+                          </Input>
+                        </FormItem>
+                        <FormItem prop="password">
+                          <Input v-model="formStaffLogin.password" type="password" placeholder="密码" size="large" @on-keyup.enter="login('formStaffLogin')">
+                            <span class="input-prepend" slot="prepend">
+                              <Icon type="locked" size="20"></Icon>
+                            </span>
+                          </Input>
+                        </FormItem>
+                        <FormItem>
+                           <div class="login-button">
+                            <div class="login-button-item">
+                              <!-- TODO: add forget password page and link to it-->
+                              <a class="login-link-text" href="#">忘记密码？</a>
+                            </div>
+                            <div class="login-button-item ">
+                              <Button type="success" size="large" @click="login('formStaffLogin')">
+                                <span class="login-button-text">登录系统</span>
+                              </Button>
+                            </div>
+                          </div>
+                        </FormItem>
+                      </Form>
                     </div>
                   </TabPane>
+
                   <TabPane label="管理员登录" name="manager">
                     <div class="login-tab-vertical-space"></div>
                     <div class="login-input">
-                      <Input v-model="username" placeholder="管理员ID" size="large" autocomplete="on" autofocus @on-keyup.enter="login">
-                        <span class="input-prepend" slot="prepend">
-                          <Icon type="person" size="20"></Icon>
-                        </span>
-                      </Input>
-                      <div class="login-input-vertical-space"></div>
-                      <Input v-model="password" type="password" placeholder="密码" size="large" @on-keyup.enter="login">
-                        <span class="input-prepend" slot="prepend">
-                          <Icon type="locked" size="20"></Icon>
-                        </span>
-                      </Input>
+                      <Form ref="formManagerLogin" :model="formManagerLogin" :rules="ruleLogin">
+                        <FormItem prop="username">
+                          <Input v-model="formManagerLogin.username" placeholder="管理员ID" size="large" autocomplete="on" autofocus @on-keyup.enter="login('formManagerLogin')">
+                            <span class="input-prepend" slot="prepend">
+                              <Icon type="person" size="20"></Icon>
+                            </span>
+                          </Input>
+                        </FormItem>
+                        <FormItem prop="password">
+                          <Input v-model="formManagerLogin.password" type="password" placeholder="密码" size="large" @on-keyup.enter="login('formManagerLogin')">
+                            <span class="input-prepend" slot="prepend">
+                              <Icon type="locked" size="20"></Icon>
+                            </span>
+                          </Input>
+                        </FormItem>
+                        <FormItem>
+                           <div class="login-button">
+                            <div class="login-button-item">
+                              <!-- TODO: add forget password page and link to it-->
+                              <a class="login-link-text" href="#">忘记密码？</a>
+                            </div>
+                            <div class="login-button-item ">
+                              <Button type="success" size="large" @click="login('formManagerLogin')">
+                                <span class="login-button-text">登录系统</span>
+                              </Button>
+                            </div>
+                          </div>
+                        </FormItem>
+                      </Form>
                     </div>
                   </TabPane>
                 </Tabs>
                 
-                <div class="login-button">
-                  <div class="login-button-item">
+                <!-- <div class="login-button"> -->
+                  <!-- <div class="login-button-item"> -->
                     <!-- TODO: add forget password page and link to it-->
-                    <a class="login-link-text" href="#">忘记密码？</a>
-                  </div>
-                  <div class="login-button-item ">
-                    <Button type="success" size="large" @click="login">
-                      <span class="login-button-text">登录系统</span>
-                    </Button>
-                  </div>
-                </div>
+                    <!-- <a class="login-link-text" href="#">忘记密码？</a> -->
+                  <!-- </div> -->
+                  <!-- <div class="login-button-item "> -->
+                    <!-- <Button type="success" size="large" @click="login"> -->
+                      <!-- <span class="login-button-text">登录系统</span> -->
+                    <!-- </Button> -->
+                  <!-- </div> -->
+                <!-- </div> -->
               </div>
             </div>
           </transition>
@@ -78,71 +115,94 @@ export default {
       msg: '欢迎使用Yogurt客服系统',
       showAction: false,
       type: 'staff',
-      username: '',
-      password: '',
       staffBackUrl: 'staff',
-      managerBackUrl: 'manager'
+      managerBackUrl: 'manager',
+      formStaffLogin: {
+        username: '',
+        password: ''
+      },
+      formManagerLogin: {
+        username: '',
+        password: ''
+      },
+      ruleLogin: {
+        username: [
+          {
+            required: true,
+            message: '用户ID不能为空',
+            trigger: 'blur'
+          }
+        ],
+        password: [
+          {
+            required: true,
+            message: '密码不能为空',
+            trigger: 'blur'
+          }
+        ]
+      }
     }
   },
   methods: {
-    login () {
-      let type = this.type
-      let username = this.username
-      let password = this.password
-      if ((username === '') || (password === '')) {
-        this.$Notice.error({
-          content: '用户名和密码不能为空！',
-          duration: 3,
-          closable: true
-        })
-        return
-      }
-      let url = ''
-      if (type === 'staff') {
-        url = this.$store.state.staffLoginUrl
-      } else if (type === 'manager') {
-        url = this.$store.state.managerLoginUrl
-      }
-      let reqBody = {}
-      reqBody[type + 'Id'] = username
-      reqBody['password'] = password
-      // TODO: encrypted the password
-      // TODO: Use axios to send http request
-      // TODO: handle response
-      // else pop wrong message
-      axios.post(url, reqBody).then(response => {
-        console.log(response)
-        let body = response.data.data
-        console.log(body)
-        if (body.code === 0) {
-          // successfully login
-          window.localStorage.setItem('type', type)
-          window.localStorage.setItem('id', username)
-          window.localStorage.setItem('token', body.token)
+    login (name) {
+      console.log(this[name])
+      this.$refs[name].validate((valid) => {
+        if (valid) {
+          let type = this.type
+          let url = ''
+          let username = this[name].username
+          let password = this[name].password
           if (type === 'staff') {
-            window.location.href = this.staffBackUrl
+            url = this.$store.state.staffLoginUrl
           } else if (type === 'manager') {
-            window.location.href = this.managerBackUrl
+            url = this.$store.state.managerLoginUrl
           }
-        } else if (body.code === 2 && type === 'staff') {
-          window.location.href = window.location.origin + '/staff-first-login?staffId=' + username
+          let reqBody = {}
+          reqBody[type + 'Id'] = username
+          reqBody['password'] = password
+          // TODO: encrypted the password
+          // TODO: Use axios to send http request
+          // TODO: handle response
+          // else pop wrong message
+          axios.post(url, reqBody).then(response => {
+            console.log(response)
+            let body = response.data.data
+            console.log(body)
+            if (body.code === 0) {
+              // successfully login
+              window.localStorage.setItem('type', type)
+              window.localStorage.setItem('id', username)
+              window.localStorage.setItem('token', body.token)
+              if (type === 'staff') {
+                window.location.href = this.staffBackUrl
+              } else if (type === 'manager') {
+                window.location.href = this.managerBackUrl
+              }
+            } else if (body.code === 2 && type === 'staff') {
+              window.location.href = window.location.origin + '/staff-first-login?staffId=' + username
+            } else {
+              // error login
+              this.$Notice.error({
+                title: '用户名或密码错误'
+              })
+            }
+          }).catch(error => {
+            console.log(error)
+            this.$Notice.error({
+              title: '服务器发生错误，请稍后再试...'
+            })
+          })
         } else {
-          // error login
           this.$Notice.error({
-            title: '用户名或密码错误'
+            title: '请输入用户名和密码'
           })
         }
-      }).catch(error => {
-        console.log(error)
-        this.$Notice.error({
-          title: '服务器发生错误，请稍后再试...'
-        })
       })
     },
     changeType (name) {
       this.type = name
-      this.username = ''
-      this.password = ''
+      this.formLogin.username = ''
+      this.formLogin.password = ''
     }
   },
   created () {
@@ -240,9 +300,6 @@ export default {
 }
 .login-action {
   width: 280px;
-}
-.login-input-vertical-space {
-  height: 40px;
 }
 .login-input {
   margin-bottom: 40px;
