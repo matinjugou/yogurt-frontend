@@ -13,6 +13,13 @@
           <FormItem prop="phoneNumber" label="手机号">
             <Input v-model="formInfo.phoneNumber" size="large" placeholder="你的手机号" @on-keyup.enter="gotoNextStep"></Input>
           </FormItem>
+          <FormItem prop="staffType" label="客服类型">
+            <Select v-model="formInfo.staffType" placeholder="请选择客服类型">
+              <Option v-for="(item, index) in staffTypeList" :key="index" :value="item">
+                {{ item }}
+              </Option>
+            </Select>
+          </FormItem>
         </Form>
       </div>
     </div>
@@ -30,10 +37,12 @@ export default {
   name: 'AddInfo',
   data () {
     return {
+      staffTypeList: ['种类1', '种类2', '种类3'],
       formInfo: {
         name: '',
         nickName: '',
-        phoneNumber: ''
+        phoneNumber: '',
+        staffType: ''
       },
       ruleInfo: {
         name: [
@@ -61,6 +70,13 @@ export default {
             message: '手机号格式有误',
             trigger: 'blur'
           }
+        ],
+        staffType: [
+          {
+            required: true,
+            message: '请选择客服类型',
+            trigger: 'blur'
+          }
         ]
       }
     }
@@ -78,7 +94,8 @@ export default {
             type: 'changeInfo',
             name: this.formInfo.name,
             nickName: this.formInfo.nickName,
-            phoneNumber: this.formInfo.phoneNumber
+            phoneNumber: this.formInfo.phoneNumber,
+            staffType: this.formInfo.staffType
           })
           this.$store.commit('addCurrent')
           this.$store.commit('rightDirection')
@@ -94,9 +111,11 @@ export default {
       type: 'changeCurrent',
       current: 1
     })
+    // TODO: get staff types set by company
     this.formInfo.name = this.$store.state.name
     this.formInfo.nickName = this.$store.state.nickName
     this.formInfo.phoneNumber = this.$store.state.phoneNumber
+    this.formInfo.staffType = this.$store.state.staffType
   }
 }
 </script>
@@ -114,7 +133,7 @@ export default {
 }
 .info-input-content {
   width: 100%;
-  padding: 0 30% 0 30%;
+  padding: 0 35% 0 35%;
 }
 .bottom-button {
   display: flex;

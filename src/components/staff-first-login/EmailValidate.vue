@@ -89,6 +89,7 @@ export default {
       isValidated: false,
       sendEmailCaption: '发送验证邮件',
       sendEmailCoolDown: 0,
+      intervalId: '',
       validateButtonType: 'primary',
       validateLoading: false,
       validateStatus: '',
@@ -120,14 +121,24 @@ export default {
             this.$Notice.success({
               title: '邮件已发送，请查收'
             })
+            // TODO: change it into server time
+            this.sendEmailCoolDown = 10
+            let _this = this
+            this.intervalId = window.setInterval(function () {
+              if (_this.sendEmailCoolDown > 0) {
+                _this.sendEmailCoolDown--
+                _this.sendEmailCaption = '重新发送(' + _this.sendEmailCoolDown + 's)'
+              } else {
+                _this.sendEmailCaption = '发送验证邮件'
+                window.clearInterval(_this.intervalId)
+              }
+            }, 1000)
           }).catch(error => {
             this.$Notice.error({
               title: '邮件发送失败，请稍后再试'
             })
             console.log(error)
           })
-          // TODO: add send email cool down
-          // this.sendEmailCoolDown = 60
         } else {
           // fail to satisfy email format
         }
@@ -179,6 +190,10 @@ export default {
       type: 'changeCurrent',
       current: 3
     })
+    if (this.$store.state.email !== '') {
+      this.formEmail.tempEmail = this.$store.state.email
+      this.isValidated = true
+    }
   }
 }
 </script>

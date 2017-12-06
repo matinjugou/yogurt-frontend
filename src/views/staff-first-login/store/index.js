@@ -11,6 +11,7 @@ export default new Vuex.Store({
     name: '',
     nickName: '',
     phoneNumber: '',
+    staffType: '',
     avatarUrl: '',
     email: '',
     slideFadeDirection: 'right'
@@ -28,10 +29,14 @@ export default new Vuex.Store({
     changePhoneNumber (state, payload) {
       state.phoneNumber = payload.phoneNumber
     },
+    changeStaffType (state, payload) {
+      state.staffType = payload.staffType
+    },
     changeInfo (state, payload) {
       state.name = payload.name
       state.nickName = payload.nickName
       state.phoneNumber = payload.phoneNumber
+      state.staffType = payload.staffType
     },
     changeAvatarUrl (state, payload) {
       state.avatarUrl = payload.avatarUrl

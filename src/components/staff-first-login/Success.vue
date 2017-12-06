@@ -1,6 +1,6 @@
 <template>
   <div class="success">
-    <h1>这里是注册成功界面</h1>
+    <h1>注册成功！</h1>
     <div class="bottom-button">
       <!-- only for debug use -->
       <Button type="error" icon="chevron-left" @click="gotoPrevStep">上一步</Button>
