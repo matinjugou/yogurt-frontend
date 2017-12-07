@@ -13,6 +13,7 @@ Vue.config.productionTip = false
 Vue.use(Vuex)
 Vue.use(iView)
 Vue.component('picker', Picker)
+Vue.component('el-upload', Upload)
 
 /* eslint-disable no-new */
 new Vue({

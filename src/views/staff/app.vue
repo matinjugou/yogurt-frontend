@@ -124,8 +124,9 @@ export default {
             type: 'addChatRecord',
             userId: data.userId,
             content: {
-              'from': data.userId,
-              'to': this.staffId,
+              'userId': data.userId,
+              'staffId': this.staffId,
+              'direction': 'in',
               'url': data.url,
               'name': data.name,
               'size': data.size,
@@ -139,8 +140,9 @@ export default {
             type: 'addChatRecord',
             userId: data.userId,
             content: {
-              'from': data.userId,
-              'to': this.staffId,
+              'userId': data.userId,
+              'staffId': this.staffId,
+              'direction': 'in',
               'url': data.url,
               'compressedUrl': data.compressedUrl,
               'type': data.type,
@@ -153,8 +155,9 @@ export default {
             type: 'addChatRecord',
             userId: data.userId,
             content: {
-              'from': data.userId,
-              'to': this.staffId,
+              'userId': data.userId,
+              'staffId': this.staffId,
+              'direction': 'in',
               'msg': data.msg,
               'type': data.type,
               'time': date.toLocaleTimeString('zh-Hans-CN')
