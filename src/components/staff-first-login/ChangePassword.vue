@@ -20,7 +20,7 @@
     <div class="bottom-button">
       <Button type="error" icon="chevron-left" @click="gotoPrevStep">上一步</Button>
       <div class="horizontal-spacing"></div>
-      <Button type="success" icon="chevron-right" @click="register">注册</Button>
+      <Button :loading="registerLoading" type="success" icon="chevron-right" @click="register">注册</Button>
     </div>
   </div>
 </template>
@@ -58,7 +58,8 @@ export default {
             trigger: 'blur'
           }
         ]
-      }
+      },
+      registerLoading: false
     }
   },
   computed: {
@@ -101,6 +102,7 @@ export default {
             let body = response.data.data
             if (body.code === 0 || body.code === 2) {
               if (this.checkAllInfoNotEmpty()) {
+                this.registerLoading = true
                 axios.post(this.httpServerUrl + '/account-info', {
                   staffId: this.staffId,
                   name: this.$store.state.name,
