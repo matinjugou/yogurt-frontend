@@ -36,7 +36,7 @@
               <p class="chat-msg-time">
                 <span>{{ singleRecord.time }}</span>
               </p>
-              <div class="chat-msg-body" :class="[{'from-me': singleRecord.from.startsWith('1_u')}]">
+              <div class="chat-msg-body" :class="[{'from-me': singleRecord.from === userId}]">
                 <div class="avatar chat-single-record">
                   <Avatar shape="square" icon="person"/>
                 </div>
@@ -273,7 +273,7 @@
           // debug
           console.log(body)
           if (!body || body.code !== 0) {
-            this.$Message.info('抱歉，暂时没有空闲的人工客服，请您耐心等待。')
+            self.$Message.info('抱歉，暂时没有空闲的该种类人工客服，请您耐心等待。')
           } else {
             // tell staff to update queue
             self.socket.emit('updateQueue', {staffId: body.msg, token: self.token})
@@ -303,7 +303,7 @@
       })
       // send userreg message
       const io = require('socket.io-client')
-      this.socket = io('http://yogurt.magichc7.com')
+      this.socket = io(this.$store.state.socketIoServerUrl)
       this.socket.emit('userReg', {userId: this.userId, token: this.token})
       // debug
       console.log('Sent userReg.')
