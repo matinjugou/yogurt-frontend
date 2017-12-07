@@ -2,15 +2,15 @@
   <div class="user-chat">
     <div class="background">
       <div style="height: 200px"></div>
-      <Col offset="8">
+      <Col offset="4">
       <Form :model="formItem" :label-width="80">
         <FormItem label="User ID">
-          <Col span="8">
+          <Col span="16">
             <Input v-model="formItem.userId" placeholder="Enter userid here"></Input>
           </Col>
         </FormItem>
         <FormItem label="Staff ID">
-          <Col span="8">
+          <Col span="16">
             <Input v-model="formItem.staffId" placeholder="Enter staffid here"></Input>
           </Col>
         </FormItem>
@@ -81,16 +81,15 @@
         }
       },
       toChatPage () {
-//        if (this.isPC()) {
-//          this.$router.push({name: 'robot'})
-//        } else {
-//          this.$router.push({name: 'mobile'})
-//        }
-        if (this.chatState !== 'chat') {
-          window.localStorage.setItem('chatState', 'robot')
-          this.$router.push({name: 'robot'})
+        if (this.isPC()) {
+          if (this.chatState !== 'chat') {
+            window.localStorage.setItem('chatState', 'robot')
+            this.$router.push({name: 'robot'})
+          } else {
+            this.$router.push({name: 'chat'})
+          }
         } else {
-          this.$router.push({name: 'chat'})
+          window.location.href = window.location.origin + '/user-mobile'
         }
       }
     },

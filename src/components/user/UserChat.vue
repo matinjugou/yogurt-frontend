@@ -26,7 +26,7 @@
               <p class="chat-msg-time">
                 <span>{{ singleRecord.time }}</span>
               </p>
-              <div class="chat-msg-body" :class="[{'from-me': singleRecord.from.indexOf('_u') >= 0}]">
+              <div class="chat-msg-body" :class="[{'from-me': singleRecord.from === userId}]">
                 <div class="avatar chat-single-record">
                   <Avatar shape="square" icon="person"/>
                 </div>
@@ -42,10 +42,10 @@
                         <use :xlink:href="getFileIconName(singleRecord.name)" />
                       </svg>
                     </div>
-                  <div class="chat-file-info">
-                    {{ singleRecord.name.length > 15 ? singleRecord.name.slice(0, 15) + '...' : singleRecord.name }} <br />
-                    {{ singleRecord.size}}KB
-                  </div>
+                    <div class="chat-file-info">
+                      {{ singleRecord.name.length > 15 ? singleRecord.name.slice(0, 15) + '...' : singleRecord.name }} <br />
+                      {{ singleRecord.size}}KB
+                    </div>
                 </div>
               </div>
             </li>
@@ -765,7 +765,7 @@
       })
       // send userreg message
       const io = require('socket.io-client')
-      this.socket = io('http://yogurt.magichc7.com')
+      this.socket = io(this.$store.state.socketIoServerUrl)
       this.socket.emit('userReg', {userId: this.userId, token: this.token})
       // debug
       console.log('Sent userReg.')
