@@ -35,7 +35,9 @@ export default new Vuex.Store({
     refreshUserList (state, payload) {
       state.userList = payload.content
       for (let item of state.userList) {
-        state.chatRecordList[item.userId] = []
+        if (state.chatRecordList[item.userId] === undefined) {
+          state.chatRecordList[item.userId] = []
+        }
       }
     },
     addUser (state, payload) {
@@ -51,16 +53,23 @@ export default new Vuex.Store({
       state.userList.splice(userIndex, 1)
     },
     clearUserUnread (state, payload) {
-      state.userList.find(function (user) {
-        return user.userId === payload.userId
-      }).unread = 0
+      let user = state.userList.find(function (u) {
+        return u.userId === payload.userId
+      })
+      if (user === undefined) {
+        return
+      }
+      user['unread'] = 0
     },
     addUserUnread (state, payload) {
-      let user = state.userList.find(function (user) {
-        return user.userId === payload.userId
+      let user = state.userList.find(function (u) {
+        return u.userId === payload.userId
       })
-      if (user.unread) {
-        user.unread++
+      if (user === undefined) {
+        return
+      }
+      if (typeof user.unread === 'number') {
+        user['unread']++
       } else {
         user['unread'] = 1
       }
