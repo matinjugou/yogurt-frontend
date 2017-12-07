@@ -376,7 +376,7 @@
 //      window.localStorage.setItem('staffId', '1_s1')
       // send userreg message
       const io = require('socket.io-client')
-      this.socket = io('http://yogurt.magichc7.com')
+      this.socket = io(this.$store.state.socketIoServerUrl)
       this.socket.emit('userReg', {userId: this.userId, token: this.token})
       // debug
       console.log('Sent userReg.')

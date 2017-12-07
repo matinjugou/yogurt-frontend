@@ -5,6 +5,7 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
+    socketIoServerUrl: 'http://yogurt.magichc7.com',
     userLoginUrl: 'http://yogurt.magichc7.com/api/user/login',
     apiServerUrl: 'http://yogurt.magichc7.com/api/user',
     fileServerUrl: 'http://123.206.22.71/api/v2/file/',
