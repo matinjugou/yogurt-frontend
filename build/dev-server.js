@@ -91,7 +91,7 @@ devMiddleware.waitUntilValid(() => {
       _reject(err)
     }
     process.env.PORT = port
-    var uri = '183.172.116.115:' + port
+    var uri = '183.173.34.116:' + port
     console.log('> Listening at ' + uri + '\n')
     // when env is testing, don't need open it
     if (autoOpenBrowser && process.env.NODE_ENV !== 'testing') {

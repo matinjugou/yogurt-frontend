@@ -183,6 +183,9 @@
   .layout-hide-text .layout-text{
     display: none;
   }
+  .ivu-modal-body {
+    height: auto;
+  }
   .ivu-col{
     transition: width .2s ease-in-out;
   }
