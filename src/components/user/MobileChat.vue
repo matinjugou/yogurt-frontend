@@ -15,7 +15,7 @@
             <p class="chat-msg-time">
               <span>{{ singleRecord.time }}</span>
             </p>
-            <div class="chat-msg-body" :class="[{'from-me': singleRecord.from.indexOf('_u') >= 0}]">
+            <div class="chat-msg-body" :class="[{'from-me': singleRecord.from === userId}]">
               <div class="avatar chat-single-record">
                 <v-avatar size="40px" class="indigo">
                   <v-icon dark>account_circle</v-icon>
@@ -358,6 +358,8 @@
         self.scrollToBottom()
       }
       // if haven't logged in, redirect to login page
+      // debug
+      console.log('userId in mobilechat: ' + self.userId)
       axios.get(self.$store.state.userLoginUrl, {
         params: {
           'userId': self.userId,
@@ -370,8 +372,8 @@
         }
       })
       // for debug
-      window.localStorage.setItem('userId', '1_u1')
-      window.localStorage.setItem('staffId', '1_s1')
+//      window.localStorage.setItem('userId', '1_u1')
+//      window.localStorage.setItem('staffId', '1_s1')
       // send userreg message
       const io = require('socket.io-client')
       this.socket = io('http://yogurt.magichc7.com')

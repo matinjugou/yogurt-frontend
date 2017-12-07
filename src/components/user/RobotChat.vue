@@ -36,7 +36,7 @@
               <p class="chat-msg-time">
                 <span>{{ singleRecord.time }}</span>
               </p>
-              <div class="chat-msg-body" :class="[{'from-me': singleRecord.from.startsWith('1_u')}]">
+              <div class="chat-msg-body" :class="[{'from-me': singleRecord.from === userId}]">
                 <div class="avatar chat-single-record">
                   <Avatar shape="square" icon="person"/>
                 </div>
