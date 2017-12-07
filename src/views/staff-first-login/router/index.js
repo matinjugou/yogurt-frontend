@@ -1,13 +1,14 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Welcome from '@/components/staff-first-login/Welcome.vue'
-import AddInfo from '@/components/staff-first-login/AddInfo.vue'
-import UploadAvatar from '@/components/staff-first-login/UploadAvatar.vue'
-import EmailValidate from '@/components/staff-first-login/EmailValidate.vue'
-import ChangePassword from '@/components/staff-first-login/ChangePassword.vue'
-import Success from '@/components/staff-first-login/Success.vue'
 
 Vue.use(Router)
+
+const Welcome = () => import('@/components/staff-first-login/Welcome.vue')
+const AddInfo = () => import('@/components/staff-first-login/AddInfo.vue')
+const UploadAvatar = () => import('@/components/staff-first-login/UploadAvatar.vue')
+const EmailValidate = () => import('@/components/staff-first-login/EmailValidate.vue')
+const ChangePassword = () => import('@/components/staff-first-login/ChangePassword.vue')
+const Success = () => import('@/components/staff-first-login/Success.vue')
 
 export default new Router({
   routes: [
