@@ -370,7 +370,7 @@ export default {
       if (chatRecord.length > 0) {
         let singleRecord = chatRecord[chatRecord.length - 1]
         if (singleRecord.type === 'text') {
-          return singleRecord.msg.length > 8 ? singleRecord.msg.slice(0, 8) + '...' : singleRecord.msg 
+          return singleRecord.msg.length > 8 ? singleRecord.msg.slice(0, 8) + '...' : singleRecord.msg
         } else if (singleRecord.type === 'image') {
           return '[图片]'
         } else if (singleRecord.type === 'file') {
