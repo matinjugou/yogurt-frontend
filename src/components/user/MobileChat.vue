@@ -389,9 +389,6 @@
       })
       // socket messages
       this.socket.on('staffMsg', (data) => {
-        // debug
-        console.log(data)
-        console.log(self.currentChatRecord)
         let newMsg = {
           'time': data.time,
           'from': data.staffId,
@@ -405,8 +402,6 @@
           type: 'addChatRecord',
           content: newMsg
         })
-        // debug
-        console.log(self.currentChatRecord)
       })
       this.socket.on('sendResult', (data) => {
         // TO DO

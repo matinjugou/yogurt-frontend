@@ -226,35 +226,35 @@
     },
     methods: {
       sendMessage () {
-        let sendMsg = this.inputText
-        if (sendMsg === '') {
-          this.$Notice.warning({
-            title: '不可以发送空消息！'
-          })
-          return
-        }
-        let time = this.getCurrentTime()
-        // send text msg
-        this.$store.commit({
-          type: 'addChatRecord',
-          content: {
-            'from': this.userId,
-            'to': this.staffId,
-            'msg': sendMsg,
-            'type': 'text',
-            'time': time
-            // 'hasSent': false
-          }
-        })
-        this.socket.emit('userMsg', {
-          'staffId': this.staffId,
-          'userId': this.userId,
-          'token': this.token,
-          'msg': sendMsg,
-          'type': 'text'
-        })
-        // clear input
-        this.inputText = ''
+//        let sendMsg = this.inputText
+//        if (sendMsg === '') {
+//          this.$Notice.warning({
+//            title: '不可以发送空消息！'
+//          })
+//          return
+//        }
+//        let time = this.getCurrentTime()
+//        // send text msg
+//        this.$store.commit({
+//          type: 'addChatRecord',
+//          content: {
+//            'from': this.userId,
+//            'to': this.staffId,
+//            'msg': sendMsg,
+//            'type': 'text',
+//            'time': time
+//            // 'hasSent': false
+//          }
+//        })
+//        this.socket.emit('userMsg', {
+//          'staffId': this.staffId,
+//          'userId': this.userId,
+//          'token': this.token,
+//          'msg': sendMsg,
+//          'type': 'text'
+//        })
+//        // clear input
+//        this.inputText = ''
       },
       getCurrentTime () {
         let curDate = new Date()
@@ -279,7 +279,7 @@
             self.$Message.info('抱歉，暂时没有空闲的该种类人工客服，请您耐心等待。')
           } else {
             // tell staff to update queue
-            self.socket.emit('updateQueue', {staffId: body.msg, token: self.token})
+//            self.socket.emit('updateQueue', {staffId: body.msg, token: self.token})
             window.localStorage.setItem('staffId', body.msg)
             window.localStorage.setItem('chatState', 'chat')
             self.$router.push({name: 'chat', userId: self.userId, staffId: body.msg})

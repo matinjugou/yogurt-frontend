@@ -362,37 +362,37 @@
       },
       sendMessage () {
         // debug
-        console.log('sending message: ' + this.inputText)
-        let sendMsg = this.inputText
-        if (sendMsg === '') {
-          // debug
-          console.log('不能发送空消息！')
-          return
-        }
-        let time = this.getCurrentTime()
-        // send text msg
-        if (sendMsg !== '') {
-          this.$store.commit({
-            type: 'addChatRecord',
-            content: {
-              'from': this.userId,
-              'to': this.staffId,
-              'msg': sendMsg,
-              'type': 'text',
-              'time': time
-              // 'hasSent': false
-            }
-          })
-          this.socket.emit('userMsg', {
-            staffId: this.staffId,
-            userId: this.userId,
-            token: this.token,
-            msg: sendMsg,
-            type: 'text'
-          })
-          // clear input
-          this.inputText = ''
-        }
+//        console.log('sending message: ' + this.inputText)
+//        let sendMsg = this.inputText
+//        if (sendMsg === '') {
+//          // debug
+//          console.log('不能发送空消息！')
+//          return
+//        }
+//        let time = this.getCurrentTime()
+//        // send text msg
+//        if (sendMsg !== '') {
+//          this.$store.commit({
+//            type: 'addChatRecord',
+//            content: {
+//              'from': this.userId,
+//              'to': this.staffId,
+//              'msg': sendMsg,
+//              'type': 'text',
+//              'time': time
+//              // 'hasSent': false
+//            }
+//          })
+//          this.socket.emit('userMsg', {
+//            staffId: this.staffId,
+//            userId: this.userId,
+//            token: this.token,
+//            msg: sendMsg,
+//            type: 'text'
+//          })
+//          // clear input
+//          this.inputText = ''
+//        }
       },
       getCurrentTime () {
         let curDate = new Date()
