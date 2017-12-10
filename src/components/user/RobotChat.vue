@@ -305,31 +305,28 @@
         }
       })
       // send userreg message
-      const io = require('socket.io-client')
-      this.socket = io(this.$store.state.socketIoServerUrl)
-      this.socket.emit('userReg', {userId: this.userId, token: this.token})
-      // debug
-      console.log('Sent userReg.')
-      this.socket.on('regResult', (data) => {
-        // debug
-        console.log('Register result: code: ' + data['code'] + ', msg: ' + data['msg'])
-      })
-      this.socket.on('staffMsg', (data) => {
-        let newMsg = {
-          'time': data.time,
-          'from': data.staffId,
-          'to': data.userId,
-          'type': data.type,
-          'msg': data.msg
-        }
-        this.currentChatRecord.push(newMsg)
-      })
-      this.socket.on('sendResult', (data) => {
-        // TO DO
-      })
-    },
-    mounted () {
-      this.uploadList = this.$refs.upload.fileList
+//      const io = require('socket.io-client')
+//      this.socket = io(this.$store.state.socketIoServerUrl)
+//      this.socket.emit('userReg', {userId: this.userId, token: this.token})
+//      // debug
+//      console.log('Sent userReg.')
+//      this.socket.on('regResult', (data) => {
+//        // debug
+//        console.log('Register result: code: ' + data['code'] + ', msg: ' + data['msg'])
+//      })
+//      this.socket.on('staffMsg', (data) => {
+//        let newMsg = {
+//          'time': data.time,
+//          'from': data.staffId,
+//          'to': data.userId,
+//          'type': data.type,
+//          'msg': data.msg
+//        }
+//        this.currentChatRecord.push(newMsg)
+//      })
+//      this.socket.on('sendResult', (data) => {
+//        // TO DO
+//      })
     },
     updated () {
       this.scrollToBottom()

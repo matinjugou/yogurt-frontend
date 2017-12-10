@@ -7,6 +7,9 @@
 <script>
   export default {
     name: 'app',
+    beforeCreate () {
+      this.$store.commit('buildSocketConnect')
+    },
     created () {
       this.$router.push('login')
     }

@@ -447,39 +447,39 @@
 //      window.localStorage.setItem('userId', '1_u1')
 //      window.localStorage.setItem('staffId', '1_s1')
       // send userreg message
-      const io = require('socket.io-client')
-      this.socket = io(this.$store.state.socketIoServerUrl)
-      this.socket.emit('userReg', {userId: this.userId, token: this.token})
-      // debug
-      console.log('Sent userReg.')
-      this.socket.on('regResult', (data) => {
-        // debug
-        console.log('Register result: code: ' + data['code'] + ', msg: ' + data['msg'])
-      })
-      // socket messages
-      this.socket.on('staffMsg', (data) => {
-        // debug
-        console.log(data)
-        console.log(self.currentChatRecord)
-        let newMsg = {
-          'time': data.time,
-          'from': data.staffId,
-          'to': data.userId,
-          'type': data.type
-        }
-        if (data.type === 'text') {
-          newMsg.msg = data.msg
-        }
-        self.$store.commit({
-          type: 'addChatRecord',
-          content: newMsg
-        })
-        // debug
-        console.log(self.currentChatRecord)
-      })
-      this.socket.on('sendResult', (data) => {
-        // TO DO
-      })
+//      const io = require('socket.io-client')
+//      this.socket = io(this.$store.state.socketIoServerUrl)
+//      this.socket.emit('userReg', {userId: this.userId, token: this.token})
+//      // debug
+//      console.log('Sent userReg.')
+//      this.socket.on('regResult', (data) => {
+//        // debug
+//        console.log('Register result: code: ' + data['code'] + ', msg: ' + data['msg'])
+//      })
+//      // socket messages
+//      this.socket.on('staffMsg', (data) => {
+//        // debug
+//        console.log(data)
+//        console.log(self.currentChatRecord)
+//        let newMsg = {
+//          'time': data.time,
+//          'from': data.staffId,
+//          'to': data.userId,
+//          'type': data.type
+//        }
+//        if (data.type === 'text') {
+//          newMsg.msg = data.msg
+//        }
+//        self.$store.commit({
+//          type: 'addChatRecord',
+//          content: newMsg
+//        })
+//        // debug
+//        console.log(self.currentChatRecord)
+//      })
+//      this.socket.on('sendResult', (data) => {
+//        // TO DO
+//      })
     },
     mounted () {
       this.scrollToBottom()
