@@ -16,11 +16,16 @@ export default new Vuex.Store({
     chatRecordList: [],
     userId: '',
     staffId: '',
-    chatState: 'robot'
+    chatState: 'robot',
+    socket: null
   },
   mutations: {
     addChatRecord (state, payload) {
       state.chatRecordList.push(payload.content)
+    },
+    buildSocketConnect (state) {
+      const io = require('socket.io-client')
+      state.socket = io(state.socketIoServerUrl)
     }
   }
 })
