@@ -4,7 +4,7 @@
       <div style="height: 200px"></div>
       <Col offset="4">
       <Form :model="formItem" :label-width="80">
-        <FormItem label="User ID">
+        <!--FormItem label="User ID">
           <Col span="16">
             <Input v-model="formItem.userId" placeholder="Enter userid here"></Input>
           </Col>
@@ -13,7 +13,7 @@
           <Col span="16">
             <Input v-model="formItem.staffId" placeholder="Enter staffid here"></Input>
           </Col>
-        </FormItem>
+        </FormItem-->
         <FormItem>
           <Button type="primary" @click="submit()">Submit</Button>
         </FormItem>
@@ -48,13 +48,16 @@
     },
     methods: {
       submit () {
+        /*
         if (!this.isValidInputs()) {
           console.log('invalid intpus: userid=' + this.formItem.userId + ', staffid=' + this.formItem.staffId)
           return
         }
+        */
         const self = this
         axios.post(self.$store.state.userLoginUrl, {
-          'userId': self.formItem.userId
+          // 'userId': self.formItem.userId
+          'userId': '1_u' + String(Math.floor(Math.random() * 10000))
         }).then(response => {
           let body = response.data.data
           // debug

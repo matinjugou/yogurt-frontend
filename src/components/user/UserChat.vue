@@ -744,6 +744,9 @@
         console.log('show large image, src: ' + src)
         this.showLargeImageModal = true
         this.largeImageSrc = src
+      },
+      logout () {
+        // TODO
       }
     },
     created () {
@@ -809,6 +812,11 @@
     mounted () {
       this.uploadList = this.$refs.upload.fileList
       this.scrollToBottom()
+      const self = this
+      window.onbeforeunload = function () {
+        self.logout()
+        return true
+      }
     },
     updated () {
       this.scrollToBottom()
