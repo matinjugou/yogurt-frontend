@@ -124,7 +124,7 @@
           </div>
         </div>
         <div class="chat-input">
-          <Input v-model="inputText" type="textarea" :rows="8" placeholder="在这里输入信息，按Ctrl+Enter发送"></Input>
+          <Input v-model="inputText" type="textarea" :rows="8" placeholder="在这里输入信息，按Ctrl+Enter发送" @on-keyup.ctrl.enter="sendMessage"></Input>
         </div>
         </Col>
       </Row>
@@ -748,8 +748,15 @@
         this.showLargeImageModal = true
         this.largeImageSrc = src
       },
-      logout () {
+      logout (event) {
         // TODO
+        alert('你确定要离开吗？')
+        event.preventDefault()
+        this.socket.emit('userLogOut', {
+          userId: this.userId,
+          token: this.token
+        })
+        window.localStorage.clear()
       }
     },
     created () {
@@ -813,18 +820,17 @@
         // debug
         console.log(data)
       })
+      window.addEventListener('beforeunload', e => this.logout(e))
     },
     mounted () {
       this.uploadList = this.$refs.upload.fileList
       this.scrollToBottom()
-      const self = this
-      window.onbeforeunload = function () {
-        self.logout()
-        return true
-      }
     },
     updated () {
       this.scrollToBottom()
+    },
+    beforeDestroyed () {
+      window.removeEventListener('beforeunload', e => this.logout(e))
     }
   }
 </script>

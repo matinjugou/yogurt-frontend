@@ -55,17 +55,17 @@
         }
         */
         const self = this
+        const randomUserId = '1_u' + String(Math.floor(Math.random() * 1000))
         axios.post(self.$store.state.userLoginUrl, {
           // 'userId': self.formItem.userId
-          'userId': '1_u' + String(Math.floor(Math.random() * 10000))
+          'userId': randomUserId
         }).then(response => {
           let body = response.data.data
           // debug
           console.log(body.token)
           if (body.code === 0) {
             window.localStorage.setItem('token', body.token)
-            window.localStorage.setItem('userId', self.formItem.userId)
-            window.localStorage.setItem('staffId', self.formItem.staffId)
+            window.localStorage.setItem('userId', randomUserId)
             self.toChatPage()
           }
         })

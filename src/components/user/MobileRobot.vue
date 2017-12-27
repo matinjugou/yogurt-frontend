@@ -334,6 +334,9 @@
       },
       chatState () {
         return window.localStorage.getItem('chatState')
+      },
+      socket () {
+        return this.$store.state.socket
       }
 //      chatRecordContainerHeight () {
 //        return (this.vh - (this.functionPanelVisible ? 179 : 121))
