@@ -33,7 +33,17 @@ export default new Vuex.Store({
       console.log(state.chatRecordList)
     },
     refreshUserList (state, payload) {
-      state.userList = payload.content
+      let arr = payload.content
+      for (let item of state.userList) {
+        let i
+        for (i = 0; i < arr.length; i++) {
+          if (item.userId === arr[i].userId) {
+            arr[i].unread = item.unread
+            break
+          }
+        }
+      }
+      state.userList = arr
       for (let item of state.userList) {
         if (state.chatRecordList[item.userId] === undefined) {
           state.chatRecordList[item.userId] = []
