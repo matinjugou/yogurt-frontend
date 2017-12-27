@@ -5,7 +5,7 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    socketServerUrl: 'http://yogurt.magichc7.com',
+    socketServerUrl: '60.205.178.28:8361',
     httpServerUrl: 'http://yogurt.magichc7.com/api/staff',
     fileServerUrl: 'http://123.206.22.71/api/v2/file/',
     imageCompressUrl: 'http://123.206.22.71/api/v1/image/',
@@ -76,7 +76,9 @@ export default new Vuex.Store({
     },
     buildSocketConnect (state) {
       const io = require('socket.io-client')
-      state.socket = io(state.socketServerUrl)
+      state.socket = io(state.socketServerUrl, {
+        transports: ['websocket']
+      })
     }
   }
 })
