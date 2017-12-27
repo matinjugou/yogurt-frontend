@@ -511,6 +511,9 @@
           }
         }
         return true
+      },
+      socket () {
+        return this.$store.state.socket
       }
     },
     methods: {
@@ -764,8 +767,10 @@
         }
       })
       // send userreg message
-      const io = require('socket.io-client')
-      this.socket = io(this.$store.state.socketIoServerUrl)
+//      const io = require('socket.io-client')
+//      this.socket = io(this.$store.state.socketIoServerUrl)
+      // debug
+      console.log(this)
       this.socket.emit('userReg', {userId: this.userId, token: this.token})
       // debug
       console.log('Sent userReg.')
