@@ -489,6 +489,9 @@
     },
     updated () {
       this.scrollToBottom()
+    },
+    beforeDestroyed () {
+      window.removeEventListener('beforeunload', e => this.logout(e))
     }
   }
 </script>

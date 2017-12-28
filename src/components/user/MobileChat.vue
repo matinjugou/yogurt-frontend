@@ -299,6 +299,15 @@
 //      }
     },
     methods: {
+      logout (event) {
+        alert('你确定要离开吗？')
+        event.preventDefault()
+        this.socket.emit('userLogOut', {
+          userId: this.userId,
+          token: this.token
+        })
+        window.localStorage.clear()
+      },
       showFunctionPanel () {
         if (!this.functionPanelVisible) {
           this.functionPanelVisible = true
@@ -406,6 +415,7 @@
       this.socket.on('sendResult', (data) => {
         // TO DO
       })
+      window.addEventListener('beforeunload', e => this.logout(e))
     },
     mounted () {
       this.scrollToBottom()
