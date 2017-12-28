@@ -75,8 +75,10 @@ export default new Vuex.Store({
       }
     },
     buildSocketConnect (state) {
-      const io = require('socket.io-client')
-      state.socket = io(state.socketServerUrl)
+      if (this.socket === null) {
+        const io = require('socket.io-client')
+        state.socket = io(state.socketServerUrl)
+      }
     }
   }
 })
