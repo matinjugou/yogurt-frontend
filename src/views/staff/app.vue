@@ -124,8 +124,9 @@ export default {
             type: 'addChatRecord',
             userId: data.userId,
             content: {
-              'from': data.userId,
-              'to': this.staffId,
+              'userId': data.userId,
+              'staffId': this.staffId,
+              'direction': 'in',
               'url': data.url,
               'name': data.name,
               'size': data.size,
@@ -139,8 +140,9 @@ export default {
             type: 'addChatRecord',
             userId: data.userId,
             content: {
-              'from': data.userId,
-              'to': this.staffId,
+              'userId': data.userId,
+              'staffId': this.staffId,
+              'direction': 'in',
               'url': data.url,
               'compressedUrl': data.compressedUrl,
               'type': data.type,
@@ -153,8 +155,9 @@ export default {
             type: 'addChatRecord',
             userId: data.userId,
             content: {
-              'from': data.userId,
-              'to': this.staffId,
+              'userId': data.userId,
+              'staffId': this.staffId,
+              'direction': 'in',
               'msg': data.msg,
               'type': data.type,
               'time': date.toLocaleTimeString('zh-Hans-CN')
@@ -236,8 +239,18 @@ export default {
       // TODO: give server a message
       this.restStatus = !this.restStatus
     },
+    sendLogoutMessage () {
+      this.socket.emit('staffLogOut', {
+        staffId: this.$store.state.staffId,
+        token: this.$store.state.token
+      })
+    },
+    beforeUnloadHandler (e) {
+      e.preventDefault()
+      this.sendLogoutMessage()
+    },
     logout () {
-      // TODO: logout
+      this.sendLogoutMessage()
       this.$store.commit('logout')
       window.localStorage.removeItem('id')
       window.localStorage.removeItem('type')
@@ -290,6 +303,12 @@ export default {
     } else {
       window.location.href = window.location.origin + '/login?backUrl=' + window.location.href
     }
+  },
+  created () {
+    window.addEventListener('beforeunload', e => this.beforeUnloadHandler(e))
+  },
+  beforeDestroyed () {
+    window.removeEventListener('beforeunload', e => this.beforeUnloadHandler(e))
   }
 }
 </script>

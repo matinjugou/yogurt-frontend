@@ -86,7 +86,7 @@
                 <p class="chat-msg-time">
                   <span>{{ singleRecord.time }}</span>
                 </p>
-                <div class="chat-msg-body" :class="[{'from-me': singleRecord.from.indexOf('_s') >= 0}]">
+                <div class="chat-msg-body" :class="[{'from-me': singleRecord.direction === 'out'}]">
                   <div class="chat-single-record-element" v-if="singleRecord.hasSent === false">
                     <Spin></Spin>
                   </div>
@@ -370,7 +370,7 @@ export default {
       if (chatRecord.length > 0) {
         let singleRecord = chatRecord[chatRecord.length - 1]
         if (singleRecord.type === 'text') {
-          return singleRecord.msg
+          return singleRecord.msg.length > 8 ? singleRecord.msg.slice(0, 8) + '...' : singleRecord.msg
         } else if (singleRecord.type === 'image') {
           return '[图片]'
         } else if (singleRecord.type === 'file') {
@@ -415,8 +415,9 @@ export default {
           type: 'addChatRecord',
           userId: this.chatUserId,
           content: {
-            'from': this.staffId,
-            'to': this.chatUserId,
+            'staffId': this.staffId,
+            'userId': this.chatUserId,
+            'direction': 'out',
             'msg': sendMsg,
             'type': 'text',
             'time': date.toLocaleTimeString('zh-Hans-CN')
@@ -443,8 +444,9 @@ export default {
               type: 'addChatRecord',
               userId: this.chatUserId,
               content: {
-                'from': this.staffId,
-                'to': this.chatUserId,
+                'staffId': this.staffId,
+                'userId': this.chatUserId,
+                'direction': 'out',
                 'url': file.response.data,
                 'compressedUrl': file.response.compressedUrl ? file.response.compressedUrl : file.response.data,
                 'type': fileType,
@@ -465,8 +467,9 @@ export default {
               type: 'addChatRecord',
               userId: this.chatUserId,
               content: {
-                'from': this.staffId,
-                'to': this.chatUserId,
+                'staffId': this.staffId,
+                'userId': this.chatUserId,
+                'direction': 'out',
                 'url': file.response.data,
                 'name': file.name,
                 'size': (file.size > 1024) ? (file.size >> 10) : 1,
