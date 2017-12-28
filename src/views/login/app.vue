@@ -188,8 +188,10 @@ export default {
     },
     changeType (name) {
       this.type = name
-      this.formLogin.username = ''
-      this.formLogin.password = ''
+      this.formStaffLogin.username = ''
+      this.formStaffLogin.password = ''
+      this.formManagerLogin.username = ''
+      this.formManagerLogin.password = ''
     }
   },
   created () {
