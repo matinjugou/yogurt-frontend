@@ -252,7 +252,7 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
-  background: url(http://123.206.22.71/media/files/2017/12/07/login_bg.png) fixed no-repeat;
+  background: url(https://cdn.pbrd.co/images/H0e4O2Ov.png) fixed no-repeat;
   background-size: cover;
 }
 .login-left {

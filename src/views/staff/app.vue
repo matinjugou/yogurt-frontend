@@ -240,10 +240,12 @@ export default {
       this.restStatus = !this.restStatus
     },
     sendLogoutMessage () {
-      this.socket.emit('staffLogOut', {
-        staffId: this.$store.state.staffId,
-        token: this.$store.state.token
-      })
+      if (this.socket) {
+        this.socket.emit('staffLogOut', {
+          staffId: this.$store.state.staffId,
+          token: this.$store.state.token
+        })
+      }
     },
     beforeUnloadHandler (e) {
       e.preventDefault()
