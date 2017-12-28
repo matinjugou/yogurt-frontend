@@ -4,7 +4,7 @@
       <div style="height: 200px"></div>
       <Col offset="4">
       <Form :model="formItem" :label-width="80">
-        <FormItem label="User ID">
+        <!--FormItem label="User ID">
           <Col span="16">
             <Input v-model="formItem.userId" placeholder="Enter userid here"></Input>
           </Col>
@@ -13,9 +13,9 @@
           <Col span="16">
             <Input v-model="formItem.staffId" placeholder="Enter staffid here"></Input>
           </Col>
-        </FormItem>
+        </FormItem-->
         <FormItem>
-          <Button type="primary" @click="submit()">Submit</Button>
+          <Button type="primary" @click="submit()">点击以登录</Button>
         </FormItem>
       </Form>
       </Col>
@@ -48,21 +48,24 @@
     },
     methods: {
       submit () {
+        /*
         if (!this.isValidInputs()) {
           console.log('invalid intpus: userid=' + this.formItem.userId + ', staffid=' + this.formItem.staffId)
           return
         }
+        */
         const self = this
+        const randomUserId = '1_u' + String(Math.floor(Math.random() * 1000))
         axios.post(self.$store.state.userLoginUrl, {
-          'userId': self.formItem.userId
+          // 'userId': self.formItem.userId
+          'userId': randomUserId
         }).then(response => {
           let body = response.data.data
           // debug
           console.log(body.token)
           if (body.code === 0) {
             window.localStorage.setItem('token', body.token)
-            window.localStorage.setItem('userId', self.formItem.userId)
-            window.localStorage.setItem('staffId', self.formItem.staffId)
+            window.localStorage.setItem('userId', randomUserId)
             self.toChatPage()
           }
         })

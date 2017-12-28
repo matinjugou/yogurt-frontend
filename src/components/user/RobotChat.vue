@@ -222,39 +222,42 @@
       },
       chatState () {
         return window.localStorage.getItem('chatState')
+      },
+      socket () {
+        return this.$store.state.socket
       }
     },
     methods: {
       sendMessage () {
-        let sendMsg = this.inputText
-        if (sendMsg === '') {
-          this.$Notice.warning({
-            title: '不可以发送空消息！'
-          })
-          return
-        }
-        let time = this.getCurrentTime()
-        // send text msg
-        this.$store.commit({
-          type: 'addChatRecord',
-          content: {
-            'from': this.userId,
-            'to': this.staffId,
-            'msg': sendMsg,
-            'type': 'text',
-            'time': time
-            // 'hasSent': false
-          }
-        })
-        this.socket.emit('userMsg', {
-          'staffId': this.staffId,
-          'userId': this.userId,
-          'token': this.token,
-          'msg': sendMsg,
-          'type': 'text'
-        })
-        // clear input
-        this.inputText = ''
+//        let sendMsg = this.inputText
+//        if (sendMsg === '') {
+//          this.$Notice.warning({
+//            title: '不可以发送空消息！'
+//          })
+//          return
+//        }
+//        let time = this.getCurrentTime()
+//        // send text msg
+//        this.$store.commit({
+//          type: 'addChatRecord',
+//          content: {
+//            'from': this.userId,
+//            'to': this.staffId,
+//            'msg': sendMsg,
+//            'type': 'text',
+//            'time': time
+//            // 'hasSent': false
+//          }
+//        })
+//        this.socket.emit('userMsg', {
+//          'staffId': this.staffId,
+//          'userId': this.userId,
+//          'token': this.token,
+//          'msg': sendMsg,
+//          'type': 'text'
+//        })
+//        // clear input
+//        this.inputText = ''
       },
       getCurrentTime () {
         let curDate = new Date()
@@ -305,31 +308,28 @@
         }
       })
       // send userreg message
-      const io = require('socket.io-client')
-      this.socket = io(this.$store.state.socketIoServerUrl)
-      this.socket.emit('userReg', {userId: this.userId, token: this.token})
-      // debug
-      console.log('Sent userReg.')
-      this.socket.on('regResult', (data) => {
-        // debug
-        console.log('Register result: code: ' + data['code'] + ', msg: ' + data['msg'])
-      })
-      this.socket.on('staffMsg', (data) => {
-        let newMsg = {
-          'time': data.time,
-          'from': data.staffId,
-          'to': data.userId,
-          'type': data.type,
-          'msg': data.msg
-        }
-        this.currentChatRecord.push(newMsg)
-      })
-      this.socket.on('sendResult', (data) => {
-        // TO DO
-      })
-    },
-    mounted () {
-      this.uploadList = this.$refs.upload.fileList
+//      const io = require('socket.io-client')
+//      this.socket = io(this.$store.state.socketIoServerUrl)
+//      this.socket.emit('userReg', {userId: this.userId, token: this.token})
+//      // debug
+//      console.log('Sent userReg.')
+//      this.socket.on('regResult', (data) => {
+//        // debug
+//        console.log('Register result: code: ' + data['code'] + ', msg: ' + data['msg'])
+//      })
+//      this.socket.on('staffMsg', (data) => {
+//        let newMsg = {
+//          'time': data.time,
+//          'from': data.staffId,
+//          'to': data.userId,
+//          'type': data.type,
+//          'msg': data.msg
+//        }
+//        this.currentChatRecord.push(newMsg)
+//      })
+//      this.socket.on('sendResult', (data) => {
+//        // TO DO
+//      })
     },
     updated () {
       this.scrollToBottom()

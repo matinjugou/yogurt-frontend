@@ -334,6 +334,9 @@
       },
       chatState () {
         return window.localStorage.getItem('chatState')
+      },
+      socket () {
+        return this.$store.state.socket
       }
 //      chatRecordContainerHeight () {
 //        return (this.vh - (this.functionPanelVisible ? 179 : 121))
@@ -362,37 +365,37 @@
       },
       sendMessage () {
         // debug
-        console.log('sending message: ' + this.inputText)
-        let sendMsg = this.inputText
-        if (sendMsg === '') {
-          // debug
-          console.log('不能发送空消息！')
-          return
-        }
-        let time = this.getCurrentTime()
-        // send text msg
-        if (sendMsg !== '') {
-          this.$store.commit({
-            type: 'addChatRecord',
-            content: {
-              'from': this.userId,
-              'to': this.staffId,
-              'msg': sendMsg,
-              'type': 'text',
-              'time': time
-              // 'hasSent': false
-            }
-          })
-          this.socket.emit('userMsg', {
-            staffId: this.staffId,
-            userId: this.userId,
-            token: this.token,
-            msg: sendMsg,
-            type: 'text'
-          })
-          // clear input
-          this.inputText = ''
-        }
+//        console.log('sending message: ' + this.inputText)
+//        let sendMsg = this.inputText
+//        if (sendMsg === '') {
+//          // debug
+//          console.log('不能发送空消息！')
+//          return
+//        }
+//        let time = this.getCurrentTime()
+//        // send text msg
+//        if (sendMsg !== '') {
+//          this.$store.commit({
+//            type: 'addChatRecord',
+//            content: {
+//              'from': this.userId,
+//              'to': this.staffId,
+//              'msg': sendMsg,
+//              'type': 'text',
+//              'time': time
+//              // 'hasSent': false
+//            }
+//          })
+//          this.socket.emit('userMsg', {
+//            staffId: this.staffId,
+//            userId: this.userId,
+//            token: this.token,
+//            msg: sendMsg,
+//            type: 'text'
+//          })
+//          // clear input
+//          this.inputText = ''
+//        }
       },
       getCurrentTime () {
         let curDate = new Date()
@@ -447,45 +450,48 @@
 //      window.localStorage.setItem('userId', '1_u1')
 //      window.localStorage.setItem('staffId', '1_s1')
       // send userreg message
-      const io = require('socket.io-client')
-      this.socket = io(this.$store.state.socketIoServerUrl)
-      this.socket.emit('userReg', {userId: this.userId, token: this.token})
-      // debug
-      console.log('Sent userReg.')
-      this.socket.on('regResult', (data) => {
-        // debug
-        console.log('Register result: code: ' + data['code'] + ', msg: ' + data['msg'])
-      })
-      // socket messages
-      this.socket.on('staffMsg', (data) => {
-        // debug
-        console.log(data)
-        console.log(self.currentChatRecord)
-        let newMsg = {
-          'time': data.time,
-          'from': data.staffId,
-          'to': data.userId,
-          'type': data.type
-        }
-        if (data.type === 'text') {
-          newMsg.msg = data.msg
-        }
-        self.$store.commit({
-          type: 'addChatRecord',
-          content: newMsg
-        })
-        // debug
-        console.log(self.currentChatRecord)
-      })
-      this.socket.on('sendResult', (data) => {
-        // TO DO
-      })
+//      const io = require('socket.io-client')
+//      this.socket = io(this.$store.state.socketIoServerUrl)
+//      this.socket.emit('userReg', {userId: this.userId, token: this.token})
+//      // debug
+//      console.log('Sent userReg.')
+//      this.socket.on('regResult', (data) => {
+//        // debug
+//        console.log('Register result: code: ' + data['code'] + ', msg: ' + data['msg'])
+//      })
+//      // socket messages
+//      this.socket.on('staffMsg', (data) => {
+//        // debug
+//        console.log(data)
+//        console.log(self.currentChatRecord)
+//        let newMsg = {
+//          'time': data.time,
+//          'from': data.staffId,
+//          'to': data.userId,
+//          'type': data.type
+//        }
+//        if (data.type === 'text') {
+//          newMsg.msg = data.msg
+//        }
+//        self.$store.commit({
+//          type: 'addChatRecord',
+//          content: newMsg
+//        })
+//        // debug
+//        console.log(self.currentChatRecord)
+//      })
+//      this.socket.on('sendResult', (data) => {
+//        // TO DO
+//      })
     },
     mounted () {
       this.scrollToBottom()
     },
     updated () {
       this.scrollToBottom()
+    },
+    beforeDestroyed () {
+      window.removeEventListener('beforeunload', e => this.logout(e))
     }
   }
 </script>

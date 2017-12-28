@@ -124,7 +124,7 @@
           </div>
         </div>
         <div class="chat-input">
-          <Input v-model="inputText" type="textarea" :rows="8" placeholder="在这里输入信息，按Ctrl+Enter发送"></Input>
+          <Input v-model="inputText" type="textarea" :rows="8" placeholder="在这里输入信息，按Ctrl+Enter发送" @on-keyup.ctrl.enter="sendMessage"></Input>
         </div>
         </Col>
       </Row>
@@ -511,6 +511,9 @@
           }
         }
         return true
+      },
+      socket () {
+        return this.$store.state.socket
       }
     },
     methods: {
@@ -744,6 +747,16 @@
         console.log('show large image, src: ' + src)
         this.showLargeImageModal = true
         this.largeImageSrc = src
+      },
+      logout (event) {
+        // TODO
+        alert('你确定要离开吗？')
+        event.preventDefault()
+        this.socket.emit('userLogOut', {
+          userId: this.userId,
+          token: this.token
+        })
+        window.localStorage.clear()
       }
     },
     created () {
@@ -764,8 +777,10 @@
         }
       })
       // send userreg message
-      const io = require('socket.io-client')
-      this.socket = io(this.$store.state.socketIoServerUrl)
+//      const io = require('socket.io-client')
+//      this.socket = io(this.$store.state.socketIoServerUrl)
+      // debug
+      console.log(this)
       this.socket.emit('userReg', {userId: this.userId, token: this.token})
       // debug
       console.log('Sent userReg.')
@@ -805,6 +820,7 @@
         // debug
         console.log(data)
       })
+      window.addEventListener('beforeunload', e => this.logout(e))
     },
     mounted () {
       this.uploadList = this.$refs.upload.fileList
@@ -812,6 +828,9 @@
     },
     updated () {
       this.scrollToBottom()
+    },
+    beforeDestroyed () {
+      window.removeEventListener('beforeunload', e => this.logout(e))
     }
   }
 </script>

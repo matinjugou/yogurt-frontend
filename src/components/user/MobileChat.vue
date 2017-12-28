@@ -287,6 +287,9 @@
       },
       token () {
         return window.localStorage.getItem('token')
+      },
+      socket () {
+        return this.$store.state.socket
       }
 //      chatRecordContainerHeight () {
 //        return (this.vh - (this.functionPanelVisible ? 179 : 121))
@@ -296,6 +299,15 @@
 //      }
     },
     methods: {
+      logout (event) {
+        alert('你确定要离开吗？')
+        event.preventDefault()
+        this.socket.emit('userLogOut', {
+          userId: this.userId,
+          token: this.token
+        })
+        window.localStorage.clear()
+      },
       showFunctionPanel () {
         if (!this.functionPanelVisible) {
           this.functionPanelVisible = true
@@ -375,8 +387,8 @@
 //      window.localStorage.setItem('userId', '1_u1')
 //      window.localStorage.setItem('staffId', '1_s1')
       // send userreg message
-      const io = require('socket.io-client')
-      this.socket = io(this.$store.state.socketIoServerUrl)
+//      const io = require('socket.io-client')
+//      this.socket = io(this.$store.state.socketIoServerUrl)
       this.socket.emit('userReg', {userId: this.userId, token: this.token})
       // debug
       console.log('Sent userReg.')
@@ -386,9 +398,6 @@
       })
       // socket messages
       this.socket.on('staffMsg', (data) => {
-        // debug
-        console.log(data)
-        console.log(self.currentChatRecord)
         let newMsg = {
           'time': data.time,
           'from': data.staffId,
@@ -402,12 +411,11 @@
           type: 'addChatRecord',
           content: newMsg
         })
-        // debug
-        console.log(self.currentChatRecord)
       })
       this.socket.on('sendResult', (data) => {
         // TO DO
       })
+      window.addEventListener('beforeunload', e => this.logout(e))
     },
     mounted () {
       this.scrollToBottom()
