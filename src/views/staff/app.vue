@@ -240,10 +240,11 @@ export default {
       this.restStatus = !this.restStatus
     },
     sendLogoutMessage () {
+      let storeToken = window.localStorage.getItem('token')
       if (this.socket) {
         this.socket.emit('staffLogOut', {
           staffId: this.$store.state.staffId,
-          token: this.$store.state.token
+          token: storeToken
         })
       }
     },
@@ -291,7 +292,7 @@ export default {
           })
           this.socket.emit('staffReg', {
             staffId: this.$store.state.staffId,
-            token: this.$store.state.token
+            token: storeToken
           })
           // socket listening initialization
           this.socketListenInit()
