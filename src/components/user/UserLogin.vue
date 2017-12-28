@@ -15,7 +15,7 @@
           </Col>
         </FormItem-->
         <FormItem>
-          <Button type="primary" @click="submit()">Submit</Button>
+          <Button type="primary" @click="submit()">点击以登录</Button>
         </FormItem>
       </Form>
       </Col>
