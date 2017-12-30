@@ -2,58 +2,31 @@
   <div class="right-content">
     <div class="layout-header">
       <Row type="flex" justify="start" style="padding-left: 10px;padding-top: 10px">
-        <h1 style="padding-left: 5px;border-left: 5px solid #2baee9">快捷回复设置
+        <h1 style="padding-left: 5px;border-left: 5px solid #2baee9">留言管理
         </h1>
       </Row>
     </div>
     <div class="layout-content">
       <div class="layout-content-main">
         <Row type="flex" justify="start" style="margin-bottom: 10px">
-          <Button type="info" @click="newPhraseModal = true">新增短语</Button>
           <Modal
-            v-model="newPhraseModal"
-            title="新增短语"
-            @on-ok="newPhraseModalOk"
-            @on-cancel="newPhraseModalCancel">
+            v-model="replyMessageModal"
+            title="回复留言"
+            @on-ok="replyMessageModalOk"
+            @on-cancel="replyMessageModalCancel">
             <h4 style="margin-bottom: 7px">
-              短语
+              回复内容
             </h4>
-            <Input v-model="newPhrase"
-                   placeholder="Enter something..."
-                   style="margin-bottom: 10px"/>
-            <h4 style="margin-bottom: 7px">
-              句子
-            </h4>
-            <Input v-model="newSentence"
-                   placeholder="Enter something..."
-                   style="margin-bottom: 10px"/>
-          </Modal>
-          <Modal
-            v-model="changePhraseModal"
-            title="修改短语"
-            @on-ok="changePhraseModalOk"
-            @on-cancel="changePhraseModalCancel">
-            <h4 style="margin-bottom: 7px">
-              短语
-            </h4>
-            <span><b>当前短语：</b>{{ oldPhrase }}</span>
-            <Input v-model="newPhrase"
+            <Input v-model="replyContent"
                    placeholder="Enter something..."
                    style="margin-bottom: 10px"
             />
-            <h4 style="margin-bottom: 7px">
-              句子
-            </h4>
-            <span><b>当前句子：</b>{{ oldSentence }}</span>
-            <Input v-model="newSentence"
-                   ref="changeNewSentenceInput"
-                   placeholder="Enter something..."
-                   style="margin-bottom: 10px"/>
           </Modal>
         </Row>
-        <Table border ref="selection" :columns="tablecolumns" :data="replies"
+        <Table border ref="selection" :columns="tablecolumns" :data="messages"
                @on-selection-change="changeSelected"></Table>
-        <Button :disabled="selectedEmpty" type="error" style="margin-top: 7px" @click="deleteSelected">删除</Button>
+        <Button :disabled="selectedEmpty" type="primary"
+                style="margin-top: 7px" @click="replySelected">批量回复</Button>
       </div>
     </div>
     <div class="layout-copy">
@@ -68,12 +41,8 @@
     name: 'quickreplymanager',
     data () {
       return {
-        newPhraseModal: false,
-        changePhraseModal: false,
-        newPhrase: '',
-        newSentence: '',
-        oldPhrase: '',
-        oldSentence: '',
+        replyMessageModal: false,
+        replyContent: '',
         selected: [],
         tablecolumns: [
           {
@@ -82,12 +51,35 @@
             align: 'center'
           },
           {
-            title: '短语',
-            key: 'phrase'
+            title: '用户',
+            key: 'user'
           },
           {
-            title: '句子',
-            key: 'sentence'
+            title: '时间',
+            key: 'time'
+          },
+          {
+            title: '邮箱',
+            key: 'email'
+          },
+          {
+            title: '状态',
+            key: 'status',
+            render: (h, params) => {
+              const row = params.row
+              const color = row.status === 1 ? 'green' : 'red'
+              const text = row.status === 1 ? '已回复' : '待回复'
+              return h('div', [
+                h('Tag', {
+                  props: {
+                    color: color
+                  },
+                  style: {
+                    marginRight: '5px'
+                  }
+                }, text)
+              ])
+            }
           },
           {
             title: '操作',
@@ -104,26 +96,21 @@
                   },
                   on: {
                     click: () => {
-                      this.editPair(params.index)
+                      this.replyMessage(params.index)
                     }
                   }
-                }, '编辑'),
-                h('Button', {
-                  props: {
-                    type: 'error',
-                    size: 'small'
-                  },
-                  on: {
-                    click: () => {
-                      this.deletePair(params.index)
-                    }
-                  }
-                }, '删除')
+                }, '回复')
               ])
             }
           }
         ],
-        replies: [
+        messages: [
+          {
+            user: 'matinjugou',
+            time: '2017-12-30 15:59',
+            email: 'thss15_huangc@163.com',
+            status: 1
+          }
         ]
       }
     },
@@ -133,7 +120,7 @@
       }
     },
     methods: {
-      newPhraseModalOk () {
+      replyMessageModalOk () {
         this.$Message.info('Clicked ok')
         if (this.newPhrase !== '' && this.newSentence !== '') {
           const self = this
@@ -162,49 +149,14 @@
           })
         }
       },
-      newPhraseModalCancel () {
-        this.$Message.info('Clicked cancel')
-      },
-      changePhraseModalOk () {
-        if (this.newPhrase !== '' && this.newSentence !== '') {
-          const self = this
-          axios.put('http://yogurt.magichc7.com/api/manager/quick-reply/public', {
-            companyId: 1,
-            oldPhrase: self.oldPhrase,
-            oldSentence: self.oldSentence,
-            newPhrase: self.newPhrase,
-            newSentence: self.newSentence
-          }).then(function (response) {
-            console.log(response)
-            axios.get('http://yogurt.magichc7.com/api/manager/quick-reply/public', {
-              params: {
-                companyId: 1
-              }
-            }).then(function (response) {
-              self.replies = []
-              for (const reply of response.data.data) {
-                self.replies.push({
-                  phrase: reply.phrase,
-                  sentence: reply.sentence
-                })
-              }
-              self.$Message.info('修改成功！')
-            }).catch(function (error) {
-              self.$Message.error(error)
-            })
-          }).catch(function (error) {
-            self.$Message.error(error)
-          })
-        }
-      },
-      changePhraseModalCancel () {
+      replyMessageModalCancel () {
         this.$Message.info('Clicked cancel')
       },
       changeSelected (selection, row) {
         this.selected = selection
         console.log(this.selected)
       },
-      deleteSelected () {
+      replySelected () {
         const pairs = []
         const self = this
         for (let select of this.selected) {
@@ -214,9 +166,9 @@
           })
         }
         axios({
-          url: self.$store.state.httpServerUrl + '/quick-reply/public',
           method: 'delete',
-          params: {
+          url: self.$store.state.httpServerUrl + '/quick-reply/public',
+          data: {
             companyId: 1,
             pairs: pairs
           }
@@ -244,7 +196,7 @@
       editPair (index) {
         this.oldPhrase = this.replies[index].phrase
         this.oldSentence = this.replies[index].sentence
-        this.changePhraseModal = true
+        this.replyMessageModal = true
       },
       deletePair (index) {
         const pairs = []
@@ -256,7 +208,7 @@
         axios({
           method: 'delete',
           url: 'http://yogurt.magichc7.com/api/manager/quick-reply/public',
-          params: {
+          data: {
             companyId: 1,
             pairs: pairs
           }
