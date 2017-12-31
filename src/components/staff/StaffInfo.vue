@@ -6,101 +6,273 @@
       </div>
       <div class="staff-info-content">
         <div class="staff-info-detail">
-          <div class="single-info">
-            <div class="single-info-element title">
-              ID:
+          <Form ref="formInfo" label-position="right" :label-width="100" :model="formInfo" :rules="ruleInfo">
+            <FormItem prop="staffId" label="ID">
+              <span class="info-text"> {{ staffId }} </span>
+            </FormItem>
+            <FormItem prop="name" label="姓名">
+              <span class="info-text"> {{ formInfo.name }} </span>
+            </FormItem>
+            <FormItem prop="nickName" label="昵称">
+              <Input v-model="formInfo.nickName" size="large" placeholder="你的昵称"></Input>
+            </FormItem>
+            <FormItem prop="phoneNumber" label="手机号">
+              <Input v-model="formInfo.phoneNumber" size="large" placeholder="你的手机号"></Input>
+            </FormItem>
+            <div class="staff-info-change-button">
+              <Button type="success" shape="circle" @click="updateStaffInfo">提交修改</Button>
             </div>
-            <div class="single-info-element content">
-              {{ staffId }}
+          </Form>
+
+          <Form ref="formEmail" label-position="right" :label-width="100" :model="formEmail" :rules="ruleEmail">
+            <FormItem prop="email" label="邮箱">
+              <Input disabled v-model="formEmail.email" size="large" placeholder="你的邮箱"></Input>
+            </FormItem>
+            <div class="staff-info-change-button">
+              <Button type="success" shape="circle" @click="updateEmail">修改邮箱</Button>
             </div>
-          </div>
-          <div class="single-info">
-            <div class="single-info-element title">
-              昵称:
+          </Form>
+          <Form ref="formPassword" label-position="right" :label-width="100" :model="formPassword" :rules="rulePassword">
+            <FormItem prop="oldPassword" label="旧密码">
+              <Input type="password" v-model="formPassword.oldPassword" size="large" placeholder="你的旧密码"></Input>
+            </FormItem>
+            <FormItem prop="newPassword" label="新密码">
+              <Input type="password" v-model="formPassword.newPassword" size="large" placeholder="你的新密码"></Input>
+            </FormItem>
+            <div class="staff-info-change-button">
+              <Button :loading="formPassword.loading" type="success" shape="circle" @click="updatePassword">修改密码</Button>
             </div>
-            <div class="single-info-element content">
-              <Input v-model="nickName" placeholder="your name" size='large'></Input>
-            </div>
-          </div>
-          <div class="single-info">
-            <div class="single-info-element title">
-              邮箱:
-            </div>
-            <div class="single-info-element content">
-              <Input v-model="email" placeholder="yourname@yogurt.com" size='large'></Input>
-            </div>
-          </div>
-          <div class="single-info">
-            <div class="single-info-element title">
-              手机号:
-            </div>
-            <div class="single-info-element content">
-              <Input v-model="phoneNumber" placeholder="123****789" size='large'></Input>
-            </div>
-          </div>
-        </div>
-        <div class="staff-info-change-button">
-          <Button type="success" shape="circle" @click="updateStaffInfo">提交修改</Button>
-        </div>
-        <div class="vertical-spacing"></div>
-        <div class="staff-info-detail">
-          <div class="single-info">
-            <div class="single-info-element title">
-              旧密码:
-            </div>
-            <div class="single-info-element content">
-              <Input v-model="oldPassword" type="password" placeholder="********" size='large'></Input>
-            </div>
-          </div>
-          <div class="single-info">
-            <div class="single-info-element title">
-              新密码:
-            </div>
-            <div class="single-info-element content">
-              <Input v-model="newPassword" type="password" placeholder="********" size='large'></Input>
-            </div>
-          </div>
-        </div>
-        <div class="staff-info-change-button">
-          <Button type="success" shape="circle" @click="updatePassword">修改密码</Button>
+          </Form>
         </div>
       </div>
     </div>
+
+    <Modal v-model="showEmailModal" width="30%" title="输入验证码">
+      
+    </Modal>
+
   </div>
 </template>
 
 <script>
-
+import axios from 'axios'
 export default {
   name: 'StaffInfo',
   data () {
     return {
       showInfo: false,
+      showEmailModal: false,
       avatarUrl: 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1512143132319&di=4f1af9a57c13467a0939aaeea1627b94&imgtype=0&src=http%3A%2F%2Fi0.hdslb.com%2Fbfs%2Fface%2F08224a0bc9b5652fd9b2ad9b4f0717a38166d632.jpg',
       nickName: '',
       email: '',
       phoneNumber: '',
-      oldPassword: '',
-      newPassword: ''
+      formInfo: {
+        name: '',
+        nickName: '',
+        phoneNumber: ''
+      },
+      formEmail: {
+        email: ''
+      },
+      formPassword: {
+        oldPassword: '',
+        newPassword: '',
+        loading: false
+      },
+      ruleInfo: {
+        nickName: [
+          {
+            required: true,
+            message: '昵称不能为空',
+            trigger: 'blur'
+          }
+        ],
+        phoneNumber: [
+          {
+            required: true,
+            message: '手机号不能为空',
+            trigger: 'blur'
+          },
+          {
+            pattern: '^1\\d{10}$',
+            message: '手机号格式有误',
+            trigger: 'blur'
+          }
+        ]
+      },
+      ruleEmail: {
+        email: [
+          {
+            required: true,
+            message: '邮箱不能为空',
+            trigger: 'blur'
+          },
+          {
+            pattern: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+            message: '邮箱格式有误',
+            trigger: 'blur'
+          }
+        ]
+      },
+      rulePassword: {
+        oldPassword: [
+          {
+            required: true,
+            message: '旧密码不能为空',
+            trigger: 'blur'
+          }
+        ],
+        newPassword: [
+          {
+            required: true,
+            message: '新密码不能为空',
+            trigger: 'blur'
+          }
+        ]
+      }
     }
   },
   computed: {
     staffId () {
       return this.$store.state.staffId
+    },
+    httpServerUrl () {
+      return this.$store.state.httpServerUrl
     }
   },
   methods: {
     updateStaffInfo () {
-      // TODO: update staff info
+      this.$refs.formInfo.validate((valid) => {
+        if (valid) {
+          // update personal info
+          axios.put(this.httpServerUrl + '/account-info', {
+            staffId: this.staffId,
+            token: window.localStorage.getItem('token'),
+            nickname: this.formInfo.nickName,
+            phoneNumber: this.formInfo.phoneNumber
+          }).then(response => {
+            console.log(response)
+            let body = response.data.data
+            if (body.code === 0) {
+              this.$Notice.success({
+                title: '成功修改个人信息!'
+              })
+            } else {
+              this.$Notice.error({
+                title: '没能成功更新个人信息，请稍后重试'
+              })
+            }
+          }).catch(error => {
+            console.log(error)
+            this.$Notice.error({
+              title: '没能成功更新个人信息，请稍后重试'
+            })
+          })
+        } else {
+          // not satisfy the form format
+        }
+      })
+    },
+    updateEmail () {
+      this.$refs.formEmail.validate((valid) => {
+        if (valid) {
+          // TODO: send validation email and pop up modal
+          // this.showEmailModal = true
+          this.$Notice.warning({
+            title: '该功能暂未开放'
+          })
+        } else {
+          // not satisfy the form format
+        }
+      })
     },
     updatePassword () {
-      // TODO: update staff password
-      // TODO: better warning before
+      // update staff password
+      this.formPassword.loading = true
+      this.$refs.formPassword.validate((valid) => {
+        if (valid) {
+          // update password
+          axios.post(this.httpServerUrl + '/login', {
+            staffId: this.staffId,
+            password: this.formPassword.oldPassword
+          }).then(response => {
+            console.log(response)
+            let body = response.data.data
+            if (body.code === 0) {
+              axios.put(this.httpServerUrl + '/account-info', {
+                staffId: this.staffId,
+                token: window.localStorage.getItem('token'),
+                password: this.formPassword.newPassword
+              }).then(response => {
+                this.formPassword.newPassword = ''
+                this.formPassword.loading = false
+                let body = response.data.data
+                if (body.code === 0) {
+                  this.$Notice.success({
+                    title: '成功修改密码!'
+                  })
+                } else {
+                  this.$Notice.error({
+                    title: '没能成功修改密码，请稍后重试'
+                  })
+                }
+              }).catch(error => {
+                this.formPassword.loading = false
+                console.log(error)
+                this.$Notice.error({
+                  title: '没能成功修改密码，请稍后重试'
+                })
+              })
+            } else {
+              this.formPassword.newPassword = ''
+              this.formPassword.loading = false
+              this.$Notice.error({
+                title: '旧密码输入有误，请重试'
+              })
+            }
+          }).catch(error => {
+            this.formPassword.loading = false
+            console.log(error)
+            this.$Notice.error({
+              title: '没能成功修改密码，请稍后重试'
+            })
+          })
+          this.formPassword.oldPassword = ''
+        } else {
+          // not satisfy the form format
+          this.formPassword.loading = false
+        }
+      })
     }
   },
   created () {
-    // TODO: If not login, jump to login page
-    // TODO: update info
+    // get staff info
+    axios.get(this.httpServerUrl + '/account-info', {
+      params: {
+        staffId: window.localStorage.getItem('id'),
+        token: window.localStorage.getItem('token')
+      }
+    }).then(response => {
+      console.log(response)
+      if (response.data.errno === 0) {
+        let body = response.data.data.staff
+        console.log(body)
+        this.formInfo.name = body.name
+        this.formInfo.nickName = body.nickname
+        this.formInfo.phoneNumber = body.tel
+        this.formEmail.email = body.email
+        // this.avatarUrl = body.picUrl
+      } else {
+        this.$Notice.error({
+          title: '没能成功获取个人信息，请刷新重试'
+        })
+      }
+    }).catch(error => {
+      console.log(error)
+      this.$Notice.error({
+        title: '没能成功获取个人信息，请刷新重试'
+      })
+    })
   }
 }
 </script>
@@ -119,36 +291,37 @@ export default {
   align-items: text-top;
 }
 .staff-info-avatar {
-  margin-right: 100px;
-}
-.avatar-image {
+  margin-right: 70px;
   width: 160px;
   height: 160px;
   border: 1px solid white;
   border-radius: 50%;
   overflow: hidden;
   box-shadow: 2px 2px 1px #888888;
+  text-align: center;
 }
-.staff-info-detail {
-  font-size: 15px;
+.avatar-image {
+  width: 160px;
+  height: 160px;
 }
-.single-info {
-  margin-bottom: 15px;
-}
-.single-info-element {
-  display: inline-flex;
-}
-.single-info > .title {
-  justify-content: flex-end;
-  width: 100px;
-  letter-spacing: 2px;
-  margin-right: 30px;
+.info-text {
+  font-size: 16px;
 }
 .staff-info-change-button {
   width: 100%;
   text-align: right;
+  margin-bottom: 24px;
 }
 .vertical-spacing {
   height: 30px;
+}
+</style>
+
+<style>
+.ivu-form .ivu-form-item-label {
+  font-size: 16px;
+}
+.ivu-input[disabled] {
+  color: #495060;
 }
 </style>

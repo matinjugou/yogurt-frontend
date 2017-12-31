@@ -2,7 +2,7 @@
   <div id="app" class="staff">
     <Row type="flex">
       <Col :span="spanLeft" class="staff-menu-left" v-if="spanLeft">
-        <Menu active-name="1" theme="dark" width="auto" @on-select="menuAction">
+        <Menu active-name="1" theme="dark" width="auto" :open-names="['personal-center']" @on-select="menuAction">
           <!-- here may have a logo -->
           <div class="menu-header"></div>
           <div class="menu-burger-button">
@@ -11,39 +11,58 @@
             </MenuItem>
           </div>
           <div class="menu-items">
-          <MenuItem name="chat">
-            <Icon type="chatboxes" :size="iconSize"></Icon>
-            <span class="staff-text" v-show="showMenuText">会话页面</span>
-          </MenuItem>
-          <MenuItem name="info">
-            <Icon type="person-stalker" :size="iconSize"></Icon>
-            <span class="staff-text" v-show="showMenuText">个人信息</span>
-          </MenuItem>
-          <MenuItem name="quick-reply">
-            <Icon type="reply-all" :size="iconSize"></Icon>
-            <span class="staff-text" v-show="showMenuText">快捷回复</span>
-          </MenuItem>
-          <MenuItem name="feedback">
-            <Icon type="paper-airplane" :size="iconSize"></Icon>
-            <span class="staff-text" v-show="showMenuText">客户反馈</span>
-          </MenuItem>
-          <!--TODO: let all the actions in here-->
+            <MenuItem name="chat">
+              <Icon type="chatboxes" :size="iconSize"></Icon>
+              <span class="staff-text" v-show="showMenuText">会话页面</span>
+            </MenuItem>
+            <MenuItem name="message">
+              <Icon type="email" :size="iconSize"></Icon>
+              <span class="staff-text" v-show="showMenuText">客户留言</span>
+            </MenuItem>
+            <MenuItem name="quick-reply">
+              <Icon type="reply-all" :size="iconSize"></Icon>
+              <span class="staff-text" v-show="showMenuText">快捷回复</span>
+            </MenuItem>
+            <MenuItem name="feedback">
+              <Icon type="paper-airplane" :size="iconSize"></Icon>
+              <span class="staff-text" v-show="showMenuText">客户反馈</span>
+            </MenuItem>
+            <!--TODO: let all the actions in here-->
+            <Submenu name="personal-center">
+              <template slot="title">
+                  <Icon type="home" :size="iconSize"></Icon>
+                  <span class="staff-text" v-show="showMenuText">个人中心</span>
+              </template>
+              <MenuItem name="info">
+                <Icon type="person-stalker" :size="iconSize"></Icon>
+                <span class="staff-text" v-show="showMenuText">信息维护</span>
+              </MenuItem>
+              <MenuItem name="rest">
+                <Icon type="coffee" :size="iconSize + 4"></Icon>
+                <span class="staff-text" v-show="showMenuText">{{ restCaption }}</span>
+              </MenuItem>
+              <MenuItem name="logout">
+                <Icon type="log-out" :size="iconSize"></Icon>
+                <span class="staff-text" v-show="showMenuText">登出</span>
+              </MenuItem>
+            </Submenu>
           </div>
-          <div class="menu-vertical-spacing"></div>
-          <Button :type="restAction" shape="circle" icon="coffee" size="large" @click="changeRestStatus">
+          
+          <!-- <Button :type="restAction" shape="circle" icon="coffee" size="large" @click="changeRestStatus">
             <span v-show="showMenuText">{{ restCaption }}</span>
           </Button>
           <div class="menu-button-space"></div>
           <Button type="error" shape="circle" icon="log-out" size="large" @click="logout">
             <span class="menu-button-logout-text" v-show="showMenuText">登出</span>
           </Button>
-          <div class="menu-button-space"></div>
+          <div class="menu-button-space"></div> -->
+          
           <footer class="staff-copy">
             &copy; Yogurt
           </footer>
         </Menu>
       </Col>
-      <Col :span="spanRight">
+      <Col class="staff-right" :span="spanRight">
         <router-view/>
       </Col>
     </Row>
@@ -263,6 +282,10 @@ export default {
     menuAction (name) {
       if (name === 'burger-button') {
         this.spanLeft = this.spanLeft === 3 ? 1 : 3
+      } else if (name === 'rest') {
+        this.changeRestStatus()
+      } else if (name === 'logout') {
+        this.logout()
       } else {
         this.$router.push('/' + name)
       }
@@ -326,7 +349,7 @@ export default {
 }
 .staff {
   border: 1px solid white;
-  border-radius: 4px;
+  border-radius: 10px;
   background: #f5f7f9;
   position: relative;
   overflow: hidden;
@@ -336,12 +359,16 @@ export default {
 }
 .staff-copy {
   text-align: center;
-  padding: 10px 0 20px;
+  height: 20px;
+  width: 100%;
+  position: absolute;
+  top: calc(100vh - 40px);
   color: #9ea7b4;
 }
 .staff-menu-left{
   background: #464c5b;
   text-align: center;
+  height: calc(100vh - 2px);
 }
 .menu-header {
   height: 10px;
@@ -356,10 +383,16 @@ export default {
   padding: 0 4px 0 4px;
   letter-spacing: 9px;
 }
-.menu-vertical-spacing {
-  height: calc(100vh - 460px);
+.staff-right {
+  height: calc(100vh - 2px);
 }
 .ivu-col {
   transition: width 0.2s ease-in-out;
+}
+.ivu-menu-item{
+  padding-left: 20px;
+}
+.ivu-menu-submenu .ivu-menu-item {
+  padding-left: 24px;
 }
 </style>

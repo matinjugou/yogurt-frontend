@@ -648,6 +648,9 @@ export default {
       }
     }).catch(error => {
       console.log(error)
+      this.$Notice.error({
+        title: '没能成功获取用户列表，请刷新重试'
+      })
     })
   },
   mounted () {

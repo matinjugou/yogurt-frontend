@@ -1,5 +1,5 @@
 <template>
-  <div class="staff-quick-reply">
+  <div class="staff-message">
     {{ msg }}
   </div>
 </template>
@@ -7,10 +7,10 @@
 <script>
 
 export default {
-  name: 'StaffQuickReply',
+  name: 'StaffMessage',
   data () {
     return {
-      msg: '这里是快捷回复界面'
+      msg: '这里是客户留言界面'
     }
   }
 }
