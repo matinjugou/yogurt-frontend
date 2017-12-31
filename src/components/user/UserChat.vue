@@ -124,7 +124,7 @@
           </div>
         </div>
         <div class="chat-input">
-          <Input v-model="inputText" type="textarea" :rows="8" placeholder="在这里输入信息，按Ctrl+Enter发送"></Input>
+          <Input v-model="inputText" type="textarea" :rows="8" placeholder="在这里输入信息，按Ctrl+Enter发送" @on-keyup.ctrl.enter="sendMessage"></Input>
         </div>
         </Col>
       </Row>

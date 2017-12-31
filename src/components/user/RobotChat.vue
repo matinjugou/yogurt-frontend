@@ -4,6 +4,9 @@
       <Row type="flex">
         <Col span="5" class="layout-menu-left">
         <Menu active-name="1" theme="dark" width="auto">
+          <MenuItem name="switch" @click.native="showModal = true">
+            <span class="menu-item-text">转接人工客服</span>
+          </MenuItem>
         </Menu>
         </Col>
         <Col span="19">
@@ -11,11 +14,11 @@
           <div class="chat-title chat-title-company-name">
             XXX公司
           </div>
-          <div class="chat-title chat-title-staff-type">
+          <div class="chat-title">
             机器人
-            <Button type="text" @click="showModal = true">
-              <Icon type="android-share" size="28"></Icon>
-            </Button>
+            <!--<Button type="text" @click="showModal = true">-->
+              <!--<Icon type="android-share" size="28"></Icon>-->
+            <!--</Button>-->
             <Modal
               v-model="showModal"
               title="选择人工服务类型"
@@ -25,6 +28,24 @@
                 <Option value="0">售前</Option>
                 <Option value="1">售后</Option>
               </Select>
+            </Modal>
+            <Modal
+              v-model="showChooseModal"
+              title="暂无空闲客服"
+              ok-text="留言"
+              cancel-text="继续等待"
+              @on-ok="showLeaveMessageModal = true">
+              暂无空闲的该类型人工客服，您可以选择留言或继续等待
+            </Modal>
+            <Modal
+              v-model="showLeaveMessageModal"
+              title="留言"
+              @on-ok="leaveMessage()"
+              :loading="loading">
+              请输入邮箱(客服人员将会尽快将回复发送至此邮箱)：
+              <Input v-model="email" icon="ios-email" placeholder="输入邮箱..."></Input>
+              请输入您的留言：
+              <Input v-model="leavedMessage" type="textarea" icon="ios-chatboxes" placeholder="输入留言..."></Input>
             </Modal>
           </div>
         </div>
@@ -60,7 +81,7 @@
           </div>
         </div>
         <div class="chat-input">
-          <Input v-model="inputText" type="textarea" :rows="8" placeholder="在这里输入信息，按Ctrl+Enter发送"></Input>
+          <Input v-model="inputText" type="textarea" :rows="8" placeholder="在这里输入信息，按Ctrl+Enter发送" @on-keyup.ctrl.enter="sendMessage"></Input>
         </div>
         </Col>
       </Row>
@@ -103,6 +124,9 @@
     color: #495060;
     font-size: 20px;
     font-weight: Bold;
+  }
+  .chat-title-switch{
+    font-size: 16px;
   }
   .chat-content{
     height: calc(100vh - 290px);
@@ -189,6 +213,9 @@
   .ivu-col{
     transition: width .2s ease-in-out;
   }
+  .menu-item-text{
+    font-size: 15px;
+  }
 </style>
 <script>
   import axios from 'axios'
@@ -197,10 +224,13 @@
     data () {
       return {
         inputText: '',
+        email: '',
+        leavedMessage: '',
         earlistRecordIndex: '',
-        uploadList: [],
-        imgFileIndex: -1,
         showModal: false,
+        showLeaveMessageModal: false,
+        showChooseModal: false,
+        loading: true,
         formItem: {
           userId: this.userId,
           staffType: '0'
@@ -226,6 +256,8 @@
     },
     methods: {
       sendMessage () {
+        // debug
+        // console.log('send message')
 //        let sendMsg = this.inputText
 //        if (sendMsg === '') {
 //          this.$Notice.warning({
@@ -265,6 +297,8 @@
         el.scrollTop = el.scrollHeight
       },
       switchToHuman () {
+        // debug
+        // this.showChooseModal = true
         const self = this
         axios.get(self.$store.state.apiServerUrl + '/queue', {
           params: {
@@ -274,17 +308,60 @@
         }).then(response => {
           let body = response.data.data
           // debug
-          console.log(body)
+          // console.log(body)
           if (!body || body.code !== 0) {
+            self.showChooseModal = true
             self.$Message.info('抱歉，暂时没有空闲的该种类人工客服，请您耐心等待。')
           } else {
             // tell staff to update queue
-//            self.socket.emit('updateQueue', {staffId: body.msg, token: self.token})
+            // self.socket.emit('updateQueue', {staffId: body.msg, token: self.token})
             window.localStorage.setItem('staffId', body.msg)
             window.localStorage.setItem('chatState', 'chat')
             self.$router.push({name: 'chat', userId: self.userId, staffId: body.msg})
           }
         })
+      },
+      leaveMessage () {
+        if (this.email === '' || this.leavedMessage === '') {
+          this.$Message.error('邮箱或留言不能为空!')
+          this.loading = false
+          this.$nextTick(() => {
+            this.loading = true
+          })
+          return
+        }
+        let reg = /^[a-z0-9]+([._\\-]*[a-z0-9])*@([a-z0-9]+[-a-z0-9]*[a-z0-9]+.){1,63}[a-z0-9]+$/
+        if (reg.test(this.email) === false) {
+          this.$Message.error('邮箱地址不合法!')
+          this.loading = false
+          this.$nextTick(() => {
+            this.loading = true
+          })
+          return
+        }
+        if (this.leavedMessage.length >= 256) {
+          this.$Message.error('留言不得多于256字!')
+          this.loading = false
+          this.$nextTick(() => {
+            this.loading = true
+          })
+          return
+        }
+        const self = this
+        axios.post(self.$store.state.apiServerUrl + '/note', {'usrId': self.userId, 'content': self.leavedMessage, 'email': self.email})
+          .then(function (res) {
+            let body = res.data.data
+            if (body === null || body.code !== 0) {
+              self.$Message.error('抱歉，暂时无法留言')
+              self.loading = false
+              self.$nextTick(() => {
+                self.loading = true
+              })
+            } else {
+              self.$Message.info('留言成功!')
+              self.showLeaveMessageModal = false
+            }
+          })
       }
     },
     created () {
