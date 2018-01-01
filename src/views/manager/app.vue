@@ -136,7 +136,8 @@
                   type: 'changeCompanyInfo',
                   companyName: data.name,
                   companyLogo: data.picUrl,
-                  companyRobotAvatar: data.robotAvatar
+                  companyRobotAvatar: data.robotAvatar,
+                  companyCorpusFile: data.corpusFile
                 })
               })
             })
