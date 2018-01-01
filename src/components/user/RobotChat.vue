@@ -295,8 +295,6 @@
     },
     methods: {
       sendMessage () {
-        // debug
-        // console.log('send message')
 //        let sendMsg = this.inputText
 //        if (sendMsg === '') {
 //          this.$Notice.warning({
