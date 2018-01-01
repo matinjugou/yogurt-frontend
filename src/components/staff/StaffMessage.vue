@@ -30,7 +30,7 @@
         <br />
         <h3>你的回复</h3>
         <br />
-        <Input v-model="replyContent" type="textarea" :rows="3"></Input>
+        <Input v-model="replyContent" type="textarea" :rows="4"></Input>
       </div>
     </Modal>
   </div>
@@ -187,6 +187,12 @@ export default {
       this.isShowingReplyModal = true
     },
     replyOk () {
+      if (this.replyContent === '') {
+        this.$Notice.error({
+          title: '禁止回复空消息!'
+        })
+        return
+      }
       axios.post(this.httpServerUrl + '/note', {
         noteId: this.data[this.currentIndex].id,
         staffId: window.localStorage.getItem('id'),

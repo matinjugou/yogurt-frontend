@@ -916,10 +916,4 @@ export default {
     display: none;
   }
 }
-.ivu-modal {
-  top: 20px;
-}
-.ivu-modal-body {
-  height: 80vh;
-}
 </style>
