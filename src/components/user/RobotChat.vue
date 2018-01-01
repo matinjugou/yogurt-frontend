@@ -49,7 +49,7 @@
               <!--请输入您的留言：-->
               <!--<Input v-model="leavedMessage" type="textarea" icon="ios-chatboxes" placeholder="输入留言..."></Input>-->
               <Form ref="leaveMessageForm" label-position="right" :label-width="100" :model="leaveMessageForm" :rules="leaveMessageRules">
-                <FormItem prop="email" label="邮箱(客服将会尽快将回复发送至此邮箱)">
+                <FormItem prop="email" label="邮箱">
                   <Input v-model="leaveMessageForm.email" size="large" placeholder="在此输入您的邮箱"></Input>
                 </FormItem>
                 <FormItem prop="leavedMessage" label="留言">
@@ -338,28 +338,28 @@
       },
       switchToHuman () {
         // debug
-        this.showChooseModal = true
-//        const self = this
-//        axios.get(self.$store.state.apiServerUrl + '/queue', {
-//          params: {
-//            'userId': self.userId,
-//            'tags': self.staffTypeForm.staffType
-//          }
-//        }).then(response => {
-//          let body = response.data.data
-//          // debug
-//          // console.log(body)
-//          if (!body || body.code !== 0) {
-//            self.showChooseModal = true
-//            self.$Message.info('抱歉，暂时没有空闲的该种类人工客服，请您耐心等待。')
-//          } else {
-//            // tell staff to update queue
-//            // self.socket.emit('updateQueue', {staffId: body.msg, token: self.token})
-//            window.localStorage.setItem('staffId', body.msg)
-//            window.localStorage.setItem('chatState', 'chat')
-//            self.$router.push({name: 'chat', userId: self.userId, staffId: body.msg})
-//          }
-//        })
+        // this.showChooseModal = true
+        const self = this
+        axios.get(self.$store.state.apiServerUrl + '/queue', {
+          params: {
+            'userId': self.userId,
+            'tags': self.staffTypeForm.staffType
+          }
+        }).then(response => {
+          let body = response.data.data
+          // debug
+          // console.log(body)
+          if (!body || body.code !== 0) {
+            self.showChooseModal = true
+            // self.$Message.info('抱歉，暂时没有空闲的该种类人工客服，请您耐心等待。')
+          } else {
+            // tell staff to update queue
+            // self.socket.emit('updateQueue', {staffId: body.msg, token: self.token})
+            window.localStorage.setItem('staffId', body.msg)
+            window.localStorage.setItem('chatState', 'chat')
+            self.$router.push({name: 'chat', userId: self.userId, staffId: body.msg})
+          }
+        })
       },
       leaveMessage () {
         let isValid = this.validateForm('leaveMessageForm')
@@ -396,7 +396,7 @@
 //          return
 //        }
         const self = this
-        axios.post(self.$store.state.apiServerUrl + '/note', {'usrId': self.userId, 'content': self.leavedMessage, 'email': self.email})
+        axios.post(self.$store.state.apiServerUrl + '/note', {'userId': self.userId, 'content': self.leaveMessageForm.leavedMessage, 'email': self.leaveMessageForm.email})
           .then(function (res) {
             let body = res.data.data
             if (body === null || body.code !== 0) {
@@ -408,7 +408,7 @@
             } else {
               self.$Message.info('留言成功!')
               self.showLeaveMessageModal = false
-              this.resetForm('leaveMessageForm')
+              self.resetForm('leaveMessageForm')
             }
           })
       },
