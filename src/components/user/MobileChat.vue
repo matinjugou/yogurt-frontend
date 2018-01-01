@@ -49,11 +49,11 @@
           </v-flex>
         </v-layout>
         <v-layout v-show="functionPanelVisible" id="function-panel-layout">
-          <v-flex p>
-            <v-btn flat>
-              <v-icon>tag_faces</v-icon>表情
-            </v-btn>
-          </v-flex>
+          <!--<v-flex p>-->
+            <!--<v-btn flat>-->
+              <!--<v-icon>tag_faces</v-icon>表情-->
+            <!--</v-btn>-->
+          <!--</v-flex>-->
           <v-flex p>
             <v-btn flat>
               <v-icon>folder_open</v-icon>文件
