@@ -28,7 +28,6 @@ export default {
   name: 'StaffQuickReply',
   data () {
     return {
-      companyId: '',
       isLoading: false,
       columns: [
         {
@@ -57,6 +56,9 @@ export default {
     },
     staffId () {
       return this.$store.state.staffId
+    },
+    companyId () {
+      return this.$store.state.companyId
     },
     httpServerUrl () {
       return this.$store.state.httpServerUrl
@@ -91,31 +93,8 @@ export default {
     }
   },
   created () {
-    // get staff info
-    this.isLoading = true
-    axios.get(this.httpServerUrl + '/account-info', {
-      params: {
-        staffId: window.localStorage.getItem('id'),
-        token: window.localStorage.getItem('token')
-      }
-    }).then(response => {
-      console.log(response)
-      if (response.data.errno === 0) {
-        let body = response.data.data.staff
-        console.log(body)
-        this.companyId = body.companyId
-        this.getQuickReplys()
-      } else {
-        this.$Notice.error({
-          title: '没能成功获取个人信息，请刷新重试'
-        })
-      }
-    }).catch(error => {
-      console.log(error)
-      this.$Notice.error({
-        title: '没能成功获取个人信息，请刷新重试'
-      })
-    })
+    // get quick reply
+    this.getQuickReplys()
   }
 }
 </script>

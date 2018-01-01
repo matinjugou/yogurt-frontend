@@ -11,6 +11,7 @@ export default new Vuex.Store({
     imageCompressUrl: 'http://123.206.22.71/api/v1/image/',
     isLogin: false,
     staffId: '',
+    companyId: '',
     chatRecordList: {},
     userList: [],
     quickReplyList: [],
@@ -25,6 +26,9 @@ export default new Vuex.Store({
     },
     changeStaffId (state, payload) {
       state.staffId = payload.staffId
+    },
+    changeCompanyId (state, payload) {
+      state.companyId = payload.companyId
     },
     addChatRecord (state, payload) {
       if (state.chatRecordList[payload.userId] === undefined) {

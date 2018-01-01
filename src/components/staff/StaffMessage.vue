@@ -42,7 +42,6 @@ export default {
   name: 'StaffMessage',
   data () {
     return {
-      companyId: '',
       isLoading: false,
       isShowingReplyModal: false,
       currentIndex: 0,
@@ -124,6 +123,9 @@ export default {
     },
     httpServerUrl () {
       return this.$store.state.httpServerUrl
+    },
+    companyId () {
+      return this.$store.state.companyId
     }
   },
   methods: {
@@ -217,30 +219,7 @@ export default {
   },
   created () {
     // get staff info
-    this.isLoading = true
-    axios.get(this.httpServerUrl + '/account-info', {
-      params: {
-        staffId: window.localStorage.getItem('id'),
-        token: window.localStorage.getItem('token')
-      }
-    }).then(response => {
-      console.log(response)
-      if (response.data.errno === 0) {
-        let body = response.data.data.staff
-        console.log(body)
-        this.companyId = body.companyId
-        this.getMessages()
-      } else {
-        this.$Notice.error({
-          title: '没能成功获取个人信息，请刷新重试'
-        })
-      }
-    }).catch(error => {
-      console.log(error)
-      this.$Notice.error({
-        title: '没能成功获取个人信息，请刷新重试'
-      })
-    })
+    this.getMessages()
   }
 }
 </script>

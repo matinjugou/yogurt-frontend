@@ -94,6 +94,17 @@ export default {
     },
     socket () {
       return this.$store.state.socket
+    },
+    companyId: {
+      get: function () {
+        return this.$store.state.companyId
+      },
+      set: function (newCompanyId) {
+        this.$store.commit({
+          type: 'changeCompanyId',
+          companyId: newCompanyId
+        })
+      }
     }
   },
   methods: {
@@ -282,6 +293,58 @@ export default {
       } else {
         this.$router.push('/' + name)
       }
+    },
+    getQuickReplys () {
+      axios.get(this.httpServerUrl + '/quick-reply/public', {
+        params: {
+          companyId: this.companyId,
+          staffId: window.localStorage.getItem('id'),
+          token: window.localStorage.getItem('token')
+        }
+      }).then(response => {
+        console.log(response)
+        let body = response.data
+        if (body.errno === 0) {
+          this.$store.commit({
+            type: 'updateQuickReplyList',
+            quickReplyList: body.data.pairs
+          })
+        } else {
+          this.$Notice.error({
+            title: '没能成功获取快捷回复列表，请刷新重试'
+          })
+        }
+      }).catch(error => {
+        this.$Notice.error({
+          title: '没能成功获取快捷回复列表，请刷新重试'
+        })
+        console.log(error)
+      })
+    },
+    infoInit () {
+      axios.get(this.httpServerUrl + '/account-info', {
+        params: {
+          staffId: window.localStorage.getItem('id'),
+          token: window.localStorage.getItem('token')
+        }
+      }).then(response => {
+        console.log(response)
+        if (response.data.errno === 0) {
+          let body = response.data.data.staff
+          console.log(body)
+          this.companyId = body.companyId
+          this.getQuickReplys()
+        } else {
+          this.$Notice.error({
+            title: '没能成功获取个人信息，请刷新重试'
+          })
+        }
+      }).catch(error => {
+        console.log(error)
+        this.$Notice.error({
+          title: '没能成功获取个人信息，请刷新重试'
+        })
+      })
     }
   },
   created () {
@@ -313,6 +376,8 @@ export default {
           })
           // socket listening initialization
           this.socketListenInit()
+          // get staff detail info and quick reply list
+          this.infoInit()
         } else {
           window.location.href = window.location.origin + '/login?backUrl=' + window.location.href
         }

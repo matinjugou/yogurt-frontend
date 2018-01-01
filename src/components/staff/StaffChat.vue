@@ -306,6 +306,9 @@ export default {
     userList () {
       return this.$store.state.userList
     },
+    quickReplyList () {
+      return this.$store.state.quickReplyList
+    },
     allUnread () {
       let sum = 0
       for (let i = 0, len = this.userList.length; i < len; i++) {
@@ -408,6 +411,7 @@ export default {
         })
         return
       }
+      sendMsg = this.insertQuickReply(sendMsg)
       let date = new Date()
       // send text msg
       if (sendMsg !== '') {
@@ -550,6 +554,22 @@ export default {
     insertEmoji (emoji, event) {
       // TODO: insert at caret pos
       this.inputText += emoji.native
+    },
+    insertQuickReply (str) {
+      // change "# + quick phrase + whitespace" into long sentense
+      let reg = new RegExp(/#.+?\s/, 'g')
+      let result = str.replace(reg, (match, offset, string) => {
+        let phrase = match.slice(1, -1)
+        let pairResult = this.quickReplyList.find((value, index, arr) => {
+          return value.phrase === phrase
+        })
+        if (pairResult !== undefined) {
+          return pairResult.sentence
+        } else {
+          return match
+        }
+      })
+      return result
     },
     getFileIconName (fileName) {
       let array = fileName.split('.')
