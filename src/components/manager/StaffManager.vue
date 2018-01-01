@@ -122,17 +122,13 @@
               return h('div', [
                 h('Button', {
                   props: {
-                    type: 'primary',
-                    size: 'small'
-                  },
-                  style: {
-                    marginRight: '5px'
-                  }
-                }, '编辑'),
-                h('Button', {
-                  props: {
                     type: 'error',
                     size: 'small'
+                  },
+                  on: {
+                    click: () => {
+                      this.deleteStaff(params.index)
+                    }
                   }
                 }, '删除')
               ])
@@ -204,23 +200,59 @@
       changeSelected (selection, row) {
         this.selected = selection
       },
+      deleteStaff (index) {
+        const staff = this.staffdata[index].staffId
+        const self = this
+        axios({
+          method: 'delete',
+          url: self.$store.state.httpServerUrl + '/staff',
+          params: {
+            stuff: [staff]
+          }
+        }).then(function (response) {
+          axios.get(self.$store.state.httpServerUrl + '/staff', {
+            params: {
+              companyId: self.$store.state.companyId
+            }
+          }).then(function (response) {
+            console.log('response=', response)
+            let tmpstaffdata = []
+            for (let staff of response.data.data) {
+              tmpstaffdata.push({
+                staffId: staff.staffId,
+                name: staff.name,
+                nickname: staff.nickname,
+                email: staff.email,
+                phonenumber: staff.tel,
+                status: staff.onlineStatus,
+                role: staff.role,
+                queueCount: staff.queueCount
+              })
+            }
+            self.staffdata = tmpstaffdata
+          }).catch(function () {
+            self.$Message.error('服务出现故障，请重试一下~')
+          })
+          self.$Message.info('删除成功！')
+        }).catch(function () {
+          self.$Message.error('服务出现故障，请重试一下~')
+        })
+      },
       deleteSelected () {
         console.log('selected:', this.selected)
         const stuff = []
         const self = this
         for (let select of this.selected) {
-          stuff.push({
-            sentence: select.staffId
-          })
+          stuff.push(select.staffId)
         }
         axios({
           method: 'delete',
-          url: 'http://yogurt.magichc7.com/api/manager/staff',
-          data: {
+          url: self.$store.state.httpServerUrl + '/staff',
+          params: {
             stuff: stuff
           }
         }).then(function (response) {
-          axios.get('http://yogurt.magichc7.com/api/manager/staff', {
+          axios.get(self.$store.state.httpServerUrl + '/staff', {
             params: {
               companyId: self.$store.state.companyId
             }

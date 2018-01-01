@@ -163,7 +163,7 @@
         }
       },
       newPhraseModalCancel () {
-        self.$Message.info('Clicked cancel')
+        this.$Message.info('Clicked cancel')
       },
       changePhraseModalOk () {
         if (this.newPhrase !== '' && this.newSentence !== '') {
@@ -214,14 +214,14 @@
           })
         }
         axios({
+          url: self.$store.state.httpServerUrl + '/quick-reply/public',
           method: 'delete',
-          url: 'http://yogurt.magichc7.com/api/manager/quick-reply/public',
-          data: {
+          params: {
             companyId: 1,
             pairs: pairs
           }
         }).then(function (response) {
-          axios.get('http://yogurt.magichc7.com/api/manager/quick-reply/public', {
+          axios.get(self.$store.state.httpServerUrl + '/quick-reply/public', {
             params: {
               companyId: 1
             }
@@ -256,7 +256,7 @@
         axios({
           method: 'delete',
           url: 'http://yogurt.magichc7.com/api/manager/quick-reply/public',
-          data: {
+          params: {
             companyId: 1,
             pairs: pairs
           }

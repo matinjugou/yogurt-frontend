@@ -32,7 +32,7 @@
               <Icon type="ios-paper"></Icon>
               留言管理
             </template>
-            <MenuItem name="2-1">留言管理</MenuItem>
+            <MenuItem name="2-1" @click.native="jump('/usermessage')">留言管理</MenuItem>
           </Submenu>
           <Submenu name="3">
             <template slot="title">
@@ -136,7 +136,8 @@
                   type: 'changeCompanyInfo',
                   companyName: data.name,
                   companyLogo: data.picUrl,
-                  companyRobotAvatar: data.robotAvatar
+                  companyRobotAvatar: data.robotAvatar,
+                  companyCorpusFile: data.corpusFile
                 })
               })
             })

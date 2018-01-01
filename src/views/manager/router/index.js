@@ -5,6 +5,7 @@ import StaffManager from '@/components/manager/StaffManager'
 import QuickReplyManager from '@/components/manager/QuickReplyManager'
 import RobotManager from '@/components/manager/RobotManager'
 import ManagerInfo from '@/components/manager/ManagerInfo'
+import UserMessage from '@/components/manager/UserMessage'
 
 Vue.use(Router)
 
@@ -34,6 +35,11 @@ export default new Router({
       path: '/mgninfo',
       name: 'managerinfo',
       component: ManagerInfo
+    },
+    {
+      path: '/usermessage',
+      name: 'usermessage',
+      component: UserMessage
     }
   ]
 })
