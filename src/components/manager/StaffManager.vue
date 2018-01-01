@@ -116,6 +116,10 @@
             }
           },
           {
+            title: '答问比',
+            key: 'AnsAsk'
+          },
+          {
             title: '操作',
             key: 'actions',
             render: (h, params) => {
@@ -226,7 +230,8 @@
                 phonenumber: staff.tel,
                 status: staff.onlineStatus,
                 role: staff.role,
-                queueCount: staff.queueCount
+                queueCount: staff.queueCount,
+                AnsAsk: staff.AnsAsk
               })
             }
             self.staffdata = tmpstaffdata
@@ -268,7 +273,8 @@
                 phonenumber: staff.tel,
                 status: staff.onlineStatus,
                 role: staff.role,
-                queueCount: staff.queueCount
+                queueCount: staff.queueCount,
+                AnsAsk: staff.AnsAsk
               })
             }
             self.staffdata = tmpstaffdata
@@ -299,7 +305,8 @@
             phonenumber: staff.tel,
             status: staff.onlineStatus,
             role: staff.role,
-            queueCount: staff.queueCount
+            queueCount: staff.queueCount,
+            AnsAsk: staff.AnsAsk
           })
         }
         self.staffdata = tmpstaffdata
