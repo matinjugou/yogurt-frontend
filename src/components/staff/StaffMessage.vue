@@ -1,6 +1,10 @@
 <template>
   <div class="staff-message">
-    <h1 class="staff-message-title">客户留言</h1>
+    <div class="staff-message-title">
+      客户留言
+      <Button type="ghost" shape="circle" icon="refresh" @click="getMessages"></Button>
+    </div>
+    
     <div class="staff-message-table">
       <Table 
         border 
@@ -248,6 +252,7 @@ export default {
 }
 .staff-message-title {
   margin: 5vh 0 3vh 0;
+  font-size: 32px;
 }
 .staff-message-table {
   width: 77vw;

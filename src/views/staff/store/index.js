@@ -13,6 +13,7 @@ export default new Vuex.Store({
     staffId: '',
     chatRecordList: {},
     userList: [],
+    quickReplyList: [],
     socket: null
   },
   mutations: {
@@ -83,6 +84,9 @@ export default new Vuex.Store({
       } else {
         user['unread'] = 1
       }
+    },
+    updateQuickReplyList (state, payload) {
+      state.quickReplyList = payload.quickReplyList
     },
     buildSocketConnect (state) {
       const io = require('socket.io-client')
