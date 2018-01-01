@@ -48,22 +48,15 @@
             </Submenu>
           </div>
           
-          <!-- <Button :type="restAction" shape="circle" icon="coffee" size="large" @click="changeRestStatus">
-            <span v-show="showMenuText">{{ restCaption }}</span>
-          </Button>
-          <div class="menu-button-space"></div>
-          <Button type="error" shape="circle" icon="log-out" size="large" @click="logout">
-            <span class="menu-button-logout-text" v-show="showMenuText">登出</span>
-          </Button>
-          <div class="menu-button-space"></div> -->
-          
           <footer class="staff-copy">
             &copy; Yogurt
           </footer>
         </Menu>
       </Col>
       <Col class="staff-right" :span="spanRight">
-        <router-view/>
+        <transition name="slide-fade" mode="out-in">
+          <router-view/>
+        </transition>
       </Col>
     </Row>
   </div>
@@ -291,7 +284,8 @@ export default {
       }
     }
   },
-  beforeCreate () {
+  created () {
+    window.addEventListener('beforeunload', e => this.beforeUnloadHandler(e))
     this.$store.commit('buildSocketConnect')
     // check if the token is valid
     let storeType = window.localStorage.getItem('type')
@@ -329,9 +323,6 @@ export default {
     } else {
       window.location.href = window.location.origin + '/login?backUrl=' + window.location.href
     }
-  },
-  created () {
-    window.addEventListener('beforeunload', e => this.beforeUnloadHandler(e))
   },
   beforeDestroyed () {
     window.removeEventListener('beforeunload', e => this.beforeUnloadHandler(e))
@@ -386,6 +377,21 @@ export default {
 .staff-right {
   height: calc(100vh - 2px);
 }
+.slide-fade-enter-active {
+  transition: all .5s ease;
+}
+.slide-fade-leave-active{
+  transition: all .3s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+}
+.slide-fade-enter {
+  transform: translateY(50px);
+  opacity: 0;
+}
+.slide-fade-leave-to {
+  transform: translateY(50px);
+  opacity: 0;
+}
+
 .ivu-col {
   transition: width 0.2s ease-in-out;
 }
