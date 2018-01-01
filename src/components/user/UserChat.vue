@@ -554,7 +554,7 @@
           })
           // clear input
           this.inputText = ''
-        }
+        } else {}
         // send files
         if (this.uploadList.length) {
           for (let index of this.uploadList.keys()) {

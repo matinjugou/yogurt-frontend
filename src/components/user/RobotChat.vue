@@ -24,7 +24,7 @@
               title="选择人工服务类型"
               @on-ok="switchToHuman()">
               请选择人工服务类型：
-              <Select v-model="formItem.staffType">
+              <Select v-model="staffTypeForm.staffType">
                 <Option value="0">售前</Option>
                 <Option value="1">售后</Option>
               </Select>
@@ -41,11 +41,21 @@
               v-model="showLeaveMessageModal"
               title="留言"
               @on-ok="leaveMessage()"
+              @on-cancel="cancelLeaveMessage()"
+              @on-
               :loading="loading">
-              请输入邮箱(客服人员将会尽快将回复发送至此邮箱)：
-              <Input v-model="email" icon="ios-email" placeholder="输入邮箱..."></Input>
-              请输入您的留言：
-              <Input v-model="leavedMessage" type="textarea" icon="ios-chatboxes" placeholder="输入留言..."></Input>
+              <!--请输入邮箱(客服人员将会尽快将回复发送至此邮箱)：-->
+              <!--<Input v-model="email" icon="ios-email" placeholder="输入邮箱..."></Input>-->
+              <!--请输入您的留言：-->
+              <!--<Input v-model="leavedMessage" type="textarea" icon="ios-chatboxes" placeholder="输入留言..."></Input>-->
+              <Form ref="leaveMessageForm" label-position="right" :label-width="100" :model="leaveMessageForm" :rules="leaveMessageRules">
+                <FormItem prop="email" label="邮箱(客服将会尽快将回复发送至此邮箱)">
+                  <Input v-model="leaveMessageForm.email" size="large" placeholder="在此输入您的邮箱"></Input>
+                </FormItem>
+                <FormItem prop="leavedMessage" label="留言">
+                  <Input v-model="leaveMessageForm.leavedMessage" type="textarea" :rows="4" size="large" placeholder="您的留言"></Input>
+                </FormItem>
+              </Form>
             </Modal>
           </div>
         </div>
@@ -224,16 +234,45 @@
     data () {
       return {
         inputText: '',
-        email: '',
-        leavedMessage: '',
+        leaveMessageForm: {
+          email: '',
+          leavedMessage: ''
+        },
         earlistRecordIndex: '',
         showModal: false,
         showLeaveMessageModal: false,
         showChooseModal: false,
         loading: true,
-        formItem: {
+        staffTypeForm: {
           userId: this.userId,
           staffType: '0'
+        },
+        leaveMessageRules: {
+          email: [
+            {
+              required: true,
+              message: '邮箱不能为空',
+              trigger: 'blur'
+            },
+            {
+              pattern: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+              message: '邮箱格式有误',
+              trigger: 'blur'
+            }
+          ],
+          leavedMessage: [
+            {
+              required: true,
+              message: '留言不能为空',
+              trigger: 'blur'
+            },
+            {
+              type: 'string',
+              max: 256,
+              message: '留言不得多于256字',
+              trigger: 'blur'
+            }
+          ]
         }
       }
     },
@@ -298,55 +337,63 @@
       },
       switchToHuman () {
         // debug
-        // this.showChooseModal = true
-        const self = this
-        axios.get(self.$store.state.apiServerUrl + '/queue', {
-          params: {
-            'userId': self.userId,
-            'tags': self.formItem.staffType
-          }
-        }).then(response => {
-          let body = response.data.data
-          // debug
-          // console.log(body)
-          if (!body || body.code !== 0) {
-            self.showChooseModal = true
-            self.$Message.info('抱歉，暂时没有空闲的该种类人工客服，请您耐心等待。')
-          } else {
-            // tell staff to update queue
-            // self.socket.emit('updateQueue', {staffId: body.msg, token: self.token})
-            window.localStorage.setItem('staffId', body.msg)
-            window.localStorage.setItem('chatState', 'chat')
-            self.$router.push({name: 'chat', userId: self.userId, staffId: body.msg})
-          }
-        })
+        this.showChooseModal = true
+//        const self = this
+//        axios.get(self.$store.state.apiServerUrl + '/queue', {
+//          params: {
+//            'userId': self.userId,
+//            'tags': self.staffTypeForm.staffType
+//          }
+//        }).then(response => {
+//          let body = response.data.data
+//          // debug
+//          // console.log(body)
+//          if (!body || body.code !== 0) {
+//            self.showChooseModal = true
+//            self.$Message.info('抱歉，暂时没有空闲的该种类人工客服，请您耐心等待。')
+//          } else {
+//            // tell staff to update queue
+//            // self.socket.emit('updateQueue', {staffId: body.msg, token: self.token})
+//            window.localStorage.setItem('staffId', body.msg)
+//            window.localStorage.setItem('chatState', 'chat')
+//            self.$router.push({name: 'chat', userId: self.userId, staffId: body.msg})
+//          }
+//        })
       },
       leaveMessage () {
-        if (this.email === '' || this.leavedMessage === '') {
-          this.$Message.error('邮箱或留言不能为空!')
+        let isValid = this.validateForm('leaveMessageForm')
+        if (isValid === false) {
           this.loading = false
           this.$nextTick(() => {
             this.loading = true
           })
           return
         }
-        let reg = /^[a-z0-9]+([._\\-]*[a-z0-9])*@([a-z0-9]+[-a-z0-9]*[a-z0-9]+.){1,63}[a-z0-9]+$/
-        if (reg.test(this.email) === false) {
-          this.$Message.error('邮箱地址不合法!')
-          this.loading = false
-          this.$nextTick(() => {
-            this.loading = true
-          })
-          return
-        }
-        if (this.leavedMessage.length >= 256) {
-          this.$Message.error('留言不得多于256字!')
-          this.loading = false
-          this.$nextTick(() => {
-            this.loading = true
-          })
-          return
-        }
+//        if (this.email === '' || this.leavedMessage === '') {
+//          this.$Message.error('邮箱或留言不能为空!')
+//          this.loading = false
+//          this.$nextTick(() => {
+//            this.loading = true
+//          })
+//          return
+//        }
+//        let reg = /^[a-z0-9]+([._\\-]*[a-z0-9])*@([a-z0-9]+[-a-z0-9]*[a-z0-9]+.){1,63}[a-z0-9]+$/
+//        if (reg.test(this.email) === false) {
+//          this.$Message.error('邮箱地址不合法!')
+//          this.loading = false
+//          this.$nextTick(() => {
+//            this.loading = true
+//          })
+//          return
+//        }
+//        if (this.leavedMessage.length >= 256) {
+//          this.$Message.error('留言不得多于256字!')
+//          this.loading = false
+//          this.$nextTick(() => {
+//            this.loading = true
+//          })
+//          return
+//        }
         const self = this
         axios.post(self.$store.state.apiServerUrl + '/note', {'usrId': self.userId, 'content': self.leavedMessage, 'email': self.email})
           .then(function (res) {
@@ -360,8 +407,22 @@
             } else {
               self.$Message.info('留言成功!')
               self.showLeaveMessageModal = false
+              this.resetForm('leaveMessageForm')
             }
           })
+      },
+      cancelLeaveMessage () {
+        this.resetForm('leaveMessageForm')
+      },
+      validateForm (name) {
+        let result = false
+        this.$refs[name].validate((valid) => {
+          result = valid
+        })
+        return result
+      },
+      resetForm (name) {
+        this.$refs[name].resetFields()
       }
     },
     created () {
