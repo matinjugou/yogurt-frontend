@@ -5,7 +5,7 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    socketServerUrl: 'http://yogurt.magichc7.com',
+    socketServerUrl: '60.205.178.28:8361',
     httpServerUrl: 'http://yogurt.magichc7.com/api/staff',
     fileServerUrl: 'http://123.206.22.71/api/v2/file/',
     imageCompressUrl: 'http://123.206.22.71/api/v1/image/',
@@ -33,9 +33,21 @@ export default new Vuex.Store({
       console.log(state.chatRecordList)
     },
     refreshUserList (state, payload) {
-      state.userList = payload.content
+      let arr = payload.content
       for (let item of state.userList) {
-        state.chatRecordList[item.userId] = []
+        let i
+        for (i = 0; i < arr.length; i++) {
+          if (item.userId === arr[i].userId) {
+            arr[i].unread = item.unread
+            break
+          }
+        }
+      }
+      state.userList = arr
+      for (let item of state.userList) {
+        if (state.chatRecordList[item.userId] === undefined) {
+          state.chatRecordList[item.userId] = []
+        }
       }
     },
     addUser (state, payload) {
@@ -51,23 +63,32 @@ export default new Vuex.Store({
       state.userList.splice(userIndex, 1)
     },
     clearUserUnread (state, payload) {
-      state.userList.find(function (user) {
-        return user.userId === payload.userId
-      }).unread = 0
+      let user = state.userList.find(function (u) {
+        return u.userId === payload.userId
+      })
+      if (user === undefined) {
+        return
+      }
+      user['unread'] = 0
     },
     addUserUnread (state, payload) {
-      let user = state.userList.find(function (user) {
-        return user.userId === payload.userId
+      let user = state.userList.find(function (u) {
+        return u.userId === payload.userId
       })
-      if (user.unread) {
-        user.unread++
+      if (user === undefined) {
+        return
+      }
+      if (typeof user.unread === 'number') {
+        user['unread']++
       } else {
         user['unread'] = 1
       }
     },
     buildSocketConnect (state) {
       const io = require('socket.io-client')
-      state.socket = io(state.socketServerUrl)
+      state.socket = io(state.socketServerUrl, {
+        transports: ['websocket']
+      })
     }
   }
 })

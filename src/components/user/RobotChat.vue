@@ -291,6 +291,9 @@
       },
       chatState () {
         return window.localStorage.getItem('chatState')
+      },
+      socket () {
+        return this.$store.state.socket
       }
     },
     methods: {

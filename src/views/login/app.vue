@@ -188,8 +188,10 @@ export default {
     },
     changeType (name) {
       this.type = name
-      this.formLogin.username = ''
-      this.formLogin.password = ''
+      this.formStaffLogin.username = ''
+      this.formStaffLogin.password = ''
+      this.formManagerLogin.username = ''
+      this.formManagerLogin.password = ''
     }
   },
   created () {
@@ -252,7 +254,7 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
-  background: url(/static/login_bg.png) fixed no-repeat;
+  background: url(https://cdn.pbrd.co/images/H0e4O2Ov.png) fixed no-repeat;
   background-size: cover;
 }
 .login-left {

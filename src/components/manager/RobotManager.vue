@@ -66,7 +66,7 @@
         <h4 style="margin-bottom: 7px">
           转接时显示的消息
         </h4>
-        <Input v-model="transMnpessage"
+        <Input v-model="transMessage"
                type="textarea"
                placeholder="Enter something..."/>
       </Row>
@@ -78,6 +78,7 @@
 </template>
 
 <script>
+  import axios from 'axios'
   import MyAvatar from '@/components/public/MyAvatar'
   export default {
     name: 'robotmanager',
@@ -92,7 +93,28 @@
     methods: {
       changeRobotName: function () {
       },
-      avatarUploaded: function () {}
+      avatarUploaded: function (picUrl) {
+        const self = this
+        axios.put(self.$store.state.httpServerUrl + '/company-info', {
+          companyId: self.$store.state.companyId,
+          robotAvatar: picUrl
+        }).then(function () {
+          axios.get(self.$store.state.httpServerUrl + '/company-info', {
+            params: {
+              companyId: self.$store.state.companyId
+            }
+          }).then(function (res) {
+            console.log(res)
+            const data = res.data.data
+            self.$store.commit({
+              type: 'changeRobotAvatar',
+              companyRobotAvatar: data.robotAvatar
+            })
+          }).catch(function (error) {
+            console.log(error)
+          })
+        })
+      }
     },
     computed: {
       robotAvatar () {

@@ -26,6 +26,9 @@ export default new Vuex.Store({
     logout (state) {
       state.isLogin = false
     },
+    changeRobotAvatar (state, payload) {
+      state.companyRobotAvatar = payload.companyRobotAvatar
+    },
     changeManagerAvatar (state, payload) {
       state.picUrl = payload.picUrl
     },

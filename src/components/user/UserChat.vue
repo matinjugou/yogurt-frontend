@@ -747,6 +747,16 @@
         console.log('show large image, src: ' + src)
         this.showLargeImageModal = true
         this.largeImageSrc = src
+      },
+      logout (event) {
+        // TODO
+        alert('你确定要离开吗？')
+        event.preventDefault()
+        this.socket.emit('userLogOut', {
+          userId: this.userId,
+          token: this.token
+        })
+        window.localStorage.clear()
       }
     },
     created () {
@@ -810,6 +820,7 @@
         // debug
         console.log(data)
       })
+      window.addEventListener('beforeunload', e => this.logout(e))
     },
     mounted () {
       this.uploadList = this.$refs.upload.fileList
@@ -817,6 +828,9 @@
     },
     updated () {
       this.scrollToBottom()
+    },
+    beforeDestroyed () {
+      window.removeEventListener('beforeunload', e => this.logout(e))
     }
   }
 </script>
