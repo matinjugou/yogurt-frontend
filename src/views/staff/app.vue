@@ -27,7 +27,8 @@
               <Icon type="paper-airplane" :size="iconSize"></Icon>
               <span class="staff-text" v-show="showMenuText">客户反馈</span>
             </MenuItem>
-            <!--TODO: let all the actions in here-->
+
+            <!-- all the actions in here -->
             <Submenu name="personal-center">
               <template slot="title">
                   <Icon type="home" :size="iconSize"></Icon>
@@ -37,9 +38,14 @@
                 <Icon type="person-stalker" :size="iconSize"></Icon>
                 <span class="staff-text" v-show="showMenuText">信息维护</span>
               </MenuItem>
-              <MenuItem name="rest">
+              <MenuItem disabled name="rest">
+                <!-- TODO: issue in iview: render switch failed -->
                 <Icon type="coffee" :size="iconSize + 4"></Icon>
-                <span class="staff-text" v-show="showMenuText">{{ restCaption }}</span>
+                <span class="staff-text" v-show="showMenuText">状态</span>
+                <i-switch v-model="workStatus" size="large" @on-change="changeWorkStatus">
+                  <span slot="open">工作</span>
+                  <span slot="close">休息</span>
+                </i-switch>
               </MenuItem>
               <MenuItem name="logout">
                 <Icon type="log-out" :size="iconSize"></Icon>
@@ -70,7 +76,7 @@ export default {
     return {
       spanLeft: 3,
       iconSize: 25,
-      restStatus: false
+      workStatus: false
     }
   },
   computed: {
@@ -79,9 +85,6 @@ export default {
     },
     restAction () {
       return this.restStatus ? 'success' : 'primary'
-    },
-    restCaption () {
-      return this.restStatus ? '返回工作' : '准备休息'
     },
     spanRight () {
       return 24 - this.spanLeft
@@ -258,9 +261,11 @@ export default {
         })
       })
     },
-    changeRestStatus () {
+    changeWorkStatus (status) {
       // TODO: give server a message
-      this.restStatus = !this.restStatus
+      this.$Notice.warning({
+        title: '该功能将在后续版本中添加'
+      })
     },
     sendLogoutMessage () {
       let storeToken = window.localStorage.getItem('token')
@@ -287,7 +292,10 @@ export default {
       if (name === 'burger-button') {
         this.spanLeft = this.spanLeft === 3 ? 1 : 3
       } else if (name === 'rest') {
-        this.changeRestStatus()
+        this.$Notice.warning({
+          title: '该功能将在后续版本中添加'
+        })
+        // this.changeRestStatus()
       } else if (name === 'logout') {
         this.logout()
       } else {
@@ -412,6 +420,7 @@ export default {
 }
 .staff-text {
   font-size: 15px;
+  margin-right: 10px;
 }
 .staff-copy {
   text-align: center;
