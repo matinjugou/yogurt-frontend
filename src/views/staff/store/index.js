@@ -12,8 +12,10 @@ export default new Vuex.Store({
     isLogin: false,
     staffId: '',
     companyId: '',
+    avatarUrl: '',
     chatRecordList: {},
     userList: [],
+    userAvatarUrl: {},
     quickReplyList: [],
     socket: null
   },
@@ -29,6 +31,9 @@ export default new Vuex.Store({
     },
     changeCompanyId (state, payload) {
       state.companyId = payload.companyId
+    },
+    changeAvatarUrl (state, payload) {
+      state.avatarUrl = payload.avatarUrl
     },
     addChatRecord (state, payload) {
       if (state.chatRecordList[payload.userId] === undefined) {

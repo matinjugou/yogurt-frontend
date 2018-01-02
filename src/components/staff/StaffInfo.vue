@@ -2,7 +2,13 @@
   <div class="staff-info">
     <div class="staff-info-center">
       <div class="staff-info-avatar">
-        <img class="avatar-image" :src="avatarUrl" alt="头像"/>
+        <upload-avatar 
+          :imgSrc="avatarUrl" 
+          btnName="上传头像"
+          :serverUrl="fileServerUrl"
+          @on-uploaded="updateAvatarUrl"
+          @on-failed="handleAvatarFail"></upload-avatar>
+        <!-- <img class="avatar-image" :src="avatarUrl" alt="头像"/> -->
       </div>
       <div class="staff-info-content">
         <div class="staff-info-detail">
@@ -56,13 +62,16 @@
 
 <script>
 import axios from 'axios'
+import UploadAvatar from '@/components/public/UploadAvatar'
 export default {
   name: 'StaffInfo',
+  components: {
+    'upload-avatar': UploadAvatar
+  },
   data () {
     return {
       showInfo: false,
       showEmailModal: false,
-      avatarUrl: 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1512143132319&di=4f1af9a57c13467a0939aaeea1627b94&imgtype=0&src=http%3A%2F%2Fi0.hdslb.com%2Fbfs%2Fface%2F08224a0bc9b5652fd9b2ad9b4f0717a38166d632.jpg',
       nickName: '',
       email: '',
       phoneNumber: '',
@@ -136,11 +145,57 @@ export default {
     staffId () {
       return this.$store.state.staffId
     },
+    avatarUrl: {
+      get: function () {
+        return this.$store.state.avatarUrl
+      },
+      set: function (newAvatarUrl) {
+        this.$store.commit({
+          type: 'changeAvatarUrl',
+          avatarUrl: newAvatarUrl
+        })
+      }
+    },
     httpServerUrl () {
       return this.$store.state.httpServerUrl
+    },
+    fileServerUrl () {
+      return this.$store.state.fileServerUrl
     }
   },
   methods: {
+    updateAvatarUrl (newAvatarUrl) {
+      console.log(newAvatarUrl)
+      this.avatarUrl = newAvatarUrl
+      axios.put(this.httpServerUrl + '/account-info', {
+        staffId: this.staffId,
+        token: window.localStorage.getItem('token'),
+        picUrl: this.avatarUrl
+      }).then(response => {
+        console.log(response)
+        let body = response.data.data
+        if (body.code === 0) {
+          this.$Notice.success({
+            title: '上传头像成功~'
+          })
+        } else {
+          this.$Notice.error({
+            title: '上传头像失败，请稍后再试'
+          })
+        }
+      }).catch(error => {
+        console.log(error)
+        this.$Notice.error({
+          title: '上传头像失败，请稍后再试'
+        })
+      })
+    },
+    handleAvatarFail (error) {
+      console.log(error)
+      this.$Notice.error({
+        title: '上传头像失败，请稍后再试'
+      })
+    },
     updateStaffInfo () {
       this.$refs.formInfo.validate((valid) => {
         if (valid) {
@@ -292,13 +347,6 @@ export default {
 }
 .staff-info-avatar {
   margin-right: 70px;
-  width: 160px;
-  height: 160px;
-  border: 1px solid white;
-  border-radius: 50%;
-  overflow: hidden;
-  box-shadow: 2px 2px 1px #888888;
-  text-align: center;
 }
 .avatar-image {
   width: 160px;

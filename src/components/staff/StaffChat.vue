@@ -21,6 +21,7 @@
             <MenuItem v-for="(user, index) in userList" v-if="user.status === 'serving'":key="user.userId" :name="user.userId">
               <div class="chat-menu-item">
                 <Badge :count="user.unread" overflow-count="99">
+                  <!-- TODO: get user avatar and put it into this -->
                   <Avatar shape="square" icon="person"/>
                 </Badge>
               </div>
@@ -36,6 +37,7 @@
             </template>
             <MenuItem v-for="(user, index) in userList" v-if="user.status === 'switching'" :key="user.userId" :name="user.userId">
               <div class="chat-menu-item">
+                <!-- TODO: get user avatar and put it into this -->
                 <Avatar shape="square" icon="person"/>
               </div>
               <div class="chat-menu-item">
@@ -49,6 +51,7 @@
             </template>
             <MenuItem v-for="(user, index) in userList" v-if="user.status === 'waiting'" :key="user.userId" :name="user.userId">
               <div class="chat-menu-item">
+                <!-- TODO: get user avatar and put it into this -->
                 <Avatar shape="square" icon="person"/>
               </div>
               <div class="chat-menu-item">
@@ -58,6 +61,8 @@
           </Submenu>
         </Menu>
       </Col>
+
+      <!-- chat window -->
       <Col :span="spanMiddle" class="chat-window vertical-spacing">
         <div v-show="isChatting">
 
@@ -91,6 +96,7 @@
                     <Spin></Spin>
                   </div>
                   <div class="avatar chat-single-record-element">
+                    <!-- TODO: get avatar and put it into this -->
                     <Avatar shape="square" icon="person"/>
                   </div>
                   <div class="content chat-single-record-element" :class="singleRecord.type" v-if="singleRecord.type === 'text'">
@@ -212,7 +218,8 @@
 
       </Col>
       <Col :span="spanRight" v-if="spanRight">
-        detail info
+        这里是用户详情信息
+        后续版本中添加
       </Col>
     </Row>
     <Modal v-model="showLargeImageModal" width="80%" title="查看图片">
@@ -333,6 +340,9 @@ export default {
     staffId () {
       return this.$store.state.staffId
     },
+    avatarUrl () {
+      return this.$store.state.avatarUrl
+    },
     readyToSend () {
       for (let file of this.uploadList) {
         if (file.status !== 'finished') {
@@ -367,6 +377,8 @@ export default {
     },
     closeChatWindow () {
       // TODO: close chat with chatUserId
+      this.isChatting = false
+      this.chatUserId = ''
     },
     getLastChatRecord (userId) {
       let chatRecord = this.chatRecordList[userId]

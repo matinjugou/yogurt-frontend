@@ -108,6 +108,17 @@ export default {
           companyId: newCompanyId
         })
       }
+    },
+    avatarUrl: {
+      get: function () {
+        return this.$store.state.avatarUrl
+      },
+      set: function (newAvatarUrl) {
+        this.$store.commit({
+          type: 'changeAvatarUrl',
+          avatarUrl: newAvatarUrl
+        })
+      }
     }
   },
   methods: {
@@ -341,6 +352,7 @@ export default {
           let body = response.data.data.staff
           console.log(body)
           this.companyId = body.companyId
+          this.avatarUrl = body.picUrl
           this.getQuickReplys()
         } else {
           this.$Notice.error({
