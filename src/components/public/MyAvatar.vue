@@ -42,12 +42,7 @@
           .then(function (res) {
             console.log(res)
             const data = res.data.data
-            axios.put(self.$store.state.httpServerUrl + '/account-info', {
-              managerId: self.$store.state.managerId,
-              picUrl: data
-            }).then(function () {
-              self.$emit('avatarChanged')
-            })
+            self.$emit('picUploaded', data)
           })
         return false
       }

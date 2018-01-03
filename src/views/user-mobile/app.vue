@@ -11,7 +11,8 @@
       this.$store.commit('buildSocketConnect')
     },
     created () {
-      this.$router.push('login')
+//      window.location.href = window.location.origin + '/user#/login'
+      this.$router.push('robot')
     }
   }
 </script>

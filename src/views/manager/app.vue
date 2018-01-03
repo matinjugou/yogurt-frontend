@@ -5,9 +5,9 @@
         <a>Yogurt客服系统</a>
       </div>
       <div class="layout-ceiling-main">
-        <a href="#">登录</a> |
         <a href="#">帮助中心</a> |
-        <a href="#">服务中心</a>
+        <a href="#">服务中心</a> |
+        <a @click="logout">登出</a>
       </div>
     </div>
     <Row type="flex">
@@ -15,9 +15,9 @@
         <Menu id="left-menu" theme="dark" accordion width="auto">
           <Row id="avatar-block" type="flex" justify="center">
             <Col>
-              <Avatar :style="{background: 'orange'}" size="large" @click.native="jump('/mgninfo')">USER</Avatar>
-              <h3 style="color: white">企业名称</h3>
-              <span style="color: white">管理员姓名</span>
+              <Avatar :src="avatarSrc" :style="{background: 'orange'}" size="large" @click.native="jump('/mgninfo')"></Avatar>
+              <h3 style="color: white">{{ companyName }}</h3>
+              <span style="color: white">{{ managerName }}</span>
             </Col>
           </Row>
           <Submenu name="1">
@@ -32,7 +32,7 @@
               <Icon type="ios-paper"></Icon>
               留言管理
             </template>
-            <MenuItem name="2-1">留言管理</MenuItem>
+            <MenuItem name="2-1" @click.native="jump('/usermessage')">留言管理</MenuItem>
           </Submenu>
           <Submenu name="3">
             <template slot="title">
@@ -67,17 +67,89 @@
 </template>
 
 <script>
+  import axios from 'axios'
   export default {
     data () {
       return {
       }
     },
     computed: {
+      avatarSrc () {
+        return this.$store.state.picUrl
+      },
+      companyName () {
+        return this.$store.state.companyName
+      },
+      managerName () {
+        return this.$store.state.nickname
+      }
     },
     methods: {
       jump: function (str) {
-        console.log('jump')
         this.$router.push(str)
+      },
+      logout () {
+        this.$store.commit('logout')
+        window.localStorage.removeItem('id')
+        window.localStorage.removeItem('type')
+        window.localStorage.removeItem('token')
+        window.location.href = window.location.origin + '/login'
+      }
+    },
+    created () {
+      const self = this
+      let storeType = window.localStorage.getItem('type')
+      let storeId = window.localStorage.getItem('id')
+      let storeToken = window.localStorage.getItem('token')
+      if (storeType === 'manager' && storeId) {
+        axios.get(self.$store.state.httpServerUrl + '/login', {
+          params: {
+            managerId: storeId,
+            token: storeToken
+          }
+        }).then(response => {
+          let body = response.data.data
+          if (body.code === 0) {
+            self.$store.commit('login')
+            self.$store.commit({
+              type: 'changeManagerId',
+              managerId: storeId
+            })
+            axios.get(self.$store.state.httpServerUrl + '/account-info', {
+              params: {
+                managerId: self.$store.state.managerId
+              }
+            }).then(res => {
+              console.log(res)
+              self.$store.commit({
+                type: 'changeManagerId',
+                ...res.data.data
+              })
+              const companyId = res.data.data.companyId
+              axios.get(self.$store.state.httpServerUrl + '/company-info', {
+                params: {
+                  companyId: companyId
+                }
+              }).then(res => {
+                const data = res.data.data
+                self.$store.commit({
+                  type: 'changeCompanyInfo',
+                  companyName: data.name,
+                  companyLogo: data.picUrl,
+                  companyRobotAvatar: data.robotAvatar,
+                  companyCorpusFile: data.corpusFile
+                })
+              })
+            })
+          } else {
+            window.location.href = window.location.origin + '/login?backUrl=' + window.location.href
+          }
+        }).catch(error => {
+          console.log(error)
+          window.location.href = window.location.origin + '/login?backUrl=' + window.location.href
+        })
+      } else {
+        window.location.href = window.location.origin + '/login?backUrl=' + window.location.href
       }
     }
   }
