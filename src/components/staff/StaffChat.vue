@@ -96,7 +96,7 @@
             <ul>
               <li v-for="(singleRecord, index) in currentChatRecord" :key="index">
                 <p class="chat-msg-time">
-                  <span>{{ singleRecord.time.toLocaleTimeString('zh-Hans-CN') }}</span>
+                  <span>{{ singleRecord.time instanceof Date ? changeDateIntoString(singleRecord.time) : singleRecord.time }}</span>
                 </p>
                 <div class="chat-msg-body" :class="[{'from-me': singleRecord.direction === 'out'}]">
                   <div class="chat-single-record-element" v-if="singleRecord.hasSent === false">
@@ -365,6 +365,18 @@ export default {
     }
   },
   methods: {
+    zeroFill (num, size) {
+      let s = '000000000' + num
+      return s.substr(s.length - size)
+    },
+    changeDateIntoString (Date) {
+      return Date.getFullYear() +
+        '-' + this.zeroFill(Date.getMonth() + 1, 2) +
+        '-' + this.zeroFill(Date.getDate(), 2) +
+        ' ' + this.zeroFill(Date.getHours(), 2) +
+        ':' + this.zeroFill(Date.getMinutes(), 2) +
+        ':' + this.zeroFill(Date.getSeconds(), 2)
+    },
     chatWindowScrollDown () {
       let element = document.getElementById('chat-window')
       if (element) {
@@ -416,6 +428,7 @@ export default {
     getHistoryRecord (userId) {
       this.isGettingHistoryRecord = true
       console.log('get history record of ' + userId)
+      let currentIndex
       axios.get(this.httpServerUrl + '/chat-record', {
         params: {
           'userId': userId,
@@ -424,7 +437,51 @@ export default {
         }
       }).then(response => {
         console.log(response)
-        this.isGettingHistoryRecord = false
+        let body = response.data.data
+        console.log(body)
+        if (body.length > 0) {
+          currentIndex = body[0].index
+          if (this.chatRecordList[this.chatUserId] !== undefined) {
+            currentIndex -= this.chatRecordList[this.chatUserId].length
+          }
+          if (currentIndex < 0) {
+            this.$Notice.success({
+              title: '没有更多的消息了~'
+            })
+            this.isGettingHistoryRecord = false
+            return
+          }
+          axios.get(this.httpServerUrl + '/chat-record', {
+            params: {
+              'userId': userId,
+              'staffId': this.staffId,
+              'index': currentIndex
+            }
+          }).then(response => {
+            console.log(response)
+            let body2 = response.data.data
+            console.log(body2)
+            if (body.length > 0) {
+              let content = []
+              for (let value of body2) {
+                content.unshift(value.content)
+                content[0]['direction'] = value.direction === 's_u' ? 'out' : 'in'
+              }
+              this.$store.commit({
+                'type': 'prependChatRecord',
+                'userId': this.chatUserId,
+                'content': content
+              })
+            }
+            this.isGettingHistoryRecord = false
+          }).catch(error => {
+            this.$Notice.error({
+              title: '获取历史消息失败，请稍后再试'
+            })
+            console.log(error)
+            this.isGettingHistoryRecord = false
+          })
+        }
       }).catch(error => {
         this.$Notice.error({
           title: '获取历史消息失败，请稍后再试'

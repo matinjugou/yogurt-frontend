@@ -106,7 +106,7 @@ export default {
                 axios.post(this.httpServerUrl + '/account-info', {
                   staffId: this.staffId,
                   name: this.$store.state.name,
-                  nickName: this.$store.state.nickName,
+                  nickname: this.$store.state.nickName,
                   email: this.$store.state.email,
                   tel: this.$store.state.phoneNumber,
                   picUrl: this.$store.state.avatarUrl,

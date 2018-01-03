@@ -35,6 +35,14 @@ export default new Vuex.Store({
     changeAvatarUrl (state, payload) {
       state.avatarUrl = payload.avatarUrl
     },
+    prependChatRecord (state, payload) {
+      if (state.chatRecordList[payload.userId] === undefined) {
+        state.chatRecordList[payload.userId] = []
+      }
+      console.log(payload.content)
+      state.chatRecordList[payload.userId].unshift(...payload.content)
+      console.log(state.chatRecordList)
+    },
     addChatRecord (state, payload) {
       if (state.chatRecordList[payload.userId] === undefined) {
         state.chatRecordList[payload.userId] = []

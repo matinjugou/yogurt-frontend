@@ -459,7 +459,7 @@ export default {
 }
 .staff {
   border: 1px solid white;
-  border-radius: 10px;
+  border-radius: 5px;
   background: #f5f7f9;
   position: relative;
   overflow: hidden;
