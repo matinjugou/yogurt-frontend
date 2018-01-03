@@ -72,7 +72,7 @@
               用户{{ chatUserId.length > 15 ? chatUserId.slice(0, 15) + '...' : chatUserId }}
             </div>
             <div class="chat-window-title-actions">
-              <Button type="text">
+              <Button type="text" @click="connectToOthers">
                 <Icon type="share" size="28"></Icon>
               </Button>
               <Button type="text" @click="showInfo">
@@ -97,7 +97,7 @@
                   </div>
                   <div class="avatar chat-single-record-element">
                     <!-- TODO: get avatar and put it into this -->
-                    <Avatar shape="square" icon="person"/>
+                    <Avatar shape="square" icon="person" :src="singleRecord.direction === 'out' ? avatarUrl : ''"/>
                   </div>
                   <div class="content chat-single-record-element" :class="singleRecord.type" v-if="singleRecord.type === 'text'">
                     {{ singleRecord.msg }}
@@ -374,6 +374,11 @@ export default {
         userId: this.chatUserId
       })
       console.log('Switch user: ' + this.chatUserId)
+    },
+    connectToOthers () {
+      this.$Notice.warning({
+        title: '转接功能将在后续版本中添加'
+      })
     },
     closeChatWindow () {
       // TODO: close chat with chatUserId

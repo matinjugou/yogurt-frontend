@@ -94,6 +94,11 @@ export default {
             required: true,
             message: '昵称不能为空',
             trigger: 'blur'
+          },
+          {
+            pattern: /^[\u4e00-\u9fa5A-Za-z\d-_]{2,12}$/,
+            message: '昵称长度应为2-12个字符',
+            trigger: 'blur'
           }
         ],
         phoneNumber: [
@@ -103,7 +108,7 @@ export default {
             trigger: 'blur'
           },
           {
-            pattern: '^1\\d{10}$',
+            pattern: /^1\d{10}$/,
             message: '手机号格式有误',
             trigger: 'blur'
           }

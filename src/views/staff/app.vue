@@ -42,7 +42,7 @@
                 <!-- TODO: issue in iview: render switch failed -->
                 <Icon type="coffee" :size="iconSize + 4"></Icon>
                 <span class="staff-text" v-show="showMenuText">状态</span>
-                <i-switch v-model="workStatus" size="large" @on-change="changeWorkStatus">
+                <i-switch v-model="workStatus" size="large" v-show="showMenuText" @on-change="changeWorkStatus">
                   <span slot="open">工作</span>
                   <span slot="close">休息</span>
                 </i-switch>
