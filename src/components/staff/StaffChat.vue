@@ -512,6 +512,7 @@ export default {
       }).then(response => {
         console.log(response)
         let body = response.data.data
+        console.log('Get chat Record')
         console.log(body)
         if (body.length > 0) {
           currentIndex = body[0].index
@@ -555,6 +556,11 @@ export default {
             console.log(error)
             this.isGettingHistoryRecord = false
           })
+        } else {
+          this.$Notice.success({
+            title: '没有更多的消息了~'
+          })
+          this.isGettingHistoryRecord = false
         }
       }).catch(error => {
         this.$Notice.error({
