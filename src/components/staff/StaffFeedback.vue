@@ -1,6 +1,17 @@
 <template>
   <div class="staff-feedback">
-    {{ msg }}
+    <div class="staff-feedback-title">
+      客户反馈
+      <Button type="ghost" shape="circle" icon="refresh" @click="getFeedbacks"></Button>
+    </div>
+
+    <div class="staff-feedback-table">
+      <Table
+        border 
+        size="large"
+        :loading="isLoading"
+      ></Table>
+    </div>
   </div>
 </template>
 
@@ -10,16 +21,37 @@ export default {
   name: 'StaffFeedback',
   data () {
     return {
-      msg: '这里是用户反馈界面'
+      isLoading: false
+    }
+  },
+  methods: {
+    getFeedbacks () {
+      // TODO: get feedbacks
+      this.isLoading = true
     }
   },
   created () {
-    // TODO: If not login, jump to login page
+    this.getFeedbacks()
   }
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
+.staff-feedback {
+  padding-left: 5vw;
+}
+.staff-feedback-title {
+  margin: 5vh 0 3vh 0;
+  font-size: 32px;
+}
+.staff-feedback-table {
+  width: 77vw;
+  height: 80vh;
+  overflow: auto;
+}
+.modal-user-info {
+  font-size: 14px;
+  overflow: auto;
+}
 </style>

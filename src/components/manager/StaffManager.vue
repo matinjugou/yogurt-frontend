@@ -116,6 +116,10 @@
             }
           },
           {
+            title: '答问比',
+            key: 'AnsAsk'
+          },
+          {
             title: '操作',
             key: 'actions',
             render: (h, params) => {
@@ -164,17 +168,15 @@
           number: self.newStaffNum,
           companyId: 1
         }).then(function (response) {
-          console.log(response.data.data)
         }).catch(function (error) {
-          console.log(error)
           self.$Message.info('Clicked cancel')
+          console.error(error)
         })
         axios.get('http://yogurt.magichc7.com/api/manager/staff', {
           params: {
             companyId: 1
           }
         }).then(function (response) {
-          console.log(response)
           let tmpstaffdata = []
           for (let staff of response.data.data) {
             tmpstaffdata.push({
@@ -190,7 +192,7 @@
           }
           self.staffdata = tmpstaffdata
         }).catch(function (error) {
-          console.log(error)
+          console.error(error)
         })
         self.$Message.info('Clicked ok')
       },
@@ -215,7 +217,6 @@
               companyId: self.$store.state.companyId
             }
           }).then(function (response) {
-            console.log('response=', response)
             let tmpstaffdata = []
             for (let staff of response.data.data) {
               tmpstaffdata.push({
@@ -226,7 +227,8 @@
                 phonenumber: staff.tel,
                 status: staff.onlineStatus,
                 role: staff.role,
-                queueCount: staff.queueCount
+                queueCount: staff.queueCount,
+                AnsAsk: staff.AnsAsk
               })
             }
             self.staffdata = tmpstaffdata
@@ -239,7 +241,6 @@
         })
       },
       deleteSelected () {
-        console.log('selected:', this.selected)
         const stuff = []
         const self = this
         for (let select of this.selected) {
@@ -257,7 +258,6 @@
               companyId: self.$store.state.companyId
             }
           }).then(function (response) {
-            console.log('response=', response)
             let tmpstaffdata = []
             for (let staff of response.data.data) {
               tmpstaffdata.push({
@@ -268,7 +268,8 @@
                 phonenumber: staff.tel,
                 status: staff.onlineStatus,
                 role: staff.role,
-                queueCount: staff.queueCount
+                queueCount: staff.queueCount,
+                AnsAsk: staff.AnsAsk
               })
             }
             self.staffdata = tmpstaffdata
@@ -288,7 +289,6 @@
           companyId: 1
         }
       }).then(function (response) {
-        console.log('response=', response)
         let tmpstaffdata = []
         for (let staff of response.data.data) {
           tmpstaffdata.push({
@@ -299,12 +299,13 @@
             phonenumber: staff.tel,
             status: staff.onlineStatus,
             role: staff.role,
-            queueCount: staff.queueCount
+            queueCount: staff.queueCount,
+            AnsAsk: staff.AnsAsk
           })
         }
         self.staffdata = tmpstaffdata
       }).catch(function (error) {
-        console.log(error)
+        console.error(error)
       })
     }
   }
