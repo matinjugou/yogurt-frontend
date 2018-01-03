@@ -10,7 +10,7 @@ export default new Vuex.Store({
   state: {
     socketIoServerUrl: 'http://yogurt.magichc7.com',
     userLoginUrl: 'http://yogurt.magichc7.com/api/user/login',
-    apiServerUrl: 'http://yogurt.magichc7.com/api/user',
+    apiServerUrl: 'http://yogurt.magichc7.com/api',
     fileServerUrl: 'http://123.206.22.71/api/v2/file/',
     fileCompressUrl: 'http://123.206.22.71/api/v1/image/',
     robotUrl: 'http://123.206.22.71/api/v1/robot/',
@@ -23,6 +23,9 @@ export default new Vuex.Store({
   mutations: {
     addChatRecord (state, payload) {
       state.chatRecordList.push(payload.content)
+    },
+    prependChatRecord (state, payload) {
+      state.chatRecordList.unshift(payload.content)
     },
     buildSocketConnect (state) {
       const io = require('socket.io-client')

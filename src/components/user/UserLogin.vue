@@ -55,7 +55,8 @@
         }
         */
         const self = this
-        const randomUserId = '1_u' + String(Math.floor(Math.random() * 1000))
+        // only for debug
+        const randomUserId = '1_u377' // + String(Math.floor(Math.random() * 1000))
         axios.post(self.$store.state.userLoginUrl, {
           // 'userId': self.formItem.userId
           'userId': randomUserId

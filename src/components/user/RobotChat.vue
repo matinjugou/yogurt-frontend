@@ -2,17 +2,10 @@
   <div class="robot-chat">
     <div class="layout">
       <Row type="flex">
-        <Col span="5" class="layout-menu-left">
-        <Menu active-name="1" theme="dark" width="auto">
-          <MenuItem name="switch" @click.native="showModal = true">
-            <span class="menu-item-text">转接人工客服</span>
-          </MenuItem>
-        </Menu>
-        </Col>
-        <Col span="19">
+        <Col span="24">
         <div class="chat-header">
           <div class="chat-title chat-title-company-name">
-            XXX公司
+            {{ companyName }}
           </div>
           <div class="chat-title">
             机器人
@@ -82,7 +75,7 @@
         <div class="chat-input-actions">
           <div class="chat-window-input-media">
             <div class="media-button">
-              <Button type="ghost" icon="chatboxes">历史消息</Button>
+              <Button type="ghost" icon="chatboxes" @click="showModal = true">转接人工</Button>
             </div>
           </div>
           <div class="chat-input-send">
@@ -232,6 +225,7 @@
     name: 'UserChat',
     data () {
       return {
+        companyName: '',
         inputText: '',
         leaveMessageForm: {
           email: '',
@@ -383,7 +377,7 @@
         // debug
         // this.showChooseModal = true
         const self = this
-        axios.get(self.$store.state.apiServerUrl + '/queue', {
+        axios.get(self.$store.state.apiServerUrl + '/user/queue', {
           params: {
             'userId': self.userId,
             'tags': self.staffTypeForm.staffType
@@ -398,8 +392,11 @@
           } else {
             // tell staff to update queue
             // self.socket.emit('updateQueue', {staffId: body.msg, token: self.token})
+            // debug
+            console.log(body)
             window.localStorage.setItem('staffId', body.msg)
             window.localStorage.setItem('chatState', 'chat')
+            window.localStorage.setItem('staffInfo', JSON.stringify(body.data))
             self.socket.emit('updateQueue', {staffId: body.msg, token: self.token})
             self.$router.push({name: 'chat', userId: self.userId, staffId: body.msg})
           }
@@ -440,7 +437,7 @@
 //          return
 //        }
         const self = this
-        axios.post(self.$store.state.apiServerUrl + '/note', {'userId': self.userId, 'content': self.leaveMessageForm.leavedMessage, 'email': self.leaveMessageForm.email})
+        axios.post(self.$store.state.apiServerUrl + '/user/note', {'userId': self.userId, 'content': self.leaveMessageForm.leavedMessage, 'email': self.leaveMessageForm.email})
           .then(function (res) {
             let body = res.data.data
             if (body === null || body.code !== 0) {
@@ -473,6 +470,17 @@
     created () {
       // if haven't login, show login page instead
       const self = this
+      axios.get(self.$store.state.apiServerUrl + '/user/company', {
+        params: {
+          userId: self.userId
+        }
+      }).then(response => {
+        let body = response.data.data
+        // debug
+        // console.log(body)
+        self.companyName = body.company.name
+        window.localStorage.setItem('companyName', body.company.name)
+      })
       // debug
       console.log('userId in robot-chat: ' + self.userId)
       console.log('token in robot-chat: ' + self.token)

@@ -488,7 +488,7 @@
 //        this.showChooseDialog = true
         this.showSelectStaffTypeDialog = false
         const self = this
-        axios.get(self.$store.state.apiServerUrl + '/queue', {
+        axios.get(self.$store.state.apiServerUrl + '/user/queue', {
           params: {
             'userId': self.userId,
             'tags': self.staffType.value
@@ -515,7 +515,7 @@
         if (this.$refs.leaveMessageForm.validate()) {
           // debug
           console.log('leave message: after validate')
-          axios.post(self.$store.state.apiServerUrl + '/note', {
+          axios.post(self.$store.state.apiServerUrl + '/user/note', {
             'userId': self.userId,
             'content': self.leavedMessage,
             'email': self.email
