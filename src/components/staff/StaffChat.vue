@@ -72,7 +72,7 @@
               用户{{ chatUserId.length > 15 ? chatUserId.slice(0, 15) + '...' : chatUserId }}
             </div>
             <div class="chat-window-title-actions">
-              <Button type="text" @click="connectToOthers">
+              <Button type="text" @click="openStaffListModal">
                 <Icon type="share" size="28"></Icon>
               </Button>
               <Button type="text" @click="showInfo">
@@ -106,9 +106,18 @@
                     <!-- TODO: get avatar and put it into this -->
                     <Avatar shape="square" icon="person" :src="singleRecord.direction === 'out' ? avatarUrl : ''"/>
                   </div>
+
+                  <!-- text message -->
                   <div class="content chat-single-record-element" :class="singleRecord.type" v-if="singleRecord.type === 'text'">
                     {{ singleRecord.msg }}
                   </div>
+
+                  <!-- snapshot message -->
+                  <div class="content chat-single-record-element" :class="singleRecord.type" v-if="singleRecord.type === 'snapshot'">
+                    截图请求已发送
+                  </div>
+
+                  <!-- image message -->
                   <div class="content chat-single-record-element" :class="singleRecord.type" v-if="singleRecord.type === 'image'">
                     <img 
                       class="chat-image" 
@@ -117,6 +126,8 @@
                       @click="showLargeImage(singleRecord.url)"
                     />
                   </div>
+
+                  <!-- file message -->
                   <div class="content chat-single-record-element" :class="singleRecord.type" v-if="singleRecord.type === 'file'"
                     @click="downloadFile(singleRecord.url, singleRecord.name)">
                     <div class="chat-file-prepend">
@@ -195,7 +206,7 @@
                 <Button type="ghost" icon="happy" @click="() => {showEmojiPanel = !showEmojiPanel}">表情</Button>
               </div>
               <div class="media-button">
-                <Button type="ghost" icon="monitor" @click="askForCapture">请求截图</Button>
+                <Button type="ghost" icon="monitor" @click="askForSnapshot">请求截图</Button>
               </div>
             </div>
             <div class="chat-window-input-send">
@@ -229,12 +240,33 @@
         后续版本中添加
       </Col>
     </Row>
+
+    <!-- large image modal -->
     <Modal v-model="showLargeImageModal" width="80%" title="查看图片">
       <div class="large-image">
         <img :src="largeImageSrc" />
       </div>
       <div slot="footer"></div>
     </Modal>
+
+    <!-- forwarding select staff modal -->
+    <Modal 
+      v-model="showForwardingModal" 
+      width="40%" 
+      title="选择客服"
+      @on-ok="connectToOthers"
+      @on-cancel="() => {selectedStaff = ''}"
+    >
+      <div v-if="onlineStaffList.length > 0">
+        <RadioGroup v-model="selectedStaff" vertical>
+          <Radio v-for="(staff, index) in onlineStaffList" :key="index" :label="staff"></Radio>
+        </RadioGroup>
+      </div>
+      <h3 v-else class="forwarding-modal-empty-caption">
+        当前没有其他在线的客服
+      </h3>
+    </Modal>
+
   </div>
 </template>
 
@@ -254,6 +286,9 @@ export default {
       inputText: '',
       inputCaretPos: 0,
       showLargeImageModal: false,
+      showForwardingModal: false,
+      onlineStaffList: [],
+      selectedStaff: '',
       largeImageSrc: '',
       uploadList: [],
       maxFileSize: 204800, // KB
@@ -349,6 +384,9 @@ export default {
     staffId () {
       return this.$store.state.staffId
     },
+    companyId () {
+      return this.$store.state.companyId
+    },
     avatarUrl () {
       return this.$store.state.avatarUrl
     },
@@ -397,10 +435,37 @@ export default {
       })
       console.log('Switch user: ' + this.chatUserId)
     },
-    connectToOthers () {
-      this.$Notice.warning({
-        title: '转接功能将在后续版本中添加'
+    openStaffListModal () {
+      axios.get(this.httpServerUrl + '/trans', {
+        params: {
+          companyId: this.companyId
+        }
+      }).then(response => {
+        console.log(response)
+        let body = response.data.data
+        if (body.code === 0) {
+          this.onlineStaffList = body.stuff
+          let index = this.onlineStaffList.indexOf(this.staffId)
+          if (index >= 0) {
+            this.onlineStaffList.splice(index, 1)
+          }
+          this.showForwardingModal = true
+        } else {
+          this.$Notice.error({
+            title: '获取在线客服列表失败，请稍后再试'
+          })
+        }
+      }).catch(error => {
+        this.$Notice.error({
+          title: '获取在线客服列表失败，请稍后再试'
+        })
+        console.log(error)
       })
+    },
+    connectToOthers () {
+      console.log(this.selectedStaff)
+      // TODO: send request
+      this.selectedStaff = ''
     },
     closeChatWindow () {
       // TODO: close chat with chatUserId
@@ -411,13 +476,17 @@ export default {
       let chatRecord = this.chatRecordList[userId]
       if (chatRecord !== undefined && chatRecord.length > 0) {
         let singleRecord = chatRecord[chatRecord.length - 1]
+        let result = singleRecord.direction === 'out' ? '我：' : '用户：'
         if (singleRecord.type === 'text') {
-          return singleRecord.msg.length > 8 ? singleRecord.msg.slice(0, 8) + '...' : singleRecord.msg
+          result += singleRecord.msg.length > 8 ? singleRecord.msg.slice(0, 8) + '...' : singleRecord.msg
         } else if (singleRecord.type === 'image') {
-          return '[图片]'
+          result += '[图片]'
         } else if (singleRecord.type === 'file') {
-          return '[文件]'
+          result += '[文件]'
+        } else if (singleRecord.type === 'snapshot') {
+          result += '截图请求已发送'
         }
+        return result
       } else {
         return '无消息'
       }
@@ -633,10 +702,27 @@ export default {
       }
       // TODO: 异步处理消息返回信息（发送成功与否）
     },
-    askForCapture () {
-      this.$Notice.warning({
-        title: '请求截图的功能将在后续版本中加入'
+    askForSnapshot () {
+      let date = new Date()
+      this.$store.commit({
+        type: 'addChatRecord',
+        userId: this.chatUserId,
+        content: {
+          'staffId': this.staffId,
+          'userId': this.chatUserId,
+          'direction': 'out',
+          'type': 'snapshot',
+          // 'time': date.toLocaleTimeString('zh-Hans-CN')
+          'time': date
+        }
       })
+      this.socket.emit('staffMsg', {
+        'staffId': this.staffId,
+        'userId': this.chatUserId,
+        'token': window.localStorage.getItem('token'),
+        'type': 'snapshot'
+      })
+      this.$forceUpdate()
     },
     handleBeforeUpload (file) {
       const check = this.uploadList.length < 5

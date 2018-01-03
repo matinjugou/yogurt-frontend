@@ -11,7 +11,8 @@
 
     <div class="staff-quick-reply-table">
       <Table 
-        border 
+        border
+        stripe
         size="large"
         :loading="isLoading" 
         :columns="columns" 

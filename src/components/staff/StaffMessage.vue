@@ -7,7 +7,8 @@
     
     <div class="staff-message-table">
       <Table 
-        border 
+        border
+        stripe 
         size="large"
         :loading="isLoading" 
         :columns="columns" 
