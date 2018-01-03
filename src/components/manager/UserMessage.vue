@@ -23,10 +23,8 @@
             />
           </Modal>
         </Row>
-        <Table border ref="selection" :columns="tablecolumns" :data="notes"
+        <Table border :columns="tablecolumns" :data="notes"
                @on-selection-change="changeSelected"></Table>
-        <Button :disabled="selectedEmpty" type="primary"
-                style="margin-top: 7px" @click="replySelected">批量回复</Button>
       </div>
     </div>
     <div class="layout-copy">
@@ -44,12 +42,8 @@
         replyMessageModal: false,
         replyContent: '',
         selected: [],
+        indexToReply: 0,
         tablecolumns: [
-          {
-            type: 'selection',
-            width: 60,
-            align: 'center'
-          },
           {
             title: '用户',
             key: 'user'
@@ -110,6 +104,7 @@
                   },
                   on: {
                     click: () => {
+                      this.indexToReply = params.index
                       this.replyMessageModal = true
                     }
                   }
@@ -129,42 +124,51 @@
     },
     methods: {
       replyMessageModalOk () {
-        this.$Message.info('Clicked ok')
-        if (this.newPhrase !== '' && this.newSentence !== '') {
-          const self = this
-          axios.post('http://yogurt.magichc7.com/api/manager/quick-reply/public', {
-            companyId: 1,
-            phrase: self.newPhrase,
-            sentence: self.newSentence
+        const self = this
+        if (self.replyContent === '') {
+          return
+        }
+        if (this.indexToReply >= 0) {
+          axios.post(self.$store.state.httpServerUrl + '/note', {
+            noteId: self.notes[self.indexToReply].noteId,
+            staffId: self.$store.state.managerId,
+            reply: self.replyContent
           }).then(function (response) {
-            axios.get('http://yogurt.magichc7.com/api/manager/quick-reply/public', {
+            axios.get(self.$store.state.httpServerUrl + '/note', {
               params: {
                 companyId: 1
               }
             }).then(function (response) {
-              self.replies = []
-              for (const reply of response.data.data) {
-                self.replies.push({
-                  phrase: reply.phrase,
-                  sentence: reply.sentence
+              self.notes = []
+              for (const note of response.data.data) {
+                self.notes.push({
+                  noteId: note.id,
+                  user: note.userId,
+                  time: note.time,
+                  email: note.email,
+                  content: note.content,
+                  status: note.isReplied,
+                  reply: note.reply,
+                  staff: note.staffId
                 })
               }
+              self.$Message.info('回复成功')
+              self.replyContent = ''
             }).catch(function (error) {
               self.$Message.error(error)
             })
-          }).catch(function (error) {
-            self.$Message.error(error)
           })
         }
       },
       replyMessageModalCancel () {
         this.$Message.info('Clicked cancel')
       },
-      replyMessage (index) {},
-      replySelected () {},
+      replySelected () {
+        this.indexToReply = -1
+        this.replyMessageModal = true
+      },
       changeSelected (selection, row) {
         this.selected = selection
-        console.log(this.selected)
       }
     },
     mounted: function () {
@@ -177,6 +181,7 @@
         self.notes = []
         for (const note of response.data.data) {
           self.notes.push({
+            noteId: note.id,
             user: note.userId,
             time: note.time,
             email: note.email,
