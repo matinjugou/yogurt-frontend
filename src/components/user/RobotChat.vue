@@ -42,7 +42,6 @@
               title="留言"
               @on-ok="leaveMessage()"
               @on-cancel="cancelLeaveMessage()"
-              @on-
               :loading="loading">
               <!--请输入邮箱(客服人员将会尽快将回复发送至此邮箱)：-->
               <!--<Input v-model="email" icon="ios-email" placeholder="输入邮箱..."></Input>-->
@@ -164,9 +163,9 @@
     display: inline-block;
     position: relative;
     padding: 0 10px;
-    max-width: calc(100vw - 40px);
+    max-width: calc(50vw);
     min-height: 30px;
-    line-height: 2.5;
+    line-height: 2;
     font-size: 16px;
     text-align: left;
     word-break: break-all;
@@ -284,7 +283,11 @@
         return window.localStorage.getItem('userId')
       },
       staffId () {
-        return window.localStorage.getItem('staffId')
+        // return window.localStorage.getItem('staffId')
+        return 'robot'
+      },
+      companyId () {
+        return 1 // TO DO
       },
       token () {
         return window.localStorage.getItem('token')
@@ -298,26 +301,66 @@
     },
     methods: {
       sendMessage () {
-//        let sendMsg = this.inputText
-//        if (sendMsg === '') {
-//          this.$Notice.warning({
-//            title: '不可以发送空消息！'
-//          })
-//          return
-//        }
-//        let time = this.getCurrentTime()
-//        // send text msg
-//        this.$store.commit({
-//          type: 'addChatRecord',
-//          content: {
-//            'from': this.userId,
-//            'to': this.staffId,
-//            'msg': sendMsg,
-//            'type': 'text',
-//            'time': time
-//            // 'hasSent': false
-//          }
-//        })
+        let sendMsg = this.inputText
+        if (sendMsg === '') {
+          this.$Notice.warning({
+            title: '不可以发送空消息！'
+          })
+        } else {
+          // send text msg
+          let time = this.getCurrentTime()
+          this.$store.commit({
+            type: 'addChatRecord',
+            content: {
+              'from': this.userId,
+              'to': this.staffId,
+              'msg': sendMsg,
+              'type': 'text',
+              'time': time
+              // 'hasSent': false
+            }
+          })
+          this.inputText = ''
+          // get answer
+          const self = this
+          axios.get(self.$store.state.robotUrl, {
+            params: {
+              'question': self.userId,
+              'companyId': self.companyId
+            }
+          }).then(response => {
+            let code = response.data.code
+            // debug
+            // console.log(response.data)
+            if (code !== 0) {
+              self.$Notice.error({
+                title: '服务器异常，无法获得机器人回答'
+              })
+            } else {
+              let results = response.data.data.split('\n')
+              let len = results.length
+              let resultMessage = '我们筛选到' + len + '条可能有用的答案:'
+              for (let i = 0; i < len; i++) {
+                resultMessage += (i + 1) + results[i]
+                if (i !== len - 1) {
+                  resultMessage += ';'
+                }
+              }
+              time = self.getCurrentTime()
+              self.$store.commit({
+                type: 'addChatRecord',
+                content: {
+                  'from': self.staffId,
+                  'to': self.userId,
+                  'msg': resultMessage,
+                  'type': 'text',
+                  'time': time
+                  // 'hasSent': false
+                }
+              })
+            }
+          })
+        }
 //        this.socket.emit('userMsg', {
 //          'staffId': this.staffId,
 //          'userId': this.userId,
@@ -357,6 +400,7 @@
             // self.socket.emit('updateQueue', {staffId: body.msg, token: self.token})
             window.localStorage.setItem('staffId', body.msg)
             window.localStorage.setItem('chatState', 'chat')
+            self.socket.emit('updateQueue', {staffId: body.msg, token: self.token})
             self.$router.push({name: 'chat', userId: self.userId, staffId: body.msg})
           }
         })

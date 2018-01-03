@@ -113,7 +113,7 @@
               <Button type="ghost" icon="happy" @click="() => {showEmojiPanel = !showEmojiPanel}">表情</Button>
             </div>
             <div class="media-button">
-              <Button type="ghost" icon="monitor">截图</Button>
+              <Button type="ghost" icon="monitor" @click="screenShot()">截屏</Button>
             </div>
             <div class="media-button">
               <Button type="ghost" icon="chatboxes">历史消息</Button>
@@ -131,6 +131,11 @@
       <Modal v-model="showLargeImageModal" width="80%" title="查看图片">
         <div class="large-image">
           <img :src="largeImageSrc" />
+        </div>
+        <div slot="footer"></div>
+      </Modal>
+      <Modal v-model="showScreenShotModal" width="80%" title="屏幕截图">
+        <div id="screen-shot" class="large-image">
         </div>
         <div slot="footer"></div>
       </Modal>
@@ -399,6 +404,7 @@
 </style>
 <script>
   import axios from 'axios'
+  import html2canvas from 'html2canvas'
   export default {
     name: 'UserChat',
     data () {
@@ -408,6 +414,8 @@
         showEmojiPanel: false,
         showLargeImageModal: false,
         largeImageSrc: '',
+        showScreenShotModal: false,
+        screenShotSrc: '',
         cachedMsg: {},
         uploadList: [],
         maxFileSize: 204800, // KB
@@ -747,6 +755,19 @@
         console.log('show large image, src: ' + src)
         this.showLargeImageModal = true
         this.largeImageSrc = src
+      },
+      screenShot () {
+        // only a try
+        const self = this
+        console.log('in screenShot')
+        html2canvas(document.body).then(function (canvas) {
+          let el = document.getElementById('screen-shot')
+          while (el.lastChild) {
+            el.removeChild(el.lastChild)
+          }
+          el.appendChild(canvas)
+          self.showScreenShotModal = true
+        })
       },
       logout (event) {
         // TODO

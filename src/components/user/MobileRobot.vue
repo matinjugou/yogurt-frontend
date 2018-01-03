@@ -81,8 +81,8 @@
       </v-card>
     </v-dialog>
     <v-content>
-      <v-alert color="error" icon="warning" dismissible v-model="showLeaveMessageAlert">
-        抱歉，暂时无法留言
+      <v-alert color="error" icon="warning" dismissible v-model="showAlert">
+        {{ alertMessage }}
       </v-alert>
       <v-alert color="success" icon="check_circle" dismissible v-model="showLeaveMessageSuccess">
         留言成功!
@@ -239,9 +239,10 @@
         showSelectStaffTypeDialog: false,
         showChooseDialog: false,
         showLeaveMessageDialog: false,
-        showLeaveMessageAlert: false,
+        showAlert: false,
         showLeaveMessageSuccess: false,
         inputText: '',
+        alertMessage: '',
         staffType: { text: '售前', value: '0' },
         email: '',
         emailRules: [
@@ -418,38 +419,64 @@
         }
       },
       sendMessage () {
-        // debug
-//        console.log('sending message: ' + this.inputText)
-//        let sendMsg = this.inputText
-//        if (sendMsg === '') {
-//          // debug
-//          console.log('不能发送空消息！')
-//          return
-//        }
-//        let time = this.getCurrentTime()
-//        // send text msg
-//        if (sendMsg !== '') {
-//          this.$store.commit({
-//            type: 'addChatRecord',
-//            content: {
-//              'from': this.userId,
-//              'to': this.staffId,
-//              'msg': sendMsg,
-//              'type': 'text',
-//              'time': time
-//              // 'hasSent': false
-//            }
-//          })
-//          this.socket.emit('userMsg', {
-//            staffId: this.staffId,
-//            userId: this.userId,
-//            token: this.token,
-//            msg: sendMsg,
-//            type: 'text'
-//          })
-//          // clear input
-//          this.inputText = ''
-//        }
+        let sendMsg = this.inputText
+        if (sendMsg === '') {
+          this.alertMessage = '不可以发送空消息!'
+          this.showAlert = true
+        } else {
+          // send text msg
+          let time = this.getCurrentTime()
+          this.$store.commit({
+            type: 'addChatRecord',
+            content: {
+              'from': this.userId,
+              'to': this.staffId,
+              'msg': sendMsg,
+              'type': 'text',
+              'time': time
+              // 'hasSent': false
+            }
+          })
+          this.inputText = ''
+          // get answer
+          const self = this
+          axios.get(self.$store.state.robotUrl, {
+            params: {
+              'question': self.userId,
+              'companyId': self.companyId
+            }
+          }).then(response => {
+            let code = response.data.code
+            // debug
+            // console.log(response.data)
+            if (code !== 0) {
+              self.alertMessage = '服务器异常，无法获得机器人回答'
+              self.showAlert = true
+            } else {
+              let results = response.data.data.split('\n')
+              let len = results.length
+              let resultMessage = '我们筛选到' + len + '条可能有用的答案:'
+              for (let i = 0; i < len; i++) {
+                resultMessage += (i + 1) + results[i]
+                if (i !== len - 1) {
+                  resultMessage += ';'
+                }
+              }
+              time = self.getCurrentTime()
+              self.$store.commit({
+                type: 'addChatRecord',
+                content: {
+                  'from': self.staffId,
+                  'to': self.userId,
+                  'msg': resultMessage,
+                  'type': 'text',
+                  'time': time
+                  // 'hasSent': false
+                }
+              })
+            }
+          })
+        }
       },
       getCurrentTime () {
         let curDate = new Date()
@@ -496,7 +523,8 @@
             .then(function (res) {
               let body = res.data.data
               if (body === null || body.code !== 0) {
-                self.showLeaveMessageAlert = true
+                self.alertMessage = '抱歉，暂时无法留言'
+                self.showAlert = true
               } else {
                 self.showLeaveMessageSuccess = true
                 self.showLeaveMessageDialog = false

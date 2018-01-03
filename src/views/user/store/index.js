@@ -10,6 +10,7 @@ export default new Vuex.Store({
     apiServerUrl: 'http://yogurt.magichc7.com/api/user',
     fileServerUrl: 'http://123.206.22.71/api/v2/file/',
     fileCompressUrl: 'http://123.206.22.71/api/v1/image/',
+    robotUrl: 'http://123.206.22.71/api/v1/robot/',
     chatRecordList: [],
     userId: '',
     staffId: '',
@@ -22,7 +23,7 @@ export default new Vuex.Store({
     },
     buildSocketConnect (state) {
       const io = require('socket.io-client')
-      state.socket = io(state.socketIoServerUrl, { transports: ['websocket'] })
+      state.socket = io(state.socketIoServerUrl, { transports: ['polling'] })
     }
   }
 })
