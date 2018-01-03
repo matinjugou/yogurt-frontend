@@ -1,5 +1,6 @@
 <template>
   <div id="app" class="staff">
+    <vue-progress-bar></vue-progress-bar>
     <Row type="flex">
       <Col :span="spanLeft" class="staff-menu-left" v-if="spanLeft">
         <Menu active-name="1" theme="dark" width="auto" :open-names="['personal-center']" @on-select="menuAction">
@@ -169,7 +170,8 @@ export default {
               'size': data.size,
               'mimeType': data.mimeType,
               'type': data.type,
-              'time': date.toLocaleTimeString('zh-Hans-CN')
+              // 'time': date.toLocaleTimeString('zh-Hans-CN')
+              'time': date
             }
           })
         } else if (data.type === 'image') {
@@ -183,7 +185,8 @@ export default {
               'url': data.url,
               'compressedUrl': data.compressedUrl,
               'type': data.type,
-              'time': date.toLocaleTimeString('zh-Hans-CN')
+              // 'time': date.toLocaleTimeString('zh-Hans-CN')
+              'time': date
             }
           })
         } else {
@@ -197,7 +200,8 @@ export default {
               'direction': 'in',
               'msg': data.msg,
               'type': data.type,
-              'time': date.toLocaleTimeString('zh-Hans-CN')
+              // 'time': date.toLocaleTimeString('zh-Hans-CN')
+              'time': date
             }
           })
         }
@@ -368,7 +372,12 @@ export default {
     }
   },
   created () {
+    // progress bar start
+    this.$Progress.start()
+
+    // add close window listener
     window.addEventListener('beforeunload', e => this.beforeUnloadHandler(e))
+
     this.$store.commit('buildSocketConnect')
     // check if the token is valid
     let storeType = window.localStorage.getItem('type')
@@ -394,10 +403,32 @@ export default {
             staffId: this.$store.state.staffId,
             token: storeToken
           })
+
           // socket listening initialization
           this.socketListenInit()
+
           // get staff detail info and quick reply list
           this.infoInit()
+
+          // hook the progress bar to start before we move router-view
+          this.$router.beforeEach((to, from, next) => {
+            //  does the page we want to go to have a meta.progress object
+            if (to.meta.progress !== undefined) {
+              let meta = to.meta.progress
+              // parse meta tags
+              this.$Progress.parseMeta(meta)
+            }
+            //  start the progress bar
+            this.$Progress.start()
+            //  continue to next page
+            next()
+          })
+
+          //  hook the progress bar to finish after we've finished moving router-view
+          this.$router.afterEach((to, from) => {
+            //  finish the progress bar
+            this.$Progress.finish()
+          })
         } else {
           window.location.href = window.location.origin + '/login?backUrl=' + window.location.href
         }
@@ -408,6 +439,9 @@ export default {
     } else {
       window.location.href = window.location.origin + '/login?backUrl=' + window.location.href
     }
+  },
+  mounted () {
+    this.$Progress.finish()
   },
   beforeDestroyed () {
     window.removeEventListener('beforeunload', e => this.beforeUnloadHandler(e))

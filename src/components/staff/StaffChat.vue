@@ -86,10 +86,17 @@
 
           <!-- main window of chat -->
           <div id="chat-window" class="chat-window-content">
+            <div class="chat-window-get-history">
+              <Spin v-show="isGettingHistoryRecord"></Spin>
+              <a @click="getHistoryRecord(chatUserId)">
+                <Icon type="clock"/>加载历史消息
+              </a>
+            </div>
+
             <ul>
               <li v-for="(singleRecord, index) in currentChatRecord" :key="index">
                 <p class="chat-msg-time">
-                  <span>{{ singleRecord.time }}</span>
+                  <span>{{ singleRecord.time.toLocaleTimeString('zh-Hans-CN') }}</span>
                 </p>
                 <div class="chat-msg-body" :class="[{'from-me': singleRecord.direction === 'out'}]">
                   <div class="chat-single-record-element" v-if="singleRecord.hasSent === false">
@@ -188,7 +195,7 @@
                 <Button type="ghost" icon="happy" @click="() => {showEmojiPanel = !showEmojiPanel}">表情</Button>
               </div>
               <div class="media-button">
-                <Button type="ghost" icon="monitor">请求截图</Button>
+                <Button type="ghost" icon="monitor" @click="askForCapture">请求截图</Button>
               </div>
             </div>
             <div class="chat-window-input-send">
@@ -240,8 +247,13 @@ export default {
       spanLeft: 6,
       spanRight: 0,
       isChatting: false,
+      isGettingHistoryRecord: false,
       showEmojiPanel: false,
       chatUserId: '',
+      chatWindowScroll: {
+        last_known_scroll_position: 0,
+        ticking: false
+      },
       inputText: '',
       inputCaretPos: 0,
       showLargeImageModal: false,
@@ -353,7 +365,7 @@ export default {
     }
   },
   methods: {
-    chatWindowScroll () {
+    chatWindowScrollDown () {
       let element = document.getElementById('chat-window')
       if (element) {
         element.scrollTop = element.scrollHeight
@@ -362,7 +374,8 @@ export default {
     openChatWindow (userId) {
       this.isChatting = true
       this.chatUserId = userId
-      // TODO: refresh chat record
+      // clear flag
+      this.isGettingHistoryRecord = false
       // clear input
       this.inputText = ''
       // clear files
@@ -387,7 +400,7 @@ export default {
     },
     getLastChatRecord (userId) {
       let chatRecord = this.chatRecordList[userId]
-      if (chatRecord.length > 0) {
+      if (chatRecord !== undefined && chatRecord.length > 0) {
         let singleRecord = chatRecord[chatRecord.length - 1]
         if (singleRecord.type === 'text') {
           return singleRecord.msg.length > 8 ? singleRecord.msg.slice(0, 8) + '...' : singleRecord.msg
@@ -399,6 +412,26 @@ export default {
       } else {
         return '无消息'
       }
+    },
+    getHistoryRecord (userId) {
+      this.isGettingHistoryRecord = true
+      console.log('get history record of ' + userId)
+      axios.get(this.httpServerUrl + '/chat-record', {
+        params: {
+          'userId': userId,
+          'staffId': this.staffId,
+          'index': -1
+        }
+      }).then(response => {
+        console.log(response)
+        this.isGettingHistoryRecord = false
+      }).catch(error => {
+        this.$Notice.error({
+          title: '获取历史消息失败，请稍后再试'
+        })
+        console.log(error)
+        this.isGettingHistoryRecord = false
+      })
     },
     showInfo () {
       this.spanRight = this.spanRight === 0 ? 3 : 0
@@ -441,7 +474,8 @@ export default {
             'direction': 'out',
             'msg': sendMsg,
             'type': 'text',
-            'time': date.toLocaleTimeString('zh-Hans-CN')
+            // 'time': date.toLocaleTimeString('zh-Hans-CN')
+            'time': date
             // 'hasSent': false
           }
         })
@@ -471,7 +505,8 @@ export default {
                 'url': file.response.data,
                 'compressedUrl': file.response.compressedUrl ? file.response.compressedUrl : file.response.data,
                 'type': fileType,
-                'time': date.toLocaleTimeString('zh-Hans-CN')
+                // 'time': date.toLocaleTimeString('zh-Hans-CN')
+                'time': date
                 // 'hasSent': false
               }
             })
@@ -496,7 +531,8 @@ export default {
                 'size': (file.size > 1024) ? (file.size >> 10) : 1,
                 'mimeType': file.response.type,
                 'type': fileType,
-                'time': date.toLocaleTimeString('zh-Hans-CN')
+                // 'time': date.toLocaleTimeString('zh-Hans-CN')
+                'time': date
                 // 'hasSent': false
               }
             })
@@ -517,6 +553,11 @@ export default {
         this.uploadList = this.$refs.upload.fileList
       }
       // TODO: 异步处理消息返回信息（发送成功与否）
+    },
+    askForCapture () {
+      this.$Notice.warning({
+        title: '请求截图的功能将在后续版本中加入'
+      })
     },
     handleBeforeUpload (file) {
       const check = this.uploadList.length < 5
@@ -644,7 +685,7 @@ export default {
     }
   },
   updated () {
-    this.chatWindowScroll()
+    this.chatWindowScrollDown()
   },
   created () {
     // update user queue
@@ -660,18 +701,22 @@ export default {
         // successfully get user queue
         let arr = []
         for (let value of body.queue.serving) {
-          arr.push({
-            userId: value,
-            status: 'serving',
-            unread: 0
-          })
+          if (value) {
+            arr.push({
+              userId: value,
+              status: 'serving',
+              unread: 0
+            })
+          }
         }
         for (let value of body.queue.waiting) {
-          arr.push({
-            userId: value,
-            status: 'waiting',
-            unread: 0
-          })
+          if (value) {
+            arr.push({
+              userId: value,
+              status: 'waiting',
+              unread: 0
+            })
+          }
         }
         this.$store.commit({
           type: 'refreshUserList',
@@ -740,6 +785,12 @@ export default {
   color: #495060;
   font-size: 20px;
   font-weight: Bold;
+}
+.chat-window-get-history {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .chat-window-content {
   height: calc(100vh - 207px);
