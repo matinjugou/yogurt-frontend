@@ -250,10 +250,7 @@ export default {
       isGettingHistoryRecord: false,
       showEmojiPanel: false,
       chatUserId: '',
-      chatWindowScroll: {
-        last_known_scroll_position: 0,
-        ticking: false
-      },
+      isScrollDown: false,
       inputText: '',
       inputCaretPos: 0,
       showLargeImageModal: false,
@@ -427,6 +424,7 @@ export default {
     },
     getHistoryRecord (userId) {
       this.isGettingHistoryRecord = true
+      this.isScrollDown = false
       console.log('get history record of ' + userId)
       let currentIndex
       axios.get(this.httpServerUrl + '/chat-record', {
@@ -518,6 +516,7 @@ export default {
         })
         return
       }
+      this.isScrollDown = true
       sendMsg = this.insertQuickReply(sendMsg)
       let date = new Date()
       let _this = this
@@ -765,7 +764,9 @@ export default {
     }
   },
   updated () {
-    this.chatWindowScrollDown()
+    if (this.isScrollDown) {
+      this.chatWindowScrollDown()
+    }
   },
   created () {
     // update user queue
