@@ -99,7 +99,7 @@
                   <span>{{ singleRecord.time instanceof Date ? changeDateIntoString(singleRecord.time) : singleRecord.time }}</span>
                 </p>
                 <div class="chat-msg-body" :class="[{'from-me': singleRecord.direction === 'out'}]">
-                  <div class="chat-single-record-element" v-if="singleRecord.hasSent === false">
+                  <div class="chat-single-record-element" v-show="singleRecord.hasSent === false">
                     <Spin></Spin>
                   </div>
                   <div class="avatar chat-single-record-element">
@@ -520,9 +520,10 @@ export default {
       }
       sendMsg = this.insertQuickReply(sendMsg)
       let date = new Date()
+      let _this = this
       // send text msg
       if (sendMsg !== '') {
-        this.$store.commit({
+        _this.$store.commit({
           type: 'addChatRecord',
           userId: this.chatUserId,
           content: {
@@ -532,19 +533,27 @@ export default {
             'msg': sendMsg,
             'type': 'text',
             // 'time': date.toLocaleTimeString('zh-Hans-CN')
-            'time': date
-            // 'hasSent': false
+            'time': date,
+            'hasSent': false
           }
         })
-        this.socket.emit('staffMsg', {
+        _this.socket.emit('staffMsg', {
           'staffId': this.staffId,
           'userId': this.chatUserId,
           'token': window.localStorage.getItem('token'),
           'msg': sendMsg,
           'type': 'text'
+        }, function (data) {
+          console.log(data)
+          _this.$store.commit({
+            type: 'changeMessageSentStatus',
+            userId: _this.chatUserId,
+            content: data
+          })
+          _this.$forceUpdate()
         })
         // clear input
-        this.inputText = ''
+        _this.inputText = ''
       }
       // send files
       if (this.uploadList.length) {
@@ -552,7 +561,7 @@ export default {
           const file = this.uploadList[index]
           let fileType = file.response.type.startsWith('image') ? 'image' : 'file'
           if (fileType === 'image') {
-            this.$store.commit({
+            _this.$store.commit({
               type: 'addChatRecord',
               userId: this.chatUserId,
               content: {
@@ -563,20 +572,27 @@ export default {
                 'compressedUrl': file.response.compressedUrl ? file.response.compressedUrl : file.response.data,
                 'type': fileType,
                 // 'time': date.toLocaleTimeString('zh-Hans-CN')
-                'time': date
-                // 'hasSent': false
+                'time': date,
+                'hasSent': false
               }
             })
-            this.socket.emit('staffMsg', {
+            _this.socket.emit('staffMsg', {
               'staffId': this.staffId,
               'userId': this.chatUserId,
               'token': window.localStorage.getItem('token'),
               'type': fileType,
               'url': file.response.data,
               'compressedUrl': file.response.compressedUrl ? file.response.compressedUrl : file.response.data
+            }, function (data) {
+              _this.$store.commit({
+                type: 'changeMessageSentStatus',
+                userId: _this.chatUserId,
+                content: data
+              })
+              _this.$forceUpdate()
             })
           } else {
-            this.$store.commit({
+            _this.$store.commit({
               type: 'addChatRecord',
               userId: this.chatUserId,
               content: {
@@ -589,11 +605,11 @@ export default {
                 'mimeType': file.response.type,
                 'type': fileType,
                 // 'time': date.toLocaleTimeString('zh-Hans-CN')
-                'time': date
-                // 'hasSent': false
+                'time': date,
+                'hasSent': false
               }
             })
-            this.socket.emit('staffMsg', {
+            _this.socket.emit('staffMsg', {
               'staffId': this.staffId,
               'userId': this.chatUserId,
               'token': window.localStorage.getItem('token'),
@@ -602,6 +618,13 @@ export default {
               'name': file.name,
               'size': (file.size > 1024) ? (file.size >> 10) : 1,
               'mimeType': file.response.type
+            }, function (data) {
+              _this.$store.commit({
+                type: 'changeMessageSentStatus',
+                userId: _this.chatUserId,
+                content: data
+              })
+              _this.$forceUpdate()
             })
           }
         }

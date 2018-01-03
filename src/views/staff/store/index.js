@@ -50,6 +50,22 @@ export default new Vuex.Store({
       state.chatRecordList[payload.userId].push(payload.content)
       console.log(state.chatRecordList)
     },
+    changeMessageSentStatus (state, payload) {
+      if (state.chatRecordList[payload.userId]) {
+        let content = payload.content
+        let record = state.chatRecordList[payload.userId].find(function (value) {
+          if (value.type !== content.type || value.hasSent !== false) {
+            return false
+          }
+          if (value.type === 'text') {
+            return value.msg === content.msg
+          } else {
+            return value.url === content.url
+          }
+        })
+        record.hasSent = true
+      }
+    },
     refreshUserList (state, payload) {
       let arr = payload.content
       for (let item of state.userList) {
