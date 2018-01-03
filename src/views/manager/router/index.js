@@ -14,12 +14,8 @@ export default new Router({
     {
       path: '/',
       name: 'systemstatus',
-      component: SystemStatus
-    },
-    {
-      path: '/systemstatus',
-      name: 'systemstatus',
-      component: SystemStatus
+      component: SystemStatus,
+      alias: '/systemstatus'
     },
     {
       path: '/stfmgn',
