@@ -129,7 +129,6 @@
           return
         }
         if (this.indexToReply >= 0) {
-          console.log(self.notes[self.indexToReply])
           axios.post(self.$store.state.httpServerUrl + '/note', {
             noteId: self.notes[self.indexToReply].noteId,
             staffId: self.$store.state.managerId,
@@ -170,7 +169,6 @@
       },
       changeSelected (selection, row) {
         this.selected = selection
-        console.log(this.selected)
       }
     },
     mounted: function () {

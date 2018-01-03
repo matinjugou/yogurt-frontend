@@ -60,7 +60,6 @@
         }
       }).then(res => {
         const data = res.data.data
-        console.log('data=', data)
         self.totalServeCount = data.totalServeCount
         self.totalAnsAsk = data.totalAnsAsk
         self.totalNoteCount = data.totalNoteCount

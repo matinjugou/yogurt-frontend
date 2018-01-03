@@ -85,14 +85,13 @@
               companyId: self.$store.state.companyId
             }
           }).then(function (res) {
-            console.log(res)
             const data = res.data.data
             self.$store.commit({
               type: 'changeRobotAvatar',
               companyRobotAvatar: data.robotAvatar
             })
           }).catch(function (error) {
-            console.log(error)
+            console.error(error)
           })
         })
       },
@@ -108,7 +107,6 @@
         }
         axios.post(this.$store.state.robotServerUrl, formData, config)
           .then(function (res) {
-            console.log(res)
             axios.put(self.$store.state.httpServerUrl + '/company-info', {
               companyId: self.$store.state.companyId,
               corpusFile: res.data.data
@@ -118,14 +116,13 @@
                   companyId: self.$store.state.companyId
                 }
               }).then(function (res) {
-                console.log(res)
                 const data = res.data.data
                 self.$store.commit({
                   type: 'changeCorpusFile',
                   companyCorpusFile: data.corpusFile
                 })
               }).catch(function (error) {
-                console.log(error)
+                console.error(error)
               })
             })
           })
