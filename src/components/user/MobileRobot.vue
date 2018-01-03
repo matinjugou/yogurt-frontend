@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <v-toolbar color="indigo" dark fixed app height="56px">
-      <v-toolbar-title>xxx公司</v-toolbar-title>
+      <v-toolbar-title>{{ companyName }}</v-toolbar-title>
       <v-spacer></v-spacer>
       <span style="font-size: 16px">
         机器人
@@ -245,6 +245,10 @@
         alertMessage: '',
         staffType: { text: '售前', value: '0' },
         email: '',
+        companyName: '',
+        staffNickName: '',
+        staffPicUrl: '',
+        staffRole: '',
         emailRules: [
           (v) => !!v || '邮箱不能为空',
           (v) => /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(v) || '邮箱格式不合法'
@@ -257,120 +261,6 @@
         items: [
           { text: '售前', value: '0' },
           { text: '售后', value: '1' }
-        ],
-        contentList: [
-          {
-            id: '1',
-            msg: 'Hello, I\'m staff_1.',
-            from: '1_s1',
-            to: '1_u1',
-            type: 'text',
-            time: '2017-11-19 15:39:14'
-          },
-          {
-            id: '2',
-            msg: 'Hello, I\'m user_1.',
-            from: '1_u1',
-            to: '1_s1',
-            type: 'text',
-            time: '2017-11-19 15:39:15'
-          }
-//          {
-//            id: '3',
-//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          },
-//          {
-//            id: '4',
-//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          },
-//          {
-//            id: '3',
-//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          },
-//          {
-//            id: '4',
-//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          },
-//          {
-//            id: '3',
-//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          },
-//          {
-//            id: '4',
-//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          },
-//          {
-//            id: '3',
-//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          },
-//          {
-//            id: '4',
-//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          },
-//          {
-//            id: '3',
-//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          },
-//          {
-//            id: '4',
-//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          },
-//          {
-//            id: '3',
-//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          },
-//          {
-//            id: '4',
-//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          }
         ]
       }
     },
@@ -478,9 +368,18 @@
           })
         }
       },
+      zeroFill (num, size) {
+        let s = '000000000' + num
+        return s.substr(s.length - size)
+      },
       getCurrentTime () {
         let curDate = new Date()
-        return curDate.toLocaleTimeString('zh-Hans-CN')
+        return curDate.getFullYear() +
+          '-' + this.zeroFill(curDate.getMonth() + 1, 2) +
+          '-' + this.zeroFill(curDate.getDate(), 2) +
+          ' ' + this.zeroFill(curDate.getHours(), 2) +
+          ':' + this.zeroFill(curDate.getMinutes(), 2) +
+          ':' + this.zeroFill(curDate.getSeconds(), 2)
       },
       switchToHuman () {
         // debug
@@ -504,6 +403,11 @@
             self.socket.emit('updateQueue', {staffId: body.msg, token: self.token})
             window.localStorage.setItem('staffId', body.msg)
             window.localStorage.setItem('chatState', 'chat')
+            window.localStorage.setItem('staffInfo', JSON.stringify(body.data))
+            self.$store.commit({
+              type: 'clearChatRecord',
+              content: {}
+            })
             self.$router.push({name: 'chat', userId: self.userId, staffId: body.msg})
           }
         })
@@ -559,43 +463,17 @@
           window.location.href = window.location.origin + '/user#/login'
         }
       })
-      // for debug
-//      window.localStorage.setItem('userId', '1_u1')
-//      window.localStorage.setItem('staffId', '1_s1')
-      // send userreg message
-//      const io = require('socket.io-client')
-//      this.socket = io(this.$store.state.socketIoServerUrl)
-//      this.socket.emit('userReg', {userId: this.userId, token: this.token})
-//      // debug
-//      console.log('Sent userReg.')
-//      this.socket.on('regResult', (data) => {
-//        // debug
-//        console.log('Register result: code: ' + data['code'] + ', msg: ' + data['msg'])
-//      })
-//      // socket messages
-//      this.socket.on('staffMsg', (data) => {
-//        // debug
-//        console.log(data)
-//        console.log(self.currentChatRecord)
-//        let newMsg = {
-//          'time': data.time,
-//          'from': data.staffId,
-//          'to': data.userId,
-//          'type': data.type
-//        }
-//        if (data.type === 'text') {
-//          newMsg.msg = data.msg
-//        }
-//        self.$store.commit({
-//          type: 'addChatRecord',
-//          content: newMsg
-//        })
-//        // debug
-//        console.log(self.currentChatRecord)
-//      })
-//      this.socket.on('sendResult', (data) => {
-//        // TO DO
-//      })
+      axios.get(self.$store.state.apiServerUrl + '/user/company', {
+        params: {
+          userId: self.userId
+        }
+      }).then(response => {
+        let body = response.data.data
+        // debug
+        // console.log(body)
+        self.companyName = body.company.name
+        window.localStorage.setItem('companyName', body.company.name)
+      })
     },
     mounted () {
       this.scrollToBottom()

@@ -25,7 +25,12 @@ export default new Vuex.Store({
       state.chatRecordList.push(payload.content)
     },
     prependChatRecord (state, payload) {
-      state.chatRecordList.unshift(payload.content)
+      state.chatRecordList.unshift(...payload.content)
+    },
+    clearChatRecord (state, payload) {
+      while (state.chatRecordList.length) {
+        state.chatRecordList.pop()
+      }
     },
     buildSocketConnect (state) {
       const io = require('socket.io-client')

@@ -228,7 +228,7 @@
   .chat-msg-body > .content {
     position: relative;
     padding: 0 10px;
-    max-width: calc(100vw - 50px);
+    max-width: calc(50vw);
     min-height: 30px;
     line-height: 2.5;
     font-size: 16px;
@@ -467,24 +467,6 @@
             custom: '自定义'
           }
         },
-//        contentList: [
-//          {
-//            id: '1',
-//            msg: 'Hello, I\'m staff_1.',
-//            from: '1_s1',
-//            to: '1_u1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:14'
-//          },
-//          {
-//            id: '2',
-//            msg: 'Hello, I\'m user.',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          }
-//        ],
         imgFileIndex: -1,
         fileIconMap: {
           // compressed file
@@ -672,9 +654,18 @@
           this.uploadList = this.$refs.upload.fileList
         }
       },
+      zeroFill (num, size) {
+        let s = '000000000' + num
+        return s.substr(s.length - size)
+      },
       getCurrentTime () {
         let curDate = new Date()
-        return curDate.toLocaleTimeString('zh-Hans-CN')
+        return curDate.getFullYear() +
+          '-' + this.zeroFill(curDate.getMonth() + 1, 2) +
+          '-' + this.zeroFill(curDate.getDate(), 2) +
+          ' ' + this.zeroFill(curDate.getHours(), 2) +
+          ':' + this.zeroFill(curDate.getMinutes(), 2) +
+          ':' + this.zeroFill(curDate.getSeconds(), 2)
       },
       scrollToBottom () {
         let el = document.getElementById('user-chat-content')
@@ -792,16 +783,63 @@
         this.largeImageSrc = src
       },
       screenShot () {
-        // only a try
         const self = this
-        console.log('in screenShot')
-        html2canvas(document.body).then(function (canvas) {
-          let el = document.getElementById('screen-shot')
-          while (el.lastChild) {
-            el.removeChild(el.lastChild)
+        setTimeout(function () {
+          html2canvas(document.body).then(function (canvas) {
+            let el = document.getElementById('screen-shot')
+            while (el.lastChild) {
+              el.removeChild(el.lastChild)
+            }
+            el.appendChild(canvas)
+            self.showScreenShotModal = true
+          })
+        }, 1000)
+      },
+      sendScreenShot () {
+        let canvas = document.getElementById('screen-shot').firstChild
+        let self = this
+        canvas.toBlob(function (blob) {
+          let formData = new FormData()
+          formData.append('file', blob)
+          formData.append('fileType', 'image/png')
+          formData.append('validTime', '1')
+          let config = {
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
           }
-          el.appendChild(canvas)
-          self.showScreenShotModal = true
+          let fileUrl = ''
+          let compressedUrl = ''
+          let time = self.getCurrentTime()
+          axios.post(self.fileServerUrl, formData, config)
+            .then(function (res) {
+              fileUrl = res.data.data
+              if (fileUrl.length) {
+                axios.post(self.fileCompressUrl, {'fileUrl': fileUrl})
+                  .then(function (res) {
+                    compressedUrl = res.data.data.length ? res.data.data : compressedUrl
+                    self.currentChatRecord.push({
+                      'from': self.userId,
+                      'to': self.staffId,
+                      'url': fileUrl,
+                      'compressedUrl': compressedUrl,
+                      'type': 'image',
+                      'time': time
+                    })
+                    self.socket.emit('userMsg', {
+                      time: time,
+                      staffId: self.staffId,
+                      userId: self.userId,
+                      token: self.token,
+                      type: 'image',
+                      url: fileUrl,
+                      compressedUrl: compressedUrl
+                    })
+                  })
+              } else {
+                self.showAlert('上传截图失败!')
+              }
+            })
         })
       },
       logout (event) {
@@ -926,9 +964,10 @@
         console.log('Register result: code: ' + data['code'] + ', msg: ' + data['msg'])
       })
       this.socket.on('staffMsg', (data) => {
-        // debug
-        console.log(data)
-        console.log(self.currentChatRecord)
+        if (data.type === 'snapshot') {
+          this.showAskScreenShotModal = true
+          return
+        }
         let newMsg = {
           'time': data.time,
           'from': data.staffId,

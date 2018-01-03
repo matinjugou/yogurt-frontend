@@ -24,6 +24,11 @@ export default new Vuex.Store({
     prependChatRecord (state, payload) {
       state.chatRecordList.unshift(...payload.content)
     },
+    clearChatRecord (state, payload) {
+      while (state.chatRecordList.length) {
+        state.chatRecordList.pop()
+      }
+    },
     buildSocketConnect (state) {
       const io = require('socket.io-client')
       state.socket = io(state.socketIoServerUrl, { transports: ['polling'] })

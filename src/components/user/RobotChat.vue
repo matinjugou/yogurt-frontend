@@ -9,9 +9,6 @@
           </div>
           <div class="chat-title">
             机器人
-            <!--<Button type="text" @click="showModal = true">-->
-              <!--<Icon type="android-share" size="28"></Icon>-->
-            <!--</Button>-->
             <Modal
               v-model="showModal"
               title="选择人工服务类型"
@@ -365,9 +362,18 @@
 //        // clear input
 //        this.inputText = ''
       },
+      zeroFill (num, size) {
+        let s = '000000000' + num
+        return s.substr(s.length - size)
+      },
       getCurrentTime () {
         let curDate = new Date()
-        return curDate.toLocaleTimeString('zh-Hans-CN')
+        return curDate.getFullYear() +
+          '-' + this.zeroFill(curDate.getMonth() + 1, 2) +
+          '-' + this.zeroFill(curDate.getDate(), 2) +
+          ' ' + this.zeroFill(curDate.getHours(), 2) +
+          ':' + this.zeroFill(curDate.getMinutes(), 2) +
+          ':' + this.zeroFill(curDate.getSeconds(), 2)
       },
       scrollToBottom () {
         let el = document.getElementById('user-chat-content')
@@ -398,6 +404,10 @@
             window.localStorage.setItem('chatState', 'chat')
             window.localStorage.setItem('staffInfo', JSON.stringify(body.data))
             self.socket.emit('updateQueue', {staffId: body.msg, token: self.token})
+            self.$store.commit({
+              type: 'clearChatRecord',
+              content: {}
+            })
             self.$router.push({name: 'chat', userId: self.userId, staffId: body.msg})
           }
         })
