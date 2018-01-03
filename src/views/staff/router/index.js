@@ -8,6 +8,7 @@ const StaffChat = () => import('@/components/staff/StaffChat')
 const StaffInfo = () => import('@/components/staff/StaffInfo')
 const StaffQuickReply = () => import('@/components/staff/StaffQuickReply')
 const StaffFeedback = () => import('@/components/staff/StaffFeedback')
+const StaffMessage = () => import('@/components/staff/StaffMessage')
 
 export default new Router({
   routes: [
@@ -35,6 +36,11 @@ export default new Router({
       path: '/feedback',
       name: 'Feedback',
       component: StaffFeedback
+    },
+    {
+      path: '/message',
+      name: 'Message',
+      component: StaffMessage
     }
   ]
 })

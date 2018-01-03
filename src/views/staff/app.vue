@@ -1,8 +1,9 @@
 <template>
   <div id="app" class="staff">
+    <vue-progress-bar></vue-progress-bar>
     <Row type="flex">
       <Col :span="spanLeft" class="staff-menu-left" v-if="spanLeft">
-        <Menu active-name="1" theme="dark" width="auto" @on-select="menuAction">
+        <Menu active-name="1" theme="dark" width="auto" :open-names="['personal-center']" @on-select="menuAction">
           <!-- here may have a logo -->
           <div class="menu-header"></div>
           <div class="menu-burger-button">
@@ -11,40 +12,58 @@
             </MenuItem>
           </div>
           <div class="menu-items">
-          <MenuItem name="chat">
-            <Icon type="chatboxes" :size="iconSize"></Icon>
-            <span class="staff-text" v-show="showMenuText">会话页面</span>
-          </MenuItem>
-          <MenuItem name="info">
-            <Icon type="person-stalker" :size="iconSize"></Icon>
-            <span class="staff-text" v-show="showMenuText">个人信息</span>
-          </MenuItem>
-          <MenuItem name="quick-reply">
-            <Icon type="reply-all" :size="iconSize"></Icon>
-            <span class="staff-text" v-show="showMenuText">快捷回复</span>
-          </MenuItem>
-          <MenuItem name="feedback">
-            <Icon type="paper-airplane" :size="iconSize"></Icon>
-            <span class="staff-text" v-show="showMenuText">客户反馈</span>
-          </MenuItem>
-          <!--TODO: let all the actions in here-->
+            <MenuItem name="chat">
+              <Icon type="chatboxes" :size="iconSize"></Icon>
+              <span class="staff-text" v-show="showMenuText">会话页面</span>
+            </MenuItem>
+            <MenuItem name="message">
+              <Icon type="email" :size="iconSize"></Icon>
+              <span class="staff-text" v-show="showMenuText">客户留言</span>
+            </MenuItem>
+            <MenuItem name="quick-reply">
+              <Icon type="reply-all" :size="iconSize"></Icon>
+              <span class="staff-text" v-show="showMenuText">快捷回复</span>
+            </MenuItem>
+            <MenuItem name="feedback">
+              <Icon type="paper-airplane" :size="iconSize"></Icon>
+              <span class="staff-text" v-show="showMenuText">客户反馈</span>
+            </MenuItem>
+
+            <!-- all the actions in here -->
+            <Submenu name="personal-center">
+              <template slot="title">
+                  <Icon type="home" :size="iconSize"></Icon>
+                  <span class="staff-text" v-show="showMenuText">个人中心</span>
+              </template>
+              <MenuItem name="info">
+                <Icon type="person-stalker" :size="iconSize"></Icon>
+                <span class="staff-text" v-show="showMenuText">信息维护</span>
+              </MenuItem>
+              <MenuItem disabled name="rest">
+                <!-- TODO: issue in iview: render switch failed -->
+                <Icon type="coffee" :size="iconSize + 4"></Icon>
+                <span class="staff-text" v-show="showMenuText">状态</span>
+                <i-switch v-model="workStatus" size="large" v-show="showMenuText" @on-change="changeWorkStatus">
+                  <span slot="open">工作</span>
+                  <span slot="close">休息</span>
+                </i-switch>
+              </MenuItem>
+              <MenuItem name="logout">
+                <Icon type="log-out" :size="iconSize"></Icon>
+                <span class="staff-text" v-show="showMenuText">登出</span>
+              </MenuItem>
+            </Submenu>
           </div>
-          <div class="menu-vertical-spacing"></div>
-          <Button :type="restAction" shape="circle" icon="coffee" size="large" @click="changeRestStatus">
-            <span v-show="showMenuText">{{ restCaption }}</span>
-          </Button>
-          <div class="menu-button-space"></div>
-          <Button type="error" shape="circle" icon="log-out" size="large" @click="logout">
-            <span class="menu-button-logout-text" v-show="showMenuText">登出</span>
-          </Button>
-          <div class="menu-button-space"></div>
+          
           <footer class="staff-copy">
             &copy; Yogurt
           </footer>
         </Menu>
       </Col>
-      <Col :span="spanRight">
-        <router-view/>
+      <Col class="staff-right" :span="spanRight">
+        <transition name="slide-fade" mode="out-in">
+          <router-view/>
+        </transition>
       </Col>
     </Row>
   </div>
@@ -58,7 +77,7 @@ export default {
     return {
       spanLeft: 3,
       iconSize: 25,
-      restStatus: false
+      workStatus: false
     }
   },
   computed: {
@@ -67,9 +86,6 @@ export default {
     },
     restAction () {
       return this.restStatus ? 'success' : 'primary'
-    },
-    restCaption () {
-      return this.restStatus ? '返回工作' : '准备休息'
     },
     spanRight () {
       return 24 - this.spanLeft
@@ -82,6 +98,28 @@ export default {
     },
     socket () {
       return this.$store.state.socket
+    },
+    companyId: {
+      get: function () {
+        return this.$store.state.companyId
+      },
+      set: function (newCompanyId) {
+        this.$store.commit({
+          type: 'changeCompanyId',
+          companyId: newCompanyId
+        })
+      }
+    },
+    avatarUrl: {
+      get: function () {
+        return this.$store.state.avatarUrl
+      },
+      set: function (newAvatarUrl) {
+        this.$store.commit({
+          type: 'changeAvatarUrl',
+          avatarUrl: newAvatarUrl
+        })
+      }
     }
   },
   methods: {
@@ -132,7 +170,8 @@ export default {
               'size': data.size,
               'mimeType': data.mimeType,
               'type': data.type,
-              'time': date.toLocaleTimeString('zh-Hans-CN')
+              // 'time': date.toLocaleTimeString('zh-Hans-CN')
+              'time': date
             }
           })
         } else if (data.type === 'image') {
@@ -146,7 +185,8 @@ export default {
               'url': data.url,
               'compressedUrl': data.compressedUrl,
               'type': data.type,
-              'time': date.toLocaleTimeString('zh-Hans-CN')
+              // 'time': date.toLocaleTimeString('zh-Hans-CN')
+              'time': date
             }
           })
         } else {
@@ -160,7 +200,8 @@ export default {
               'direction': 'in',
               'msg': data.msg,
               'type': data.type,
-              'time': date.toLocaleTimeString('zh-Hans-CN')
+              // 'time': date.toLocaleTimeString('zh-Hans-CN')
+              'time': date
             }
           })
         }
@@ -235,9 +276,11 @@ export default {
         })
       })
     },
-    changeRestStatus () {
+    changeWorkStatus (status) {
       // TODO: give server a message
-      this.restStatus = !this.restStatus
+      this.$Notice.warning({
+        title: '该功能将在后续版本中添加'
+      })
     },
     sendLogoutMessage () {
       let storeToken = window.localStorage.getItem('token')
@@ -263,12 +306,78 @@ export default {
     menuAction (name) {
       if (name === 'burger-button') {
         this.spanLeft = this.spanLeft === 3 ? 1 : 3
+      } else if (name === 'rest') {
+        this.$Notice.warning({
+          title: '该功能将在后续版本中添加'
+        })
+        // this.changeRestStatus()
+      } else if (name === 'logout') {
+        this.logout()
       } else {
         this.$router.push('/' + name)
       }
+    },
+    getQuickReplys () {
+      axios.get(this.httpServerUrl + '/quick-reply/public', {
+        params: {
+          companyId: this.companyId,
+          staffId: window.localStorage.getItem('id'),
+          token: window.localStorage.getItem('token')
+        }
+      }).then(response => {
+        console.log(response)
+        let body = response.data
+        if (body.errno === 0) {
+          this.$store.commit({
+            type: 'updateQuickReplyList',
+            quickReplyList: body.data.pairs
+          })
+        } else {
+          this.$Notice.error({
+            title: '没能成功获取快捷回复列表，请刷新重试'
+          })
+        }
+      }).catch(error => {
+        this.$Notice.error({
+          title: '没能成功获取快捷回复列表，请刷新重试'
+        })
+        console.log(error)
+      })
+    },
+    infoInit () {
+      axios.get(this.httpServerUrl + '/account-info', {
+        params: {
+          staffId: window.localStorage.getItem('id'),
+          token: window.localStorage.getItem('token')
+        }
+      }).then(response => {
+        console.log(response)
+        if (response.data.errno === 0) {
+          let body = response.data.data.staff
+          console.log(body)
+          this.companyId = body.companyId
+          this.avatarUrl = body.picUrl
+          this.getQuickReplys()
+        } else {
+          this.$Notice.error({
+            title: '没能成功获取个人信息，请刷新重试'
+          })
+        }
+      }).catch(error => {
+        console.log(error)
+        this.$Notice.error({
+          title: '没能成功获取个人信息，请刷新重试'
+        })
+      })
     }
   },
-  beforeCreate () {
+  created () {
+    // progress bar start
+    this.$Progress.start()
+
+    // add close window listener
+    window.addEventListener('beforeunload', e => this.beforeUnloadHandler(e))
+
     this.$store.commit('buildSocketConnect')
     // check if the token is valid
     let storeType = window.localStorage.getItem('type')
@@ -294,8 +403,32 @@ export default {
             staffId: this.$store.state.staffId,
             token: storeToken
           })
+
           // socket listening initialization
           this.socketListenInit()
+
+          // get staff detail info and quick reply list
+          this.infoInit()
+
+          // hook the progress bar to start before we move router-view
+          this.$router.beforeEach((to, from, next) => {
+            //  does the page we want to go to have a meta.progress object
+            if (to.meta.progress !== undefined) {
+              let meta = to.meta.progress
+              // parse meta tags
+              this.$Progress.parseMeta(meta)
+            }
+            //  start the progress bar
+            this.$Progress.start()
+            //  continue to next page
+            next()
+          })
+
+          //  hook the progress bar to finish after we've finished moving router-view
+          this.$router.afterEach((to, from) => {
+            //  finish the progress bar
+            this.$Progress.finish()
+          })
         } else {
           window.location.href = window.location.origin + '/login?backUrl=' + window.location.href
         }
@@ -307,8 +440,8 @@ export default {
       window.location.href = window.location.origin + '/login?backUrl=' + window.location.href
     }
   },
-  created () {
-    window.addEventListener('beforeunload', e => this.beforeUnloadHandler(e))
+  mounted () {
+    this.$Progress.finish()
   },
   beforeDestroyed () {
     window.removeEventListener('beforeunload', e => this.beforeUnloadHandler(e))
@@ -326,22 +459,27 @@ export default {
 }
 .staff {
   border: 1px solid white;
-  border-radius: 4px;
+  border-radius: 5px;
   background: #f5f7f9;
   position: relative;
   overflow: hidden;
 }
 .staff-text {
   font-size: 15px;
+  margin-right: 10px;
 }
 .staff-copy {
   text-align: center;
-  padding: 10px 0 20px;
+  height: 20px;
+  width: 100%;
+  position: absolute;
+  top: calc(100vh - 40px);
   color: #9ea7b4;
 }
 .staff-menu-left{
   background: #464c5b;
   text-align: center;
+  height: calc(100vh - 2px);
 }
 .menu-header {
   height: 10px;
@@ -356,10 +494,31 @@ export default {
   padding: 0 4px 0 4px;
   letter-spacing: 9px;
 }
-.menu-vertical-spacing {
-  height: calc(100vh - 460px);
+.staff-right {
+  height: calc(100vh - 2px);
 }
+.slide-fade-enter-active {
+  transition: all .5s ease;
+}
+.slide-fade-leave-active{
+  transition: all .3s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+}
+.slide-fade-enter {
+  transform: translateY(50px);
+  opacity: 0;
+}
+.slide-fade-leave-to {
+  transform: translateY(50px);
+  opacity: 0;
+}
+
 .ivu-col {
   transition: width 0.2s ease-in-out;
+}
+.ivu-menu-item{
+  padding-left: 20px;
+}
+.ivu-menu-submenu .ivu-menu-item {
+  padding-left: 24px;
 }
 </style>
