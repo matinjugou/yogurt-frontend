@@ -5,8 +5,6 @@
         <a>Yogurt客服系统</a>
       </div>
       <div class="layout-ceiling-main">
-        <a href="#">帮助中心</a> |
-        <a href="#">服务中心</a> |
         <a @click="logout">登出</a>
       </div>
     </div>
@@ -54,8 +52,8 @@
             <MenuItem name="4-2" @click.native="jump('/settings-quickrly')">
               快捷回复设置
             </MenuItem>
-            <MenuItem name="4-3">购买设置</MenuItem>
-            <MenuItem name="4-4">企业信息设置</MenuItem>
+            <!--MenuItem name="4-3">购买设置</MenuItem>
+            <MenuItem name="4-4">企业信息设置</MenuItem-->
           </Submenu>
         </Menu>
       </Col>

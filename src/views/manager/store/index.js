@@ -9,6 +9,7 @@ export default new Vuex.Store({
     httpServerUrl: 'http://yogurt.magichc7.com/api/manager',
     fileServerUrl: 'http://123.206.22.71/api/v2/file/',
     robotServerUrl: 'http://123.206.22.71/api/v1/robot/',
+    analyseServerUrl: 'http://123.206.22.71/api/v1/analyse/',
     isLogin: false,
     managerId: '1_m1',
     picUrl: '',
