@@ -170,6 +170,7 @@
         }).then(function (response) {
         }).catch(function (error) {
           self.$Message.info('Clicked cancel')
+          console.error(error)
         })
         axios.get('http://yogurt.magichc7.com/api/manager/staff', {
           params: {
