@@ -23,7 +23,7 @@
             />
           </Modal>
         </Row>
-        <Table border ref="selection" :columns="tablecolumns" :data="notes"
+        <Table border :columns="tablecolumns" :data="notes"
                @on-selection-change="changeSelected"></Table>
       </div>
     </div>
@@ -44,11 +44,6 @@
         selected: [],
         indexToReply: 0,
         tablecolumns: [
-          {
-            type: 'selection',
-            width: 60,
-            align: 'center'
-          },
           {
             title: '用户',
             key: 'user'
@@ -158,7 +153,8 @@
                   staff: note.staffId
                 })
               }
-              this.$Message.info('回复成功')
+              self.$Message.info('回复成功')
+              self.replyContent = ''
             }).catch(function (error) {
               self.$Message.error(error)
             })

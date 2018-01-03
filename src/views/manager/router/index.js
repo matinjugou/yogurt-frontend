@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import HelloWorld from '@/components/HelloWorld'
+import SystemStatus from '@/components/manager/SystemStatus'
 import StaffManager from '@/components/manager/StaffManager'
 import QuickReplyManager from '@/components/manager/QuickReplyManager'
 import RobotManager from '@/components/manager/RobotManager'
@@ -13,8 +13,13 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: 'Hello',
-      component: HelloWorld
+      name: 'systemstatus',
+      component: SystemStatus
+    },
+    {
+      path: '/systemstatus',
+      name: 'systemstatus',
+      component: SystemStatus
     },
     {
       path: '/stfmgn',

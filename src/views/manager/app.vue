@@ -25,7 +25,7 @@
               <Icon type="ios-paper"></Icon>
               系统状态
             </template>
-            <MenuItem name="1-1">系统状态</MenuItem>
+            <MenuItem name="1-1" @click.native="jump('/systemstatus')">系统状态</MenuItem>
           </Submenu>
           <Submenu name="2">
             <template slot="title">
@@ -60,7 +60,9 @@
         </Menu>
       </Col>
       <Col :xs="18" :sm="18" :md="21" :lg="21">
-        <router-view></router-view>
+        <transition name="slide-fade" mode="out-in">
+          <router-view></router-view>
+        </transition>
       </Col>
     </Row>
   </div>
@@ -200,5 +202,19 @@
   }
   .layout-ceiling-main a{
     color: #9ba7b5;
+  }
+  .slide-fade-enter-active {
+    transition: all .5s ease;
+  }
+  .slide-fade-leave-active{
+    transition: all .3s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+  }
+  .slide-fade-enter {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  .slide-fade-leave-to {
+    transform: translateY(50px);
+    opacity: 0;
   }
 </style>
