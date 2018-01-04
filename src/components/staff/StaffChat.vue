@@ -236,8 +236,14 @@
 
       </Col>
       <Col :span="spanRight" v-if="spanRight">
-        这里是用户详情信息
-        后续版本中添加
+        <div v-if="chatUserId !== '' && userInfo[chatUserId]">
+          <p>用户Id: {{userInfo[chatUserId].userId}}</p>
+          <p>公司Id: {{userInfo[chatUserId].companyId}}</p>
+          <p>接入时间: {{userInfo[chatUserId].accessTime}}</p>
+        </div>
+        <div v-else>
+          无详情信息
+        </div>
       </Col>
     </Row>
 
@@ -356,6 +362,9 @@ export default {
     },
     userList () {
       return this.$store.state.userList
+    },
+    userInfo () {
+      return this.$store.state.userInfo
     },
     quickReplyList () {
       return this.$store.state.quickReplyList
@@ -571,8 +580,43 @@ export default {
       })
     },
     showInfo () {
-      this.spanRight = this.spanRight === 0 ? 3 : 0
-      // TODO: Add detail info
+      if (this.spanRight === 0) {
+        if (this.chatUserId) {
+          if (this.userInfo[this.chatUserId] === undefined) {
+            axios.get(this.httpServerUrl + '/user-info', {
+              params: {
+                userId: this.chatUserId,
+                staffId: this.staffId,
+                token: window.localStorage.getItem('token')
+              }
+            }).then(response => {
+              console.log(response)
+              let body = response.data.data
+              console.log(body)
+              this.$store.commit({
+                type: 'addUserInfo',
+                userId: this.chatUserId,
+                content: body.user
+              })
+              this.spanRight = 3
+            }).catch(error => {
+              this.$Notice.error({
+                title: '获取用户详细信息失败，请稍后再试'
+              })
+              console.log(error)
+            })
+          } else {
+            this.spanRight = 3
+          }
+        } else {
+          this.$Notice.error({
+            title: '网页内部出错'
+          })
+          console.error('User Detail error')
+        }
+      } else {
+        this.spanRight = 0
+      }
     },
     showLargeImage (src) {
       this.showLargeImageModal = true
