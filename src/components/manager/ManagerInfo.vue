@@ -86,7 +86,6 @@
               managerId: self.$store.state.managerId
             }
           }).then(function (res) {
-            console.log(res)
             const data = res.data.data
             self.avatarSrc = data.picUrl
             self.$store.commit({
@@ -94,7 +93,7 @@
               picUrl: data.picUrl
             })
           }).catch(function (error) {
-            console.log(error)
+            console.error(error)
           })
         })
       },
@@ -111,12 +110,11 @@
           managerId: self.$store.state.managerId
         }
       }).then(function (res) {
-        console.log(res)
         const data = res.data.data
         self.avatarSrc = data.picUrl
         self.avatarLoading = false
       }).catch(function (error) {
-        console.log(error)
+        console.error(error)
       })
     }
   }

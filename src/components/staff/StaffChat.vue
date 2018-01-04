@@ -21,6 +21,7 @@
             <MenuItem v-for="(user, index) in userList" v-if="user.status === 'serving'":key="user.userId" :name="user.userId">
               <div class="chat-menu-item">
                 <Badge :count="user.unread" overflow-count="99">
+                  <!-- TODO: get user avatar and put it into this -->
                   <Avatar shape="square" icon="person"/>
                 </Badge>
               </div>
@@ -36,6 +37,7 @@
             </template>
             <MenuItem v-for="(user, index) in userList" v-if="user.status === 'switching'" :key="user.userId" :name="user.userId">
               <div class="chat-menu-item">
+                <!-- TODO: get user avatar and put it into this -->
                 <Avatar shape="square" icon="person"/>
               </div>
               <div class="chat-menu-item">
@@ -49,6 +51,7 @@
             </template>
             <MenuItem v-for="(user, index) in userList" v-if="user.status === 'waiting'" :key="user.userId" :name="user.userId">
               <div class="chat-menu-item">
+                <!-- TODO: get user avatar and put it into this -->
                 <Avatar shape="square" icon="person"/>
               </div>
               <div class="chat-menu-item">
@@ -58,6 +61,8 @@
           </Submenu>
         </Menu>
       </Col>
+
+      <!-- chat window -->
       <Col :span="spanMiddle" class="chat-window vertical-spacing">
         <div v-show="isChatting">
 
@@ -67,7 +72,7 @@
               用户{{ chatUserId.length > 15 ? chatUserId.slice(0, 15) + '...' : chatUserId }}
             </div>
             <div class="chat-window-title-actions">
-              <Button type="text">
+              <Button type="text" @click="openStaffListModal">
                 <Icon type="share" size="28"></Icon>
               </Button>
               <Button type="text" @click="showInfo">
@@ -81,21 +86,38 @@
 
           <!-- main window of chat -->
           <div id="chat-window" class="chat-window-content">
+            <div class="chat-window-get-history">
+              <Spin v-show="isGettingHistoryRecord"></Spin>
+              <a @click="getHistoryRecord(chatUserId)">
+                <Icon type="clock"/>加载历史消息
+              </a>
+            </div>
+
             <ul>
               <li v-for="(singleRecord, index) in currentChatRecord" :key="index">
                 <p class="chat-msg-time">
-                  <span>{{ singleRecord.time }}</span>
+                  <span>{{ singleRecord.time instanceof Date ? changeDateIntoString(singleRecord.time) : singleRecord.time }}</span>
                 </p>
                 <div class="chat-msg-body" :class="[{'from-me': singleRecord.direction === 'out'}]">
-                  <div class="chat-single-record-element" v-if="singleRecord.hasSent === false">
+                  <div class="chat-single-record-element" v-show="singleRecord.hasSent === false">
                     <Spin></Spin>
                   </div>
                   <div class="avatar chat-single-record-element">
-                    <Avatar shape="square" icon="person"/>
+                    <!-- TODO: get avatar and put it into this -->
+                    <Avatar shape="square" icon="person" :src="singleRecord.direction === 'out' ? avatarUrl : ''"/>
                   </div>
+
+                  <!-- text message -->
                   <div class="content chat-single-record-element" :class="singleRecord.type" v-if="singleRecord.type === 'text'">
                     {{ singleRecord.msg }}
                   </div>
+
+                  <!-- snapshot message -->
+                  <div class="content chat-single-record-element" :class="singleRecord.type" v-if="singleRecord.type === 'snapshot'">
+                    截图请求已发送
+                  </div>
+
+                  <!-- image message -->
                   <div class="content chat-single-record-element" :class="singleRecord.type" v-if="singleRecord.type === 'image'">
                     <img
                       class="chat-image"
@@ -104,6 +126,8 @@
                       @click="showLargeImage(singleRecord.url)"
                     />
                   </div>
+
+                  <!-- file message -->
                   <div class="content chat-single-record-element" :class="singleRecord.type" v-if="singleRecord.type === 'file'"
                     @click="downloadFile(singleRecord.url, singleRecord.name)">
                     <div class="chat-file-prepend">
@@ -182,7 +206,7 @@
                 <Button type="ghost" icon="happy" @click="() => {showEmojiPanel = !showEmojiPanel}">表情</Button>
               </div>
               <div class="media-button">
-                <Button type="ghost" icon="monitor">请求截图</Button>
+                <Button type="ghost" icon="monitor" @click="askForSnapshot">请求截图</Button>
               </div>
             </div>
             <div class="chat-window-input-send">
@@ -212,15 +236,43 @@
 
       </Col>
       <Col :span="spanRight" v-if="spanRight">
-        detail info
+        <div v-if="chatUserId !== '' && userInfo[chatUserId]">
+          <p>用户Id: {{userInfo[chatUserId].userId}}</p>
+          <p>公司Id: {{userInfo[chatUserId].companyId}}</p>
+          <p>接入时间: {{userInfo[chatUserId].accessTime}}</p>
+        </div>
+        <div v-else>
+          无详情信息
+        </div>
       </Col>
     </Row>
+
+    <!-- large image modal -->
     <Modal v-model="showLargeImageModal" width="80%" title="查看图片">
       <div class="large-image">
         <img :src="largeImageSrc" />
       </div>
       <div slot="footer"></div>
     </Modal>
+
+    <!-- forwarding select staff modal -->
+    <Modal 
+      v-model="showForwardingModal" 
+      width="40%" 
+      title="选择客服"
+      @on-ok="connectToOthers"
+      @on-cancel="() => {selectedStaff = ''}"
+    >
+      <div v-if="onlineStaffList.length > 0">
+        <RadioGroup v-model="selectedStaff" vertical>
+          <Radio v-for="(staff, index) in onlineStaffList" :key="index" :label="staff"></Radio>
+        </RadioGroup>
+      </div>
+      <h3 v-else class="forwarding-modal-empty-caption">
+        当前没有其他在线的客服
+      </h3>
+    </Modal>
+
   </div>
 </template>
 
@@ -233,11 +285,16 @@ export default {
       spanLeft: 6,
       spanRight: 0,
       isChatting: false,
+      isGettingHistoryRecord: false,
       showEmojiPanel: false,
       chatUserId: '',
+      isScrollDown: false,
       inputText: '',
       inputCaretPos: 0,
       showLargeImageModal: false,
+      showForwardingModal: false,
+      onlineStaffList: [],
+      selectedStaff: '',
       largeImageSrc: '',
       uploadList: [],
       maxFileSize: 204800, // KB
@@ -306,6 +363,12 @@ export default {
     userList () {
       return this.$store.state.userList
     },
+    userInfo () {
+      return this.$store.state.userInfo
+    },
+    quickReplyList () {
+      return this.$store.state.quickReplyList
+    },
     allUnread () {
       let sum = 0
       for (let i = 0, len = this.userList.length; i < len; i++) {
@@ -330,6 +393,12 @@ export default {
     staffId () {
       return this.$store.state.staffId
     },
+    companyId () {
+      return this.$store.state.companyId
+    },
+    avatarUrl () {
+      return this.$store.state.avatarUrl
+    },
     readyToSend () {
       for (let file of this.uploadList) {
         if (file.status !== 'finished') {
@@ -340,7 +409,19 @@ export default {
     }
   },
   methods: {
-    chatWindowScroll () {
+    zeroFill (num, size) {
+      let s = '000000000' + num
+      return s.substr(s.length - size)
+    },
+    changeDateIntoString (Date) {
+      return Date.getFullYear() +
+        '-' + this.zeroFill(Date.getMonth() + 1, 2) +
+        '-' + this.zeroFill(Date.getDate(), 2) +
+        ' ' + this.zeroFill(Date.getHours(), 2) +
+        ':' + this.zeroFill(Date.getMinutes(), 2) +
+        ':' + this.zeroFill(Date.getSeconds(), 2)
+    },
+    chatWindowScrollDown () {
       let element = document.getElementById('chat-window')
       if (element) {
         element.scrollTop = element.scrollHeight
@@ -349,7 +430,8 @@ export default {
     openChatWindow (userId) {
       this.isChatting = true
       this.chatUserId = userId
-      // TODO: refresh chat record
+      // clear flag
+      this.isGettingHistoryRecord = false
       // clear input
       this.inputText = ''
       // clear files
@@ -362,27 +444,179 @@ export default {
       })
       console.log('Switch user: ' + this.chatUserId)
     },
+    openStaffListModal () {
+      axios.get(this.httpServerUrl + '/trans', {
+        params: {
+          companyId: this.companyId
+        }
+      }).then(response => {
+        console.log(response)
+        let body = response.data.data
+        if (body.code === 0) {
+          this.onlineStaffList = body.stuff
+          let index = this.onlineStaffList.indexOf(this.staffId)
+          if (index >= 0) {
+            this.onlineStaffList.splice(index, 1)
+          }
+          this.showForwardingModal = true
+        } else {
+          this.$Notice.error({
+            title: '获取在线客服列表失败，请稍后再试'
+          })
+        }
+      }).catch(error => {
+        this.$Notice.error({
+          title: '获取在线客服列表失败，请稍后再试'
+        })
+        console.log(error)
+      })
+    },
+    connectToOthers () {
+      console.log(this.selectedStaff)
+      this.socket.emit('transUser', {
+        userId: this.chatUserId,
+        staffAId: this.staffId,
+        staffBId: this.selectedStaff,
+        messages: []
+      })
+      this.isChatting = false
+      this.chatUserId = ''
+      this.selectedStaff = ''
+    },
     closeChatWindow () {
       // TODO: close chat with chatUserId
+      this.isChatting = false
+      this.chatUserId = ''
     },
     getLastChatRecord (userId) {
       let chatRecord = this.chatRecordList[userId]
-      if (chatRecord.length > 0) {
+      if (chatRecord !== undefined && chatRecord.length > 0) {
         let singleRecord = chatRecord[chatRecord.length - 1]
+        let result = singleRecord.direction === 'out' ? '我：' : '用户：'
         if (singleRecord.type === 'text') {
-          return singleRecord.msg.length > 8 ? singleRecord.msg.slice(0, 8) + '...' : singleRecord.msg
+          result += singleRecord.msg.length > 8 ? singleRecord.msg.slice(0, 8) + '...' : singleRecord.msg
         } else if (singleRecord.type === 'image') {
-          return '[图片]'
+          result += '[图片]'
         } else if (singleRecord.type === 'file') {
-          return '[文件]'
+          result += '[文件]'
+        } else if (singleRecord.type === 'snapshot') {
+          result += '截图请求已发送'
         }
+        return result
       } else {
         return '无消息'
       }
     },
+    getHistoryRecord (userId) {
+      this.isGettingHistoryRecord = true
+      this.isScrollDown = false
+      console.log('get history record of ' + userId)
+      let currentIndex
+      axios.get(this.httpServerUrl + '/chat-record', {
+        params: {
+          'userId': userId,
+          'staffId': this.staffId,
+          'index': -1
+        }
+      }).then(response => {
+        console.log(response)
+        let body = response.data.data
+        console.log('Get chat Record')
+        console.log(body)
+        if (body.length > 0) {
+          currentIndex = body[0].index
+          if (this.chatRecordList[this.chatUserId] !== undefined) {
+            currentIndex -= this.chatRecordList[this.chatUserId].length
+          }
+          if (currentIndex < 0) {
+            this.$Notice.success({
+              title: '没有更多的消息了~'
+            })
+            this.isGettingHistoryRecord = false
+            return
+          }
+          axios.get(this.httpServerUrl + '/chat-record', {
+            params: {
+              'userId': userId,
+              'staffId': this.staffId,
+              'index': currentIndex
+            }
+          }).then(response => {
+            console.log(response)
+            let body2 = response.data.data
+            console.log(body2)
+            if (body.length > 0) {
+              let content = []
+              for (let value of body2) {
+                content.unshift(value.content)
+                content[0]['direction'] = value.direction === 's_u' ? 'out' : 'in'
+              }
+              this.$store.commit({
+                'type': 'prependChatRecord',
+                'userId': this.chatUserId,
+                'content': content
+              })
+            }
+            this.isGettingHistoryRecord = false
+          }).catch(error => {
+            this.$Notice.error({
+              title: '获取历史消息失败，请稍后再试'
+            })
+            console.log(error)
+            this.isGettingHistoryRecord = false
+          })
+        } else {
+          this.$Notice.success({
+            title: '没有更多的消息了~'
+          })
+          this.isGettingHistoryRecord = false
+        }
+      }).catch(error => {
+        this.$Notice.error({
+          title: '获取历史消息失败，请稍后再试'
+        })
+        console.log(error)
+        this.isGettingHistoryRecord = false
+      })
+    },
     showInfo () {
-      this.spanRight = this.spanRight === 0 ? 3 : 0
-      // TODO: Add detail info
+      if (this.spanRight === 0) {
+        if (this.chatUserId) {
+          if (this.userInfo[this.chatUserId] === undefined) {
+            axios.get(this.httpServerUrl + '/user-info', {
+              params: {
+                userId: this.chatUserId,
+                staffId: this.staffId,
+                token: window.localStorage.getItem('token')
+              }
+            }).then(response => {
+              console.log(response)
+              let body = response.data.data
+              console.log(body)
+              this.$store.commit({
+                type: 'addUserInfo',
+                userId: this.chatUserId,
+                content: body.user
+              })
+              this.spanRight = 3
+            }).catch(error => {
+              this.$Notice.error({
+                title: '获取用户详细信息失败，请稍后再试'
+              })
+              console.log(error)
+            })
+          } else {
+            this.spanRight = 3
+          }
+        } else {
+          this.$Notice.error({
+            title: '网页内部出错'
+          })
+          console.error('User Detail error')
+        }
+      } else {
+        this.spanRight = 0
+      }
     },
     showLargeImage (src) {
       this.showLargeImageModal = true
@@ -408,10 +642,13 @@ export default {
         })
         return
       }
+      this.isScrollDown = true
+      sendMsg = this.insertQuickReply(sendMsg)
       let date = new Date()
+      let _this = this
       // send text msg
       if (sendMsg !== '') {
-        this.$store.commit({
+        _this.$store.commit({
           type: 'addChatRecord',
           userId: this.chatUserId,
           content: {
@@ -420,19 +657,28 @@ export default {
             'direction': 'out',
             'msg': sendMsg,
             'type': 'text',
-            'time': date.toLocaleTimeString('zh-Hans-CN')
-            // 'hasSent': false
+            // 'time': date.toLocaleTimeString('zh-Hans-CN')
+            'time': date,
+            'hasSent': false
           }
         })
-        this.socket.emit('staffMsg', {
+        _this.socket.emit('staffMsg', {
           'staffId': this.staffId,
           'userId': this.chatUserId,
           'token': window.localStorage.getItem('token'),
           'msg': sendMsg,
           'type': 'text'
+        }, function (data) {
+          console.log(data)
+          _this.$store.commit({
+            type: 'changeMessageSentStatus',
+            userId: _this.chatUserId,
+            content: data
+          })
+          _this.$forceUpdate()
         })
         // clear input
-        this.inputText = ''
+        _this.inputText = ''
       }
       // send files
       if (this.uploadList.length) {
@@ -440,7 +686,7 @@ export default {
           const file = this.uploadList[index]
           let fileType = file.response.type.startsWith('image') ? 'image' : 'file'
           if (fileType === 'image') {
-            this.$store.commit({
+            _this.$store.commit({
               type: 'addChatRecord',
               userId: this.chatUserId,
               content: {
@@ -450,20 +696,28 @@ export default {
                 'url': file.response.data,
                 'compressedUrl': file.response.compressedUrl ? file.response.compressedUrl : file.response.data,
                 'type': fileType,
-                'time': date.toLocaleTimeString('zh-Hans-CN')
-                // 'hasSent': false
+                // 'time': date.toLocaleTimeString('zh-Hans-CN')
+                'time': date,
+                'hasSent': false
               }
             })
-            this.socket.emit('staffMsg', {
+            _this.socket.emit('staffMsg', {
               'staffId': this.staffId,
               'userId': this.chatUserId,
               'token': window.localStorage.getItem('token'),
               'type': fileType,
               'url': file.response.data,
               'compressedUrl': file.response.compressedUrl ? file.response.compressedUrl : file.response.data
+            }, function (data) {
+              _this.$store.commit({
+                type: 'changeMessageSentStatus',
+                userId: _this.chatUserId,
+                content: data
+              })
+              _this.$forceUpdate()
             })
           } else {
-            this.$store.commit({
+            _this.$store.commit({
               type: 'addChatRecord',
               userId: this.chatUserId,
               content: {
@@ -475,11 +729,12 @@ export default {
                 'size': (file.size > 1024) ? (file.size >> 10) : 1,
                 'mimeType': file.response.type,
                 'type': fileType,
-                'time': date.toLocaleTimeString('zh-Hans-CN')
-                // 'hasSent': false
+                // 'time': date.toLocaleTimeString('zh-Hans-CN')
+                'time': date,
+                'hasSent': false
               }
             })
-            this.socket.emit('staffMsg', {
+            _this.socket.emit('staffMsg', {
               'staffId': this.staffId,
               'userId': this.chatUserId,
               'token': window.localStorage.getItem('token'),
@@ -488,6 +743,13 @@ export default {
               'name': file.name,
               'size': (file.size > 1024) ? (file.size >> 10) : 1,
               'mimeType': file.response.type
+            }, function (data) {
+              _this.$store.commit({
+                type: 'changeMessageSentStatus',
+                userId: _this.chatUserId,
+                content: data
+              })
+              _this.$forceUpdate()
             })
           }
         }
@@ -496,6 +758,28 @@ export default {
         this.uploadList = this.$refs.upload.fileList
       }
       // TODO: 异步处理消息返回信息（发送成功与否）
+    },
+    askForSnapshot () {
+      let date = new Date()
+      this.$store.commit({
+        type: 'addChatRecord',
+        userId: this.chatUserId,
+        content: {
+          'staffId': this.staffId,
+          'userId': this.chatUserId,
+          'direction': 'out',
+          'type': 'snapshot',
+          // 'time': date.toLocaleTimeString('zh-Hans-CN')
+          'time': date
+        }
+      })
+      this.socket.emit('staffMsg', {
+        'staffId': this.staffId,
+        'userId': this.chatUserId,
+        'token': window.localStorage.getItem('token'),
+        'type': 'snapshot'
+      })
+      this.$forceUpdate()
     },
     handleBeforeUpload (file) {
       const check = this.uploadList.length < 5
@@ -550,6 +834,22 @@ export default {
     insertEmoji (emoji, event) {
       // TODO: insert at caret pos
       this.inputText += emoji.native
+    },
+    insertQuickReply (str) {
+      // change "# + quick phrase + whitespace" into long sentense
+      let reg = new RegExp(/#.+?\s/, 'g')
+      let result = str.replace(reg, (match, offset, string) => {
+        let phrase = match.slice(1, -1)
+        let pairResult = this.quickReplyList.find((value, index, arr) => {
+          return value.phrase === phrase
+        })
+        if (pairResult !== undefined) {
+          return pairResult.sentence
+        } else {
+          return match
+        }
+      })
+      return result
     },
     getFileIconName (fileName) {
       let array = fileName.split('.')
@@ -607,7 +907,9 @@ export default {
     }
   },
   updated () {
-    this.chatWindowScroll()
+    if (this.isScrollDown) {
+      this.chatWindowScrollDown()
+    }
   },
   created () {
     // update user queue
@@ -623,18 +925,22 @@ export default {
         // successfully get user queue
         let arr = []
         for (let value of body.queue.serving) {
-          arr.push({
-            userId: value,
-            status: 'serving',
-            unread: 0
-          })
+          if (value) {
+            arr.push({
+              userId: value,
+              status: 'serving',
+              unread: 0
+            })
+          }
         }
         for (let value of body.queue.waiting) {
-          arr.push({
-            userId: value,
-            status: 'waiting',
-            unread: 0
-          })
+          if (value) {
+            arr.push({
+              userId: value,
+              status: 'waiting',
+              unread: 0
+            })
+          }
         }
         this.$store.commit({
           type: 'refreshUserList',
@@ -648,6 +954,9 @@ export default {
       }
     }).catch(error => {
       console.log(error)
+      this.$Notice.error({
+        title: '没能成功获取用户列表，请刷新重试'
+      })
     })
   },
   mounted () {
@@ -700,6 +1009,12 @@ export default {
   color: #495060;
   font-size: 20px;
   font-weight: Bold;
+}
+.chat-window-get-history {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .chat-window-content {
   height: calc(100vh - 207px);
@@ -892,11 +1207,5 @@ export default {
   .emoji-mart-preview {
     display: none;
   }
-}
-.ivu-modal {
-  top: 20px;
-}
-.ivu-modal-body {
-  height: 80vh;
 }
 </style>

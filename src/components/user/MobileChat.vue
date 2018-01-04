@@ -1,15 +1,24 @@
 <template>
   <v-app>
     <v-toolbar color="indigo" dark fixed app height="56px">
-      <v-toolbar-title>xxx公司</v-toolbar-title>
+      <v-toolbar-title>{{ companyName }}</v-toolbar-title>
       <v-spacer></v-spacer>
-      <span style="font-size: 16px">
-        人工客服
+      <span v-if="staffNickName.length" style="font-size: 16px">
+        {{staffNickName}}（{{ staffRole }}）
+      </span>
+      <span v-else style="font-size: 16px">
+        {{ staffRole }}
       </span>
     </v-toolbar>
     <v-content>
       <v-container id="chat-record-container" :class="{'no-function-panel': !functionPanelVisible, 'with-function-panel': functionPanelVisible}">
         <!--<v-container :class="{'no-function-panel': !functionPanelVisible, 'with-function-panel': functionPanelVisible}" id="chat-record-container">-->
+        <div class="chat-window-get-history">
+          <v-progress-circular v-show="isGettingHistoryRecord" indeterminate color="primary"></v-progress-circular>
+          <a @click="getHistoryRecord()">
+            <Icon type="clock"/>加载历史消息
+          </a>
+        </div>
         <ul style="list-style: none">
           <li v-for="(singleRecord, index) in currentChatRecord">
             <p class="chat-msg-time">
@@ -23,6 +32,9 @@
               </div>
               <div v-if="singleRecord.type === 'text'" class="content chat-single-record">
                 {{ singleRecord.msg }}
+              </div>
+              <div v-else class="content chat-single-record">
+                该条消息包含图片／文件，只能在电脑端查看
               </div>
             </div>
           </li>
@@ -49,11 +61,11 @@
           </v-flex>
         </v-layout>
         <v-layout v-show="functionPanelVisible" id="function-panel-layout">
-          <v-flex p>
-            <v-btn flat>
-              <v-icon>tag_faces</v-icon>表情
-            </v-btn>
-          </v-flex>
+          <!--<v-flex p>-->
+            <!--<v-btn flat>-->
+              <!--<v-icon>tag_faces</v-icon>表情-->
+            <!--</v-btn>-->
+          <!--</v-flex>-->
           <v-flex p>
             <v-btn flat>
               <v-icon>folder_open</v-icon>文件
@@ -76,6 +88,12 @@
   #chat-record-container {
     position: relative;
     overflow: scroll;
+  }
+  .chat-window-get-history {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   .chat-msg-time {
     margin: 4px 0;
@@ -157,125 +175,19 @@
     data () {
       return {
         functionPanelVisible: false,
-
         inputText: '',
-        contentList: [
-          {
-            id: '1',
-            msg: 'Hello, I\'m staff_1.',
-            from: '1_s1',
-            to: '1_u1',
-            type: 'text',
-            time: '2017-11-19 15:39:14'
-          },
-          {
-            id: '2',
-            msg: 'Hello, I\'m user_1.',
-            from: '1_u1',
-            to: '1_s1',
-            type: 'text',
-            time: '2017-11-19 15:39:15'
-          }
-//          {
-//            id: '3',
-//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          },
-//          {
-//            id: '4',
-//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          },
-//          {
-//            id: '3',
-//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          },
-//          {
-//            id: '4',
-//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          },
-//          {
-//            id: '3',
-//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          },
-//          {
-//            id: '4',
-//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          },
-//          {
-//            id: '3',
-//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          },
-//          {
-//            id: '4',
-//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          },
-//          {
-//            id: '3',
-//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          },
-//          {
-//            id: '4',
-//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          },
-//          {
-//            id: '3',
-//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          },
-//          {
-//            id: '4',
-//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          }
-        ]
+        companyName: '',
+        staffNickName: '',
+        staffPicUrl: '',
+        staffRole: '',
+        isGettingHistoryRecord: false,
+        isScrollDown: false
       }
     },
     computed: {
+      apiServerUrl () {
+        return this.$store.state.apiServerUrl
+      },
       currentChatRecord () {
         return this.$store.state.chatRecordList
       },
@@ -299,15 +211,6 @@
 //      }
     },
     methods: {
-      logout (event) {
-        alert('你确定要离开吗？')
-        event.preventDefault()
-        this.socket.emit('userLogOut', {
-          userId: this.userId,
-          token: this.token
-        })
-        window.localStorage.clear()
-      },
       showFunctionPanel () {
         if (!this.functionPanelVisible) {
           this.functionPanelVisible = true
@@ -334,6 +237,7 @@
           console.log('不能发送空消息！')
           return
         }
+        this.isScrollDown = true
         let time = this.getCurrentTime()
         // send text msg
         if (sendMsg !== '') {
@@ -359,9 +263,90 @@
           this.inputText = ''
         }
       },
+      zeroFill (num, size) {
+        let s = '000000000' + num
+        return s.substr(s.length - size)
+      },
       getCurrentTime () {
         let curDate = new Date()
-        return curDate.toLocaleTimeString('zh-Hans-CN')
+        return curDate.getFullYear() +
+          '-' + this.zeroFill(curDate.getMonth() + 1, 2) +
+          '-' + this.zeroFill(curDate.getDate(), 2) +
+          ' ' + this.zeroFill(curDate.getHours(), 2) +
+          ':' + this.zeroFill(curDate.getMinutes(), 2) +
+          ':' + this.zeroFill(curDate.getSeconds(), 2)
+      },
+      getHistoryRecord () {
+        this.isGettingHistoryRecord = true
+        this.isScrollDown = false
+        const self = this
+        let currentIndex
+        axios.get(this.apiServerUrl + '/user/chat-record', {
+          params: {
+            'userId': this.userId,
+            'staffId': this.staffId,
+            'index': -1
+          }
+        }).then(response => {
+          let body = response.data.data
+          if (body.length > 0) {
+            currentIndex = body[0].index
+            currentIndex -= self.currentChatRecord.length
+            if (currentIndex < 0) {
+              self.isGettingHistoryRecord = false
+              return
+            }
+            axios.get(self.apiServerUrl + '/user/chat-record', {
+              params: {
+                'userId': self.userId,
+                'staffId': self.staffId,
+                'index': currentIndex
+              }
+            }).then(response => {
+              let body2 = response.data.data
+              if (body2.length > 0) {
+                let content = []
+                for (let value of body2) {
+                  let newMsg = value.content
+                  // debug
+                  if (value.direction === 's_u') {
+                    newMsg.from = value.staffId
+                    newMsg.to = value.userId
+                  } else {
+                    newMsg.from = value.userId
+                    newMsg.to = value.staffId
+                  }
+                  // debug
+                  console.log(newMsg)
+                  content.unshift(newMsg)
+                }
+                this.$store.commit({
+                  'type': 'prependChatRecord',
+                  'content': content
+                })
+              }
+              this.isGettingHistoryRecord = false
+            }).catch(error => {
+              console.log(error)
+              this.isGettingHistoryRecord = false
+            })
+          } else {
+            this.isGettingHistoryRecord = false
+          }
+        }).catch(error => {
+          console.log(error)
+          this.isGettingHistoryRecord = false
+        })
+      },
+      logout (event) {
+        // TODO
+        alert('你确定要离开吗？')
+        event.preventDefault()
+        this.socket.emit('userLogOut', {
+          userId: this.userId,
+          token: this.token
+        })
+        window.localStorage.clear()
       }
     },
     created () {
@@ -383,12 +368,14 @@
           window.location.href = window.location.origin + '/user#/login'
         }
       })
-      // for debug
-//      window.localStorage.setItem('userId', '1_u1')
-//      window.localStorage.setItem('staffId', '1_s1')
-      // send userreg message
-//      const io = require('socket.io-client')
-//      this.socket = io(this.$store.state.socketIoServerUrl)
+      // set company and staff informations
+      self.companyName = window.localStorage.getItem('companyName')
+      let staffInfo = JSON.parse(window.localStorage.getItem('staffInfo'))
+      // debug
+      console.log(staffInfo)
+      self.staffNickName = staffInfo.nickname
+      self.staffPicUrl = staffInfo.picUrl
+      self.staffRole = staffInfo.role
       this.socket.emit('userReg', {userId: this.userId, token: this.token})
       // debug
       console.log('Sent userReg.')
@@ -421,7 +408,12 @@
       this.scrollToBottom()
     },
     updated () {
-      this.scrollToBottom()
+      if (this.isScrollDown) {
+        this.scrollToBottom()
+      }
+    },
+    beforeDestroyed () {
+      window.removeEventListener('beforeunload', e => this.logout(e))
     }
   }
 </script>

@@ -2,29 +2,49 @@
   <div class="robot-chat">
     <div class="layout">
       <Row type="flex">
-        <Col span="5" class="layout-menu-left">
-        <Menu active-name="1" theme="dark" width="auto">
-        </Menu>
-        </Col>
-        <Col span="19">
+        <Col span="24">
         <div class="chat-header">
           <div class="chat-title chat-title-company-name">
-            XXX公司
+            {{ companyName }}
           </div>
-          <div class="chat-title chat-title-staff-type">
+          <div class="chat-title">
             机器人
-            <Button type="text" @click="showModal = true">
-              <Icon type="android-share" size="28"></Icon>
-            </Button>
             <Modal
               v-model="showModal"
               title="选择人工服务类型"
               @on-ok="switchToHuman()">
               请选择人工服务类型：
-              <Select v-model="formItem.staffType">
+              <Select v-model="staffTypeForm.staffType">
                 <Option value="0">售前</Option>
                 <Option value="1">售后</Option>
               </Select>
+            </Modal>
+            <Modal
+              v-model="showChooseModal"
+              title="暂无空闲客服"
+              ok-text="留言"
+              cancel-text="继续等待"
+              @on-ok="showLeaveMessageModal = true">
+              暂无空闲的该类型人工客服，您可以选择留言或继续等待
+            </Modal>
+            <Modal
+              v-model="showLeaveMessageModal"
+              title="留言"
+              @on-ok="leaveMessage()"
+              @on-cancel="cancelLeaveMessage()"
+              :loading="loading">
+              <!--请输入邮箱(客服人员将会尽快将回复发送至此邮箱)：-->
+              <!--<Input v-model="email" icon="ios-email" placeholder="输入邮箱..."></Input>-->
+              <!--请输入您的留言：-->
+              <!--<Input v-model="leavedMessage" type="textarea" icon="ios-chatboxes" placeholder="输入留言..."></Input>-->
+              <Form ref="leaveMessageForm" label-position="right" :label-width="100" :model="leaveMessageForm" :rules="leaveMessageRules">
+                <FormItem prop="email" label="邮箱">
+                  <Input v-model="leaveMessageForm.email" size="large" placeholder="在此输入您的邮箱"></Input>
+                </FormItem>
+                <FormItem prop="leavedMessage" label="留言">
+                  <Input v-model="leaveMessageForm.leavedMessage" type="textarea" :rows="4" size="large" placeholder="您的留言"></Input>
+                </FormItem>
+              </Form>
             </Modal>
           </div>
         </div>
@@ -52,7 +72,7 @@
         <div class="chat-input-actions">
           <div class="chat-window-input-media">
             <div class="media-button">
-              <Button type="ghost" icon="chatboxes">历史消息</Button>
+              <Button type="ghost" icon="chatboxes" @click="showModal = true">转接人工</Button>
             </div>
           </div>
           <div class="chat-input-send">
@@ -60,7 +80,7 @@
           </div>
         </div>
         <div class="chat-input">
-          <Input v-model="inputText" type="textarea" :rows="8" placeholder="在这里输入信息，按Ctrl+Enter发送"></Input>
+          <Input v-model="inputText" type="textarea" :rows="8" placeholder="在这里输入信息，按Ctrl+Enter发送" @on-keyup.ctrl.enter="sendMessage"></Input>
         </div>
         </Col>
       </Row>
@@ -104,6 +124,9 @@
     font-size: 20px;
     font-weight: Bold;
   }
+  .chat-title-switch{
+    font-size: 16px;
+  }
   .chat-content{
     height: calc(100vh - 290px);
     padding: 10px 15px;
@@ -130,9 +153,9 @@
     display: inline-block;
     position: relative;
     padding: 0 10px;
-    max-width: calc(100vw - 40px);
+    max-width: calc(50vw);
     min-height: 30px;
-    line-height: 2.5;
+    line-height: 2;
     font-size: 16px;
     text-align: left;
     word-break: break-all;
@@ -189,6 +212,9 @@
   .ivu-col{
     transition: width .2s ease-in-out;
   }
+  .menu-item-text{
+    font-size: 15px;
+  }
 </style>
 <script>
   import axios from 'axios'
@@ -196,14 +222,47 @@
     name: 'UserChat',
     data () {
       return {
+        companyName: '',
         inputText: '',
+        leaveMessageForm: {
+          email: '',
+          leavedMessage: ''
+        },
         earlistRecordIndex: '',
-        uploadList: [],
-        imgFileIndex: -1,
         showModal: false,
-        formItem: {
+        showLeaveMessageModal: false,
+        showChooseModal: false,
+        loading: true,
+        staffTypeForm: {
           userId: this.userId,
           staffType: '0'
+        },
+        leaveMessageRules: {
+          email: [
+            {
+              required: true,
+              message: '邮箱不能为空',
+              trigger: 'blur'
+            },
+            {
+              pattern: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+              message: '邮箱格式有误',
+              trigger: 'blur'
+            }
+          ],
+          leavedMessage: [
+            {
+              required: true,
+              message: '留言不能为空',
+              trigger: 'blur'
+            },
+            {
+              type: 'string',
+              max: 256,
+              message: '留言不得多于256字',
+              trigger: 'blur'
+            }
+          ]
         }
       }
     },
@@ -215,7 +274,11 @@
         return window.localStorage.getItem('userId')
       },
       staffId () {
-        return window.localStorage.getItem('staffId')
+        // return window.localStorage.getItem('staffId')
+        return 'robot'
+      },
+      companyId () {
+        return 1 // TO DO
       },
       token () {
         return window.localStorage.getItem('token')
@@ -229,26 +292,66 @@
     },
     methods: {
       sendMessage () {
-//        let sendMsg = this.inputText
-//        if (sendMsg === '') {
-//          this.$Notice.warning({
-//            title: '不可以发送空消息！'
-//          })
-//          return
-//        }
-//        let time = this.getCurrentTime()
-//        // send text msg
-//        this.$store.commit({
-//          type: 'addChatRecord',
-//          content: {
-//            'from': this.userId,
-//            'to': this.staffId,
-//            'msg': sendMsg,
-//            'type': 'text',
-//            'time': time
-//            // 'hasSent': false
-//          }
-//        })
+        let sendMsg = this.inputText
+        if (sendMsg === '') {
+          this.$Notice.warning({
+            title: '不可以发送空消息！'
+          })
+        } else {
+          // send text msg
+          let time = this.getCurrentTime()
+          this.$store.commit({
+            type: 'addChatRecord',
+            content: {
+              'from': this.userId,
+              'to': this.staffId,
+              'msg': sendMsg,
+              'type': 'text',
+              'time': time
+              // 'hasSent': false
+            }
+          })
+          this.inputText = ''
+          // get answer
+          const self = this
+          axios.get(self.$store.state.robotUrl, {
+            params: {
+              'question': self.userId,
+              'companyId': self.companyId
+            }
+          }).then(response => {
+            let code = response.data.code
+            // debug
+            // console.log(response.data)
+            if (code !== 0) {
+              self.$Notice.error({
+                title: '服务器异常，无法获得机器人回答'
+              })
+            } else {
+              let results = response.data.data.split('\n')
+              let len = results.length
+              let resultMessage = '我们筛选到' + len + '条可能有用的答案:'
+              for (let i = 0; i < len; i++) {
+                resultMessage += (i + 1) + results[i]
+                if (i !== len - 1) {
+                  resultMessage += ';'
+                }
+              }
+              time = self.getCurrentTime()
+              self.$store.commit({
+                type: 'addChatRecord',
+                content: {
+                  'from': self.staffId,
+                  'to': self.userId,
+                  'msg': resultMessage,
+                  'type': 'text',
+                  'time': time
+                  // 'hasSent': false
+                }
+              })
+            }
+          })
+        }
 //        this.socket.emit('userMsg', {
 //          'staffId': this.staffId,
 //          'userId': this.userId,
@@ -259,40 +362,135 @@
 //        // clear input
 //        this.inputText = ''
       },
+      zeroFill (num, size) {
+        let s = '000000000' + num
+        return s.substr(s.length - size)
+      },
       getCurrentTime () {
         let curDate = new Date()
-        return curDate.toLocaleTimeString('zh-Hans-CN')
+        return curDate.getFullYear() +
+          '-' + this.zeroFill(curDate.getMonth() + 1, 2) +
+          '-' + this.zeroFill(curDate.getDate(), 2) +
+          ' ' + this.zeroFill(curDate.getHours(), 2) +
+          ':' + this.zeroFill(curDate.getMinutes(), 2) +
+          ':' + this.zeroFill(curDate.getSeconds(), 2)
       },
       scrollToBottom () {
         let el = document.getElementById('user-chat-content')
         el.scrollTop = el.scrollHeight
       },
       switchToHuman () {
+        // debug
+        // this.showChooseModal = true
         const self = this
-        axios.get(self.$store.state.apiServerUrl + '/queue', {
+        axios.get(self.$store.state.apiServerUrl + '/user/queue', {
           params: {
             'userId': self.userId,
-            'tags': self.formItem.staffType
+            'tags': self.staffTypeForm.staffType
           }
         }).then(response => {
           let body = response.data.data
           // debug
-          console.log(body)
+          // console.log(body)
           if (!body || body.code !== 0) {
-            self.$Message.info('抱歉，暂时没有空闲的该种类人工客服，请您耐心等待。')
+            self.showChooseModal = true
+            // self.$Message.info('抱歉，暂时没有空闲的该种类人工客服，请您耐心等待。')
           } else {
             // tell staff to update queue
-            self.socket.emit('updateQueue', {staffId: body.msg, token: self.token})
+            // self.socket.emit('updateQueue', {staffId: body.msg, token: self.token})
+            // debug
+            console.log(body)
             window.localStorage.setItem('staffId', body.msg)
             window.localStorage.setItem('chatState', 'chat')
+            window.localStorage.setItem('staffInfo', JSON.stringify(body.data))
+            self.socket.emit('updateQueue', {staffId: body.msg, token: self.token})
+            self.$store.commit({
+              type: 'clearChatRecord',
+              content: {}
+            })
             self.$router.push({name: 'chat', userId: self.userId, staffId: body.msg})
           }
         })
+      },
+      leaveMessage () {
+        let isValid = this.validateForm('leaveMessageForm')
+        if (isValid === false) {
+          this.loading = false
+          this.$nextTick(() => {
+            this.loading = true
+          })
+          return
+        }
+//        if (this.email === '' || this.leavedMessage === '') {
+//          this.$Message.error('邮箱或留言不能为空!')
+//          this.loading = false
+//          this.$nextTick(() => {
+//            this.loading = true
+//          })
+//          return
+//        }
+//        let reg = /^[a-z0-9]+([._\\-]*[a-z0-9])*@([a-z0-9]+[-a-z0-9]*[a-z0-9]+.){1,63}[a-z0-9]+$/
+//        if (reg.test(this.email) === false) {
+//          this.$Message.error('邮箱地址不合法!')
+//          this.loading = false
+//          this.$nextTick(() => {
+//            this.loading = true
+//          })
+//          return
+//        }
+//        if (this.leavedMessage.length >= 256) {
+//          this.$Message.error('留言不得多于256字!')
+//          this.loading = false
+//          this.$nextTick(() => {
+//            this.loading = true
+//          })
+//          return
+//        }
+        const self = this
+        axios.post(self.$store.state.apiServerUrl + '/user/note', {'userId': self.userId, 'content': self.leaveMessageForm.leavedMessage, 'email': self.leaveMessageForm.email})
+          .then(function (res) {
+            let body = res.data.data
+            if (body === null || body.code !== 0) {
+              self.$Message.error('抱歉，暂时无法留言')
+              self.loading = false
+              self.$nextTick(() => {
+                self.loading = true
+              })
+            } else {
+              self.$Message.info('留言成功!')
+              self.showLeaveMessageModal = false
+              self.resetForm('leaveMessageForm')
+            }
+          })
+      },
+      cancelLeaveMessage () {
+        this.resetForm('leaveMessageForm')
+      },
+      validateForm (name) {
+        let result = false
+        this.$refs[name].validate((valid) => {
+          result = valid
+        })
+        return result
+      },
+      resetForm (name) {
+        this.$refs[name].resetFields()
       }
     },
     created () {
       // if haven't login, show login page instead
       const self = this
+      axios.get(self.$store.state.apiServerUrl + '/user/company', {
+        params: {
+          userId: self.userId
+        }
+      }).then(response => {
+        let body = response.data.data
+        // debug
+        // console.log(body)
+        self.companyName = body.company.name
+        window.localStorage.setItem('companyName', body.company.name)
+      })
       // debug
       console.log('userId in robot-chat: ' + self.userId)
       console.log('token in robot-chat: ' + self.token)

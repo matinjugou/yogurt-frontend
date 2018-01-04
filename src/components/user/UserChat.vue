@@ -5,22 +5,27 @@
     </div>
     <div class="layout">
       <Row type="flex">
-        <Col span="5" class="layout-menu-left">
-        <Menu active-name="1" theme="dark" width="auto">
-        </Menu>
-        </Col>
-        <Col span="19">
+        <Col span="24">
         <div class="chat-header">
           <div class="chat-title chat-title-company-name">
-            XXX公司
+            {{ companyName }}
           </div>
-          <div class="chat-title chat-title-staff-type">
-            售后
+          <div v-if="staffNickName.length" class="chat-title chat-title-staff-type">
+            {{ staffNickName }}（{{ staffRole }}）
+          </div>
+          <div v-else class="chat-title chat-title-staff-type">
+            {{ staffRole }}
           </div>
         </div>
 
         <!-- chat records -->
         <div class="chat-content" id="user-chat-content">
+          <div class="chat-window-get-history">
+            <Spin v-show="isGettingHistoryRecord"></Spin>
+            <a @click="getHistoryRecord()">
+              <Icon type="clock"/>加载历史消息
+            </a>
+          </div>
           <ul>
             <li v-for="(singleRecord, index) in currentChatRecord">
               <p class="chat-msg-time">
@@ -113,10 +118,7 @@
               <Button type="ghost" icon="happy" @click="() => {showEmojiPanel = !showEmojiPanel}">表情</Button>
             </div>
             <div class="media-button">
-              <Button type="ghost" icon="monitor">截图</Button>
-            </div>
-            <div class="media-button">
-              <Button type="ghost" icon="chatboxes">历史消息</Button>
+              <Button type="ghost" icon="monitor" @click="screenShot()">截屏</Button>
             </div>
           </div>
           <div class="chat-input-send">
@@ -133,6 +135,27 @@
           <img :src="largeImageSrc" />
         </div>
         <div slot="footer"></div>
+      </Modal>
+      <Modal
+        v-model="showAskScreenShotModal"
+        width="80%"
+        title="请求截图"
+        @on-ok="screenShot"
+        ok-text="允许"
+        @on-cancel="showAskScreenShotModal = false"
+        cancel-text="拒绝">
+        客服向您请求截图
+      </Modal>
+      <Modal
+        v-model="showScreenShotModal"
+        width="80%"
+        title="屏幕截图"
+        @on-ok="sendScreenShot"
+        ok-text="发送"
+        cancel-text="放弃"
+        @on-cancel="showScreenShotModal = false">
+        <div id="screen-shot" class="large-image">
+        </div>
       </Modal>
     </div>
   </div>
@@ -179,6 +202,12 @@
     padding: 10px 15px;
     overflow: auto;
   }
+  .chat-window-get-history {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
   .chat-msg-time {
     margin: 7px 0;
     text-align: center;
@@ -199,7 +228,7 @@
   .chat-msg-body > .content {
     position: relative;
     padding: 0 10px;
-    max-width: calc(100vw - 50px);
+    max-width: calc(50vw);
     min-height: 30px;
     line-height: 2.5;
     font-size: 16px;
@@ -399,15 +428,25 @@
 </style>
 <script>
   import axios from 'axios'
+  import html2canvas from 'html2canvas'
   export default {
     name: 'UserChat',
     data () {
       return {
+        companyName: '',
+        staffNickName: '',
+        staffPicUrl: '',
+        staffRole: '',
         inputText: '',
         earlistRecordIndex: '',
         showEmojiPanel: false,
         showLargeImageModal: false,
         largeImageSrc: '',
+        showAskScreenShotModal: false,
+        showScreenShotModal: false,
+        screenShotSrc: '',
+        isGettingHistoryRecord: false,
+        isScrollDown: false,
         cachedMsg: {},
         uploadList: [],
         maxFileSize: 204800, // KB
@@ -428,24 +467,6 @@
             custom: '自定义'
           }
         },
-//        contentList: [
-//          {
-//            id: '1',
-//            msg: 'Hello, I\'m staff_1.',
-//            from: '1_s1',
-//            to: '1_u1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:14'
-//          },
-//          {
-//            id: '2',
-//            msg: 'Hello, I\'m user.',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          }
-//        ],
         imgFileIndex: -1,
         fileIconMap: {
           // compressed file
@@ -492,6 +513,9 @@
       fileCompressUrl () {
         return this.$store.state.fileCompressUrl
       },
+      apiServerUrl () {
+        return this.$store.state.apiServerUrl
+      },
       userId () {
         return window.localStorage.getItem('userId')
       },
@@ -531,6 +555,7 @@
           })
           return
         }
+        this.isScrollDown = true
         let time = this.getCurrentTime()
         // send text msg
         if (sendMsg !== '') {
@@ -554,7 +579,7 @@
           })
           // clear input
           this.inputText = ''
-        }
+        } else {}
         // send files
         if (this.uploadList.length) {
           for (let index of this.uploadList.keys()) {
@@ -629,9 +654,18 @@
           this.uploadList = this.$refs.upload.fileList
         }
       },
+      zeroFill (num, size) {
+        let s = '000000000' + num
+        return s.substr(s.length - size)
+      },
       getCurrentTime () {
         let curDate = new Date()
-        return curDate.toLocaleTimeString('zh-Hans-CN')
+        return curDate.getFullYear() +
+          '-' + this.zeroFill(curDate.getMonth() + 1, 2) +
+          '-' + this.zeroFill(curDate.getDate(), 2) +
+          ' ' + this.zeroFill(curDate.getHours(), 2) +
+          ':' + this.zeroFill(curDate.getMinutes(), 2) +
+          ':' + this.zeroFill(curDate.getSeconds(), 2)
       },
       scrollToBottom () {
         let el = document.getElementById('user-chat-content')
@@ -748,6 +782,66 @@
         this.showLargeImageModal = true
         this.largeImageSrc = src
       },
+      screenShot () {
+        const self = this
+        setTimeout(function () {
+          html2canvas(document.body).then(function (canvas) {
+            let el = document.getElementById('screen-shot')
+            while (el.lastChild) {
+              el.removeChild(el.lastChild)
+            }
+            el.appendChild(canvas)
+            self.showScreenShotModal = true
+          })
+        }, 1000)
+      },
+      sendScreenShot () {
+        let canvas = document.getElementById('screen-shot').firstChild
+        let self = this
+        canvas.toBlob(function (blob) {
+          let formData = new FormData()
+          formData.append('file', blob)
+          formData.append('fileType', 'image/png')
+          formData.append('validTime', '1')
+          let config = {
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
+          }
+          let fileUrl = ''
+          let compressedUrl = ''
+          let time = self.getCurrentTime()
+          axios.post(self.fileServerUrl, formData, config)
+            .then(function (res) {
+              fileUrl = res.data.data
+              if (fileUrl.length) {
+                axios.post(self.fileCompressUrl, {'fileUrl': fileUrl})
+                  .then(function (res) {
+                    compressedUrl = res.data.data.length ? res.data.data : compressedUrl
+                    self.currentChatRecord.push({
+                      'from': self.userId,
+                      'to': self.staffId,
+                      'url': fileUrl,
+                      'compressedUrl': compressedUrl,
+                      'type': 'image',
+                      'time': time
+                    })
+                    self.socket.emit('userMsg', {
+                      time: time,
+                      staffId: self.staffId,
+                      userId: self.userId,
+                      token: self.token,
+                      type: 'image',
+                      url: fileUrl,
+                      compressedUrl: compressedUrl
+                    })
+                  })
+              } else {
+                self.showAlert('上传截图失败!')
+              }
+            })
+        })
+      },
       logout (event) {
         // TODO
         alert('你确定要离开吗？')
@@ -757,11 +851,92 @@
           token: this.token
         })
         window.localStorage.clear()
+      },
+      getHistoryRecord () {
+        this.isGettingHistoryRecord = true
+        this.isScrollDown = false
+        const self = this
+        let currentIndex
+        axios.get(this.apiServerUrl + '/user/chat-record', {
+          params: {
+            'userId': this.userId,
+            'staffId': this.staffId,
+            'index': -1
+          }
+        }).then(response => {
+          let body = response.data.data
+          if (body.length > 0) {
+            currentIndex = body[0].index
+            currentIndex -= self.currentChatRecord.length
+            if (currentIndex < 0) {
+              self.$Notice.success({
+                title: '没有更多的消息了~'
+              })
+              self.isGettingHistoryRecord = false
+              return
+            }
+            axios.get(self.apiServerUrl + '/user/chat-record', {
+              params: {
+                'userId': self.userId,
+                'staffId': self.staffId,
+                'index': currentIndex
+              }
+            }).then(response => {
+              let body2 = response.data.data
+              if (body2.length > 0) {
+                let content = []
+                for (let value of body2) {
+                  let newMsg = value.content
+                  // debug
+                  if (value.direction === 's_u') {
+                    newMsg.from = value.staffId
+                    newMsg.to = value.userId
+                  } else {
+                    newMsg.from = value.userId
+                    newMsg.to = value.staffId
+                  }
+                  // debug
+                  console.log(newMsg)
+                  content.unshift(newMsg)
+                }
+                this.$store.commit({
+                  'type': 'prependChatRecord',
+                  'content': content
+                })
+              }
+              this.isGettingHistoryRecord = false
+            }).catch(error => {
+              this.$Notice.error({
+                title: '获取历史消息失败，请稍后再试'
+              })
+              console.log(error)
+              this.isGettingHistoryRecord = false
+            })
+          } else {
+            this.$Notice.success({
+              title: '没有更多的消息了~'
+            })
+            this.isGettingHistoryRecord = false
+          }
+        }).catch(error => {
+          this.$Notice.error({
+            title: '获取历史消息失败，请稍后再试'
+          })
+          console.log(error)
+          this.isGettingHistoryRecord = false
+        })
       }
     },
     created () {
       // if haven't login, show login page instead
       const self = this
+      self.companyName = window.localStorage.getItem('companyName')
+      let staffInfo = JSON.parse(window.localStorage.getItem('staffInfo'))
+      // debug
+      console.log(staffInfo)
+      self.staffNickName = staffInfo.nickname
+      self.staffPicUrl = staffInfo.picUrl
+      self.staffRole = staffInfo.role
       // debug
       console.log('userId in user-chat: ' + self.userId)
       console.log('token in user-chat: ' + self.token)
@@ -789,9 +964,10 @@
         console.log('Register result: code: ' + data['code'] + ', msg: ' + data['msg'])
       })
       this.socket.on('staffMsg', (data) => {
-        // debug
-        console.log(data)
-        console.log(self.currentChatRecord)
+        if (data.type === 'snapshot') {
+          this.showAskScreenShotModal = true
+          return
+        }
         let newMsg = {
           'time': data.time,
           'from': data.staffId,
@@ -827,7 +1003,9 @@
       this.scrollToBottom()
     },
     updated () {
-      this.scrollToBottom()
+      if (this.isScrollDown) {
+        this.scrollToBottom()
+      }
     },
     beforeDestroyed () {
       window.removeEventListener('beforeunload', e => this.logout(e))

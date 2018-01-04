@@ -1,16 +1,17 @@
 <template>
   <v-app>
     <v-toolbar color="indigo" dark fixed app height="56px">
-      <v-toolbar-title>xxx公司</v-toolbar-title>
+      <v-toolbar-title>{{ companyName }}</v-toolbar-title>
       <v-spacer></v-spacer>
       <span style="font-size: 16px">
         机器人
       </span>
-      <v-btn icon @click="showDialog = true">
-        <v-icon>redo</v-icon>
+      <v-btn color="indigo" @click="showSelectStaffTypeDialog = true" >
+        <!--<v-icon>redo</v-icon>-->
+        转接人工
       </v-btn>
     </v-toolbar>
-    <v-dialog v-model="showDialog" persistent max-width="500px">
+    <v-dialog v-model="showSelectStaffTypeDialog" persistent max-width="500px">
       <v-card>
         <v-card-title>
           <span class="headline">选择人工客服类型</span>
@@ -30,22 +31,62 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" flat @click.native="showDialog = false">取消</v-btn>
+          <v-btn color="blue darken-1" flat @click.native="showSelectStaffTypeDialog = false">取消</v-btn>
           <v-btn color="blue darken-1" flat @click.native="switchToHuman">确定</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-dialog v-model="showWrongMessage" max-width="290">
+    <v-dialog v-model="showChooseDialog" max-width="290">
       <v-card>
         <v-card-title class="headline">客服繁忙</v-card-title>
-        <v-card-text>抱歉，暂时没有空闲的该种类人工客服，请您耐心等待。</v-card-text>
+        <v-card-text>抱歉，暂时没有空闲的该种类人工客服，您可以选择留言或继续等待。</v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="green darken-1" flat="flat" @click.native="showWrongMessage = false">好的</v-btn>
+          <v-btn color="green darken-1" flat="flat" @click.native="showChooseDialog = false">继续等待</v-btn>
+          <v-btn color="blue darken-1" flat @click.native="showChooseDialog = false; showLeaveMessageDialog = true">留言</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog v-model="showLeaveMessageDialog" max-width="290">
+      <v-card>
+        <v-card-title class="headline">留言</v-card-title>
+        <v-card-text style="padding-top: 0; padding-bottom: 0">
+          <v-container>
+            <v-layout wrap>
+              <v-flex>
+                <v-form  ref="leaveMessageForm">
+                  <v-text-field
+                    label="邮箱"
+                    v-model="email"
+                    :rules="emailRules"
+                    required
+                  ></v-text-field>
+                  <v-text-field
+                    label="留言"
+                    v-model="leavedMessage"
+                    :rules="leavedMessageRules"
+                    :counter="256"
+                    required
+                  ></v-text-field>
+                </v-form>
+              </v-flex>
+            </v-layout>
+          </v-container>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" flat @click.native="cancelLeaveMessage()">取消</v-btn>
+          <v-btn color="blue darken-1" flat @click.native="leaveMessage()">确定</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
     <v-content>
+      <v-alert color="error" icon="warning" dismissible v-model="showAlert">
+        {{ alertMessage }}
+      </v-alert>
+      <v-alert color="success" icon="check_circle" dismissible v-model="showLeaveMessageSuccess">
+        留言成功!
+      </v-alert>
       <v-container id="chat-record-container" :class="{'no-function-panel': !functionPanelVisible, 'with-function-panel': functionPanelVisible}">
         <!--<v-container :class="{'no-function-panel': !functionPanelVisible, 'with-function-panel': functionPanelVisible}" id="chat-record-container">-->
         <ul style="list-style: none">
@@ -87,11 +128,11 @@
           </v-flex>
         </v-layout>
         <v-layout v-show="functionPanelVisible" id="function-panel-layout">
-          <v-flex p>
-            <v-btn flat>
-              <v-icon>tag_faces</v-icon>表情
-            </v-btn>
-          </v-flex>
+          <!--<v-flex p>-->
+            <!--<v-btn flat>-->
+              <!--<v-icon>tag_faces</v-icon>表情-->
+            <!--</v-btn>-->
+          <!--</v-flex>-->
           <v-flex p>
             <v-btn flat>
               <v-icon>folder_open</v-icon>文件
@@ -195,127 +236,31 @@
     data () {
       return {
         functionPanelVisible: false,
-        showDialog: false,
-        showWrongMessage: false,
+        showSelectStaffTypeDialog: false,
+        showChooseDialog: false,
+        showLeaveMessageDialog: false,
+        showAlert: false,
+        showLeaveMessageSuccess: false,
         inputText: '',
+        alertMessage: '',
         staffType: { text: '售前', value: '0' },
+        email: '',
+        companyName: '',
+        staffNickName: '',
+        staffPicUrl: '',
+        staffRole: '',
+        emailRules: [
+          (v) => !!v || '邮箱不能为空',
+          (v) => /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(v) || '邮箱格式不合法'
+        ],
+        leavedMessage: '',
+        leavedMessageRules: [
+          (v) => !!v || '留言不能为空',
+          (v) => v.length <= 256 || '留言不得多于256字'
+        ],
         items: [
           { text: '售前', value: '0' },
           { text: '售后', value: '1' }
-        ],
-        contentList: [
-          {
-            id: '1',
-            msg: 'Hello, I\'m staff_1.',
-            from: '1_s1',
-            to: '1_u1',
-            type: 'text',
-            time: '2017-11-19 15:39:14'
-          },
-          {
-            id: '2',
-            msg: 'Hello, I\'m user_1.',
-            from: '1_u1',
-            to: '1_s1',
-            type: 'text',
-            time: '2017-11-19 15:39:15'
-          }
-//          {
-//            id: '3',
-//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          },
-//          {
-//            id: '4',
-//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          },
-//          {
-//            id: '3',
-//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          },
-//          {
-//            id: '4',
-//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          },
-//          {
-//            id: '3',
-//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          },
-//          {
-//            id: '4',
-//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          },
-//          {
-//            id: '3',
-//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          },
-//          {
-//            id: '4',
-//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          },
-//          {
-//            id: '3',
-//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          },
-//          {
-//            id: '4',
-//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          },
-//          {
-//            id: '3',
-//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          },
-//          {
-//            id: '4',
-//            msg: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-//            from: '1_u1',
-//            to: '1_s1',
-//            type: 'text',
-//            time: '2017-11-19 15:39:15'
-//          }
         ]
       }
     },
@@ -364,47 +309,85 @@
         }
       },
       sendMessage () {
-        // debug
-//        console.log('sending message: ' + this.inputText)
-//        let sendMsg = this.inputText
-//        if (sendMsg === '') {
-//          // debug
-//          console.log('不能发送空消息！')
-//          return
-//        }
-//        let time = this.getCurrentTime()
-//        // send text msg
-//        if (sendMsg !== '') {
-//          this.$store.commit({
-//            type: 'addChatRecord',
-//            content: {
-//              'from': this.userId,
-//              'to': this.staffId,
-//              'msg': sendMsg,
-//              'type': 'text',
-//              'time': time
-//              // 'hasSent': false
-//            }
-//          })
-//          this.socket.emit('userMsg', {
-//            staffId: this.staffId,
-//            userId: this.userId,
-//            token: this.token,
-//            msg: sendMsg,
-//            type: 'text'
-//          })
-//          // clear input
-//          this.inputText = ''
-//        }
+        let sendMsg = this.inputText
+        if (sendMsg === '') {
+          this.alertMessage = '不可以发送空消息!'
+          this.showAlert = true
+        } else {
+          // send text msg
+          let time = this.getCurrentTime()
+          this.$store.commit({
+            type: 'addChatRecord',
+            content: {
+              'from': this.userId,
+              'to': this.staffId,
+              'msg': sendMsg,
+              'type': 'text',
+              'time': time
+              // 'hasSent': false
+            }
+          })
+          this.inputText = ''
+          // get answer
+          const self = this
+          axios.get(self.$store.state.robotUrl, {
+            params: {
+              'question': self.userId,
+              'companyId': self.companyId
+            }
+          }).then(response => {
+            let code = response.data.code
+            // debug
+            // console.log(response.data)
+            if (code !== 0) {
+              self.alertMessage = '服务器异常，无法获得机器人回答'
+              self.showAlert = true
+            } else {
+              let results = response.data.data.split('\n')
+              let len = results.length
+              let resultMessage = '我们筛选到' + len + '条可能有用的答案:'
+              for (let i = 0; i < len; i++) {
+                resultMessage += (i + 1) + results[i]
+                if (i !== len - 1) {
+                  resultMessage += ';'
+                }
+              }
+              time = self.getCurrentTime()
+              self.$store.commit({
+                type: 'addChatRecord',
+                content: {
+                  'from': self.staffId,
+                  'to': self.userId,
+                  'msg': resultMessage,
+                  'type': 'text',
+                  'time': time
+                  // 'hasSent': false
+                }
+              })
+            }
+          })
+        }
+      },
+      zeroFill (num, size) {
+        let s = '000000000' + num
+        return s.substr(s.length - size)
       },
       getCurrentTime () {
         let curDate = new Date()
-        return curDate.toLocaleTimeString('zh-Hans-CN')
+        return curDate.getFullYear() +
+          '-' + this.zeroFill(curDate.getMonth() + 1, 2) +
+          '-' + this.zeroFill(curDate.getDate(), 2) +
+          ' ' + this.zeroFill(curDate.getHours(), 2) +
+          ':' + this.zeroFill(curDate.getMinutes(), 2) +
+          ':' + this.zeroFill(curDate.getSeconds(), 2)
       },
       switchToHuman () {
-        this.showDialog = false
+        // debug
+//        this.showSelectStaffTypeDialog = false
+//        this.showChooseDialog = true
+        this.showSelectStaffTypeDialog = false
         const self = this
-        axios.get(self.$store.state.apiServerUrl + '/queue', {
+        axios.get(self.$store.state.apiServerUrl + '/user/queue', {
           params: {
             'userId': self.userId,
             'tags': self.staffType.value
@@ -414,15 +397,49 @@
           // debug
           console.log(body)
           if (!body || body.code !== 0) {
-            self.showWrongMessage = true
+            self.showChooseDialog = true
           } else {
             // tell staff to update queue
             self.socket.emit('updateQueue', {staffId: body.msg, token: self.token})
             window.localStorage.setItem('staffId', body.msg)
             window.localStorage.setItem('chatState', 'chat')
+            window.localStorage.setItem('staffInfo', JSON.stringify(body.data))
+            self.$store.commit({
+              type: 'clearChatRecord',
+              content: {}
+            })
             self.$router.push({name: 'chat', userId: self.userId, staffId: body.msg})
           }
         })
+      },
+      leaveMessage () {
+        const self = this
+        // debug
+        console.log('enter leave message')
+        if (this.$refs.leaveMessageForm.validate()) {
+          // debug
+          console.log('leave message: after validate')
+          axios.post(self.$store.state.apiServerUrl + '/user/note', {
+            'userId': self.userId,
+            'content': self.leavedMessage,
+            'email': self.email
+          })
+            .then(function (res) {
+              let body = res.data.data
+              if (body === null || body.code !== 0) {
+                self.alertMessage = '抱歉，暂时无法留言'
+                self.showAlert = true
+              } else {
+                self.showLeaveMessageSuccess = true
+                self.showLeaveMessageDialog = false
+                self.$refs.leaveMessageForm.reset()
+              }
+            })
+        }
+      },
+      cancelLeaveMessage () {
+        this.showLeaveMessageDialog = false
+        this.$refs.leaveMessageForm.reset()
       }
     },
     created () {
@@ -446,43 +463,17 @@
           window.location.href = window.location.origin + '/user#/login'
         }
       })
-      // for debug
-//      window.localStorage.setItem('userId', '1_u1')
-//      window.localStorage.setItem('staffId', '1_s1')
-      // send userreg message
-//      const io = require('socket.io-client')
-//      this.socket = io(this.$store.state.socketIoServerUrl)
-//      this.socket.emit('userReg', {userId: this.userId, token: this.token})
-//      // debug
-//      console.log('Sent userReg.')
-//      this.socket.on('regResult', (data) => {
-//        // debug
-//        console.log('Register result: code: ' + data['code'] + ', msg: ' + data['msg'])
-//      })
-//      // socket messages
-//      this.socket.on('staffMsg', (data) => {
-//        // debug
-//        console.log(data)
-//        console.log(self.currentChatRecord)
-//        let newMsg = {
-//          'time': data.time,
-//          'from': data.staffId,
-//          'to': data.userId,
-//          'type': data.type
-//        }
-//        if (data.type === 'text') {
-//          newMsg.msg = data.msg
-//        }
-//        self.$store.commit({
-//          type: 'addChatRecord',
-//          content: newMsg
-//        })
-//        // debug
-//        console.log(self.currentChatRecord)
-//      })
-//      this.socket.on('sendResult', (data) => {
-//        // TO DO
-//      })
+      axios.get(self.$store.state.apiServerUrl + '/user/company', {
+        params: {
+          userId: self.userId
+        }
+      }).then(response => {
+        let body = response.data.data
+        // debug
+        // console.log(body)
+        self.companyName = body.company.name
+        window.localStorage.setItem('companyName', body.company.name)
+      })
     },
     mounted () {
       this.scrollToBottom()

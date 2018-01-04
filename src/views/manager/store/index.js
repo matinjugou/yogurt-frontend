@@ -8,6 +8,8 @@ export default new Vuex.Store({
     socketServerUrl: 'http://yogurt.magichc7.com',
     httpServerUrl: 'http://yogurt.magichc7.com/api/manager',
     fileServerUrl: 'http://123.206.22.71/api/v2/file/',
+    robotServerUrl: 'http://123.206.22.71/api/v1/robot/',
+    analyseServerUrl: 'http://123.206.22.71/api/v1/analyse/',
     isLogin: false,
     managerId: '1_m1',
     picUrl: '',
@@ -17,7 +19,8 @@ export default new Vuex.Store({
     email: '',
     companyName: '',
     companyLogo: '',
-    companyRobotAvatar: ''
+    companyRobotAvatar: '',
+    companyCorpusFile: ''
   },
   mutations: {
     login (state) {
@@ -25,6 +28,9 @@ export default new Vuex.Store({
     },
     logout (state) {
       state.isLogin = false
+    },
+    changeCorpusFile (state, payload) {
+      state.companyCorpusFile = payload.companyCorpusFile
     },
     changeRobotAvatar (state, payload) {
       state.companyRobotAvatar = payload.companyRobotAvatar
@@ -41,6 +47,9 @@ export default new Vuex.Store({
       }
       if (payload.companyRobotAvatar) {
         state.companyRobotAvatar = payload.companyRobotAvatar
+      }
+      if (payload.companyCorpusFile) {
+        state.companyCorpusFile = payload.companyCorpusFile
       }
     },
     changeManagerId (state, payload) {

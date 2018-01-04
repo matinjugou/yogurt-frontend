@@ -175,7 +175,6 @@
             newPhrase: self.newPhrase,
             newSentence: self.newSentence
           }).then(function (response) {
-            console.log(response)
             axios.get('http://yogurt.magichc7.com/api/manager/quick-reply/public', {
               params: {
                 companyId: 1
@@ -202,7 +201,6 @@
       },
       changeSelected (selection, row) {
         this.selected = selection
-        console.log(this.selected)
       },
       deleteSelected () {
         const pairs = []

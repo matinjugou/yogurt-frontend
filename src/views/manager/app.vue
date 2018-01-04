@@ -5,8 +5,6 @@
         <a>Yogurt客服系统</a>
       </div>
       <div class="layout-ceiling-main">
-        <a href="#">帮助中心</a> |
-        <a href="#">服务中心</a> |
         <a @click="logout">登出</a>
       </div>
     </div>
@@ -25,7 +23,7 @@
               <Icon type="ios-paper"></Icon>
               系统状态
             </template>
-            <MenuItem name="1-1">系统状态</MenuItem>
+            <MenuItem name="1-1" @click.native="jump('/systemstatus')">系统状态</MenuItem>
           </Submenu>
           <Submenu name="2">
             <template slot="title">
@@ -54,13 +52,15 @@
             <MenuItem name="4-2" @click.native="jump('/settings-quickrly')">
               快捷回复设置
             </MenuItem>
-            <MenuItem name="4-3">购买设置</MenuItem>
-            <MenuItem name="4-4">企业信息设置</MenuItem>
+            <!--MenuItem name="4-3">购买设置</MenuItem>
+            <MenuItem name="4-4">企业信息设置</MenuItem-->
           </Submenu>
         </Menu>
       </Col>
       <Col :xs="18" :sm="18" :md="21" :lg="21">
-        <router-view></router-view>
+        <transition name="slide-fade" mode="out-in">
+          <router-view></router-view>
+        </transition>
       </Col>
     </Row>
   </div>
@@ -136,7 +136,8 @@
                   type: 'changeCompanyInfo',
                   companyName: data.name,
                   companyLogo: data.picUrl,
-                  companyRobotAvatar: data.robotAvatar
+                  companyRobotAvatar: data.robotAvatar,
+                  companyCorpusFile: data.corpusFile
                 })
               })
             })
@@ -199,5 +200,19 @@
   }
   .layout-ceiling-main a{
     color: #9ba7b5;
+  }
+  .slide-fade-enter-active {
+    transition: all .5s ease;
+  }
+  .slide-fade-leave-active{
+    transition: all .3s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+  }
+  .slide-fade-enter {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  .slide-fade-leave-to {
+    transform: translateY(50px);
+    opacity: 0;
   }
 </style>

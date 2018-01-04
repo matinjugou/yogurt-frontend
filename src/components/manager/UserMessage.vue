@@ -23,10 +23,8 @@
             />
           </Modal>
         </Row>
-        <Table border ref="selection" :columns="tablecolumns" :data="messages"
+        <Table border :columns="tablecolumns" :data="notes"
                @on-selection-change="changeSelected"></Table>
-        <Button :disabled="selectedEmpty" type="primary"
-                style="margin-top: 7px" @click="replySelected">批量回复</Button>
       </div>
     </div>
     <div class="layout-copy">
@@ -44,12 +42,8 @@
         replyMessageModal: false,
         replyContent: '',
         selected: [],
+        indexToReply: 0,
         tablecolumns: [
-          {
-            type: 'selection',
-            width: 60,
-            align: 'center'
-          },
           {
             title: '用户',
             key: 'user'
@@ -57,6 +51,10 @@
           {
             title: '时间',
             key: 'time'
+          },
+          {
+            title: '内容',
+            key: 'content'
           },
           {
             title: '邮箱',
@@ -82,21 +80,32 @@
             }
           },
           {
+            title: '回复内容',
+            key: 'reply'
+          },
+          {
+            title: '回复人',
+            key: 'staff'
+          },
+          {
             title: '操作',
             key: 'actions',
             render: (h, params) => {
+              const disabled = params.row.status === 1
               return h('div', [
                 h('Button', {
                   props: {
                     type: 'primary',
-                    size: 'small'
+                    size: 'small',
+                    disabled: disabled
                   },
                   style: {
                     marginRight: '5px'
                   },
                   on: {
                     click: () => {
-                      this.replyMessage(params.index)
+                      this.indexToReply = params.index
+                      this.replyMessageModal = true
                     }
                   }
                 }, '回复')
@@ -104,13 +113,7 @@
             }
           }
         ],
-        messages: [
-          {
-            user: 'matinjugou',
-            time: '2017-12-30 15:59',
-            email: 'thss15_huangc@163.com',
-            status: 1
-          }
+        notes: [
         ]
       }
     },
@@ -121,131 +124,71 @@
     },
     methods: {
       replyMessageModalOk () {
-        this.$Message.info('Clicked ok')
-        if (this.newPhrase !== '' && this.newSentence !== '') {
-          const self = this
-          axios.post('http://yogurt.magichc7.com/api/manager/quick-reply/public', {
-            companyId: 1,
-            phrase: self.newPhrase,
-            sentence: self.newSentence
+        const self = this
+        if (self.replyContent === '') {
+          return
+        }
+        if (this.indexToReply >= 0) {
+          axios.post(self.$store.state.httpServerUrl + '/note', {
+            noteId: self.notes[self.indexToReply].noteId,
+            staffId: self.$store.state.managerId,
+            reply: self.replyContent
           }).then(function (response) {
-            axios.get('http://yogurt.magichc7.com/api/manager/quick-reply/public', {
+            axios.get(self.$store.state.httpServerUrl + '/note', {
               params: {
                 companyId: 1
               }
             }).then(function (response) {
-              self.replies = []
-              for (const reply of response.data.data) {
-                self.replies.push({
-                  phrase: reply.phrase,
-                  sentence: reply.sentence
+              self.notes = []
+              for (const note of response.data.data) {
+                self.notes.push({
+                  noteId: note.id,
+                  user: note.userId,
+                  time: note.time,
+                  email: note.email,
+                  content: note.content,
+                  status: note.isReplied,
+                  reply: note.reply,
+                  staff: note.staffId
                 })
               }
+              self.$Message.info('回复成功')
+              self.replyContent = ''
             }).catch(function (error) {
               self.$Message.error(error)
             })
-          }).catch(function (error) {
-            self.$Message.error(error)
           })
         }
       },
       replyMessageModalCancel () {
         this.$Message.info('Clicked cancel')
       },
-      changeSelected (selection, row) {
-        this.selected = selection
-        console.log(this.selected)
-      },
       replySelected () {
-        const pairs = []
-        const self = this
-        for (let select of this.selected) {
-          pairs.push({
-            phrase: select.phrase,
-            sentence: select.sentence
-          })
-        }
-        axios({
-          method: 'delete',
-          url: self.$store.state.httpServerUrl + '/quick-reply/public',
-          data: {
-            companyId: 1,
-            pairs: pairs
-          }
-        }).then(function (response) {
-          axios.get(self.$store.state.httpServerUrl + '/quick-reply/public', {
-            params: {
-              companyId: 1
-            }
-          }).then(function (response) {
-            self.replies = []
-            for (const reply of response.data.data) {
-              self.replies.push({
-                phrase: reply.phrase,
-                sentence: reply.sentence
-              })
-            }
-          }).catch(function () {
-            self.$Message.error('服务出现故障，请重试一下~')
-          })
-          self.$Message.info('删除成功！')
-        }).catch(function () {
-          self.$Message.error('服务出现故障，请重试一下~')
-        })
-      },
-      editPair (index) {
-        this.oldPhrase = this.replies[index].phrase
-        this.oldSentence = this.replies[index].sentence
+        this.indexToReply = -1
         this.replyMessageModal = true
       },
-      deletePair (index) {
-        const pairs = []
-        const self = this
-        pairs.push({
-          phrase: self.replies[index].phrase,
-          sentence: self.replies[index].sentence
-        })
-        axios({
-          method: 'delete',
-          url: 'http://yogurt.magichc7.com/api/manager/quick-reply/public',
-          data: {
-            companyId: 1,
-            pairs: pairs
-          }
-        }).then(function (response) {
-          axios.get('http://yogurt.magichc7.com/api/manager/quick-reply/public', {
-            params: {
-              companyId: 1
-            }
-          }).then(function (response) {
-            self.replies = []
-            for (const reply of response.data.data) {
-              self.replies.push({
-                phrase: reply.phrase,
-                sentence: reply.sentence
-              })
-            }
-          }).catch(function () {
-            self.$Message.error('服务出现故障，请重试一下~')
-          })
-          self.$Message.info('删除成功！')
-        }).catch(function () {
-          self.$Message.error('服务出现故障，请重试一下~')
-        })
+      changeSelected (selection, row) {
+        this.selected = selection
       }
     },
     mounted: function () {
       const self = this
-      axios.get('http://yogurt.magichc7.com/api/manager/quick-reply/public', {
+      axios.get(self.$store.state.httpServerUrl + '/note', {
         params: {
           companyId: 1
         }
       }).then(function (response) {
-        self.replies = []
-        for (const reply of response.data.data) {
-          self.replies.push({
-            phrase: reply.phrase,
-            sentence: reply.sentence
+        self.notes = []
+        for (const note of response.data.data) {
+          self.notes.push({
+            noteId: note.id,
+            user: note.userId,
+            time: note.time,
+            email: note.email,
+            content: note.content,
+            status: note.isReplied,
+            reply: note.reply,
+            staff: note.staffId
           })
         }
       }).catch(function (error) {

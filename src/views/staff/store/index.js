@@ -11,8 +11,13 @@ export default new Vuex.Store({
     imageCompressUrl: 'http://123.206.22.71/api/v1/image/',
     isLogin: false,
     staffId: '',
+    companyId: '',
+    avatarUrl: '',
     chatRecordList: {},
     userList: [],
+    userInfo: {},
+    userAvatarUrl: {},
+    quickReplyList: [],
     socket: null
   },
   mutations: {
@@ -25,12 +30,45 @@ export default new Vuex.Store({
     changeStaffId (state, payload) {
       state.staffId = payload.staffId
     },
+    changeCompanyId (state, payload) {
+      state.companyId = payload.companyId
+    },
+    changeAvatarUrl (state, payload) {
+      state.avatarUrl = payload.avatarUrl
+    },
+    prependChatRecord (state, payload) {
+      if (state.chatRecordList[payload.userId] === undefined) {
+        state.chatRecordList[payload.userId] = []
+      }
+      console.log(payload.content)
+      state.chatRecordList[payload.userId].unshift(...payload.content)
+      console.log(state.chatRecordList)
+    },
     addChatRecord (state, payload) {
       if (state.chatRecordList[payload.userId] === undefined) {
         state.chatRecordList[payload.userId] = []
       }
       state.chatRecordList[payload.userId].push(payload.content)
       console.log(state.chatRecordList)
+    },
+    addUserInfo (state, payload) {
+      state.userInfo[payload.userId] = payload.content
+    },
+    changeMessageSentStatus (state, payload) {
+      if (state.chatRecordList[payload.userId]) {
+        let content = payload.content
+        let record = state.chatRecordList[payload.userId].find(function (value) {
+          if (value.type !== content.type || value.hasSent !== false) {
+            return false
+          }
+          if (value.type === 'text') {
+            return value.msg === content.msg
+          } else {
+            return value.url === content.url
+          }
+        })
+        record.hasSent = true
+      }
     },
     refreshUserList (state, payload) {
       let arr = payload.content
@@ -83,6 +121,9 @@ export default new Vuex.Store({
       } else {
         user['unread'] = 1
       }
+    },
+    updateQuickReplyList (state, payload) {
+      state.quickReplyList = payload.quickReplyList
     },
     buildSocketConnect (state) {
       const io = require('socket.io-client')
