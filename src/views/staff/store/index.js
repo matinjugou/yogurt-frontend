@@ -15,6 +15,7 @@ export default new Vuex.Store({
     avatarUrl: '',
     chatRecordList: {},
     userList: [],
+    userInfo: {},
     userAvatarUrl: {},
     quickReplyList: [],
     socket: null
@@ -49,6 +50,9 @@ export default new Vuex.Store({
       }
       state.chatRecordList[payload.userId].push(payload.content)
       console.log(state.chatRecordList)
+    },
+    addUserInfo (state, payload) {
+      state.userInfo[payload.userId] = payload.content
     },
     changeMessageSentStatus (state, payload) {
       if (state.chatRecordList[payload.userId]) {
