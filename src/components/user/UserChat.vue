@@ -202,6 +202,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    border-radius: 4px 4px 0 0;
   }
   .chat-title{
     color: #495060;
