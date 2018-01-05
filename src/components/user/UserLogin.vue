@@ -15,7 +15,8 @@
           </Col>
         </FormItem-->
         <FormItem>
-          <Button type="primary" @click="submit()">点击以登录</Button>
+          <Button type="primary" @click="submit('default')">登录（使用默认的用户ID{{ defaultUserId }}）</Button>
+          <Button type="primary" @click="submit('random')">登录（使用随机生成的用户ID）</Button>
         </FormItem>
       </Form>
       </Col>
@@ -38,7 +39,8 @@
         formItem: {
           userId: '',
           staffId: ''
-        }
+        },
+        defaultUserId: '1_u377'
       }
     },
     computed: {
@@ -47,7 +49,7 @@
       }
     },
     methods: {
-      submit () {
+      submit (choice) {
         /*
         if (!this.isValidInputs()) {
           console.log('invalid intpus: userid=' + this.formItem.userId + ', staffid=' + this.formItem.staffId)
@@ -56,17 +58,23 @@
         */
         const self = this
         // only for debug
-        const randomUserId = '1_u377' // + String(Math.floor(Math.random() * 1000))
+        const randomUserId = '1_u' + String(Math.floor(Math.random() * 1000))
+        let id = ''
+        if (choice === 'default') {
+          id = self.defaultUserId
+        } else {
+          id = randomUserId
+        }
         axios.post(self.$store.state.userLoginUrl, {
           // 'userId': self.formItem.userId
-          'userId': randomUserId
+          'userId': id
         }).then(response => {
           let body = response.data.data
           // debug
           console.log(body.token)
           if (body.code === 0) {
             window.localStorage.setItem('token', body.token)
-            window.localStorage.setItem('userId', randomUserId)
+            window.localStorage.setItem('userId', id)
             self.toChatPage()
           }
         })

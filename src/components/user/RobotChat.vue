@@ -1,5 +1,5 @@
 <template>
-  <div class="robot-chat">
+  <div id="robot-chat">
     <div class="layout">
       <Row type="flex">
         <Col span="24">
@@ -88,18 +88,29 @@
   </div>
 </template>
 <style scoped>
-  #app {
+  #app{
     font-family: 'Avenir', Helvetica, Arial, sans-serif, "Microsoft YaHei";
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    height: 100%;
     margin: 0;
+    overflow: scroll;
+  }
+  #robot-chat{
+    position: relative;
+    height: 100vh;
+    margin: 0;
+    background: url(https://cdn.pbrd.co/images/H1wn87P.png) fixed no-repeat;
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   .layout{
     background: #f5f7f9;
-    position: relative;
+    min-width: 700px;
+    min-height: 600px;
     border-radius: 4px;
-    overflow: auto;
+    box-shadow: 5px 10px 10px rgba(0,0,0,.1);
   }
   .layout-copy{
     text-align: center;
@@ -118,6 +129,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    border-radius: 4px 4px 0 0;
   }
   .chat-title{
     color: #495060;
@@ -128,7 +140,7 @@
     font-size: 16px;
   }
   .chat-content{
-    height: calc(100vh - 290px);
+    height: 310px;
     padding: 10px 15px;
     overflow: auto;
   }
@@ -531,6 +543,25 @@
     },
     updated () {
       this.scrollToBottom()
+    },
+    mounted () {
+      function temp () {
+        let el = document.getElementById('robot-chat')
+        if (el.clientHeight < 600) { // vertical
+          el.style.alignItems = 'stretch'
+        } else {
+          el.style.alignItems = 'center'
+        }
+        if (el.clientWidth < 700) {
+          el.style.justifyContent = 'flex-start'
+        } else {
+          el.style.justifyContent = 'center'
+        }
+      }
+      temp()
+      window.onresize = () => {
+        return (temp)()
+      }
     }
   }
 </script>
