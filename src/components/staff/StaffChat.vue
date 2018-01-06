@@ -473,14 +473,16 @@ export default {
     },
     connectToOthers () {
       console.log(this.selectedStaff)
-      this.socket.emit('transUser', {
-        userId: this.chatUserId,
-        staffAId: this.staffId,
-        staffBId: this.selectedStaff,
-        messages: []
-      })
-      this.isChatting = false
-      this.chatUserId = ''
+      if (this.selectedStaff !== '') {
+        this.socket.emit('transUser', {
+          userId: this.chatUserId,
+          staffAId: this.staffId,
+          staffBId: this.selectedStaff,
+          messages: []
+        })
+        this.isChatting = false
+        this.chatUserId = ''
+      }
       this.selectedStaff = ''
     },
     closeChatWindow () {
