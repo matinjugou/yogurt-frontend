@@ -117,9 +117,6 @@
             <div class="media-button">
               <Button type="ghost" icon="happy" @click="() => {showEmojiPanel = !showEmojiPanel}">表情</Button>
             </div>
-            <div class="media-button">
-              <Button type="ghost" icon="monitor" @click="screenShot()">截屏</Button>
-            </div>
           </div>
           <div class="chat-input-send">
             <Button type="success" icon="paper-airplane" @click="sendMessage">发送</Button>
@@ -198,7 +195,7 @@
     height: 60px;
     background: #FFFFFF;
     box-shadow: 0 1px 1px rgba(0,0,0,.1);
-    padding: 0px 10px 0px 40px;
+    padding: 0px 10px 0px 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -330,7 +327,7 @@
     height: 50px;
     background: #FFFFFF;
     box-shadow: 0 1px 1px rgba(0,0,0,.1);
-    padding: 0px 30px 0px 10px;
+    padding: 0px 10px 0px 10px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -968,7 +965,7 @@
 //      this.socket = io(this.$store.state.socketIoServerUrl)
       // debug
       console.log(this)
-      this.socket.emit('userReg', {userId: this.userId, token: this.token})
+      this.socket.emit('userReg', {userId: this.userId, token: this.token, accessWay: 'webpage'})
       // debug
       console.log('Sent userReg.')
       this.socket.on('regResult', (data) => {

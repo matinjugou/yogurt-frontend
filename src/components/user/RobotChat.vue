@@ -125,7 +125,7 @@
     height: 60px;
     background: #FFFFFF;
     box-shadow: 0 1px 1px rgba(0,0,0,.1);
-    padding: 0px 10px 0px 40px;
+    padding: 0px 10px 0px 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -204,7 +204,7 @@
     height: 50px;
     background: #FFFFFF;
     box-shadow: 0 1px 1px rgba(0,0,0,.1);
-    padding: 0px 30px 0px 10px;
+    padding: 0px 10px 0px 10px;
     display: flex;
     align-items: center;
     justify-content: space-between;
