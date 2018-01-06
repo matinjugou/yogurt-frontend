@@ -9,7 +9,6 @@ body.append(`<!DOCTYPE html>
   <script type="text/javascript" src="http://unpkg.com/iview/dist/iview.min.js"></script>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <script src="https://cdn.bootcss.com/socket.io/2.0.3/socket.io.js"></script>
-  <script src="./html2canvas.min.js"></script>
   <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
 </head>
 <body>

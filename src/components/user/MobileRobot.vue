@@ -257,6 +257,9 @@
       staffId () {
         return window.localStorage.getItem('staffId')
       },
+      companyId () {
+        return 1
+      },
       token () {
         return window.localStorage.getItem('token')
       },
