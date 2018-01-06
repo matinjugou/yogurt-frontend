@@ -37,7 +37,7 @@ body.append(`<!DOCTYPE html>
               <div class="avatar chat-single-record">
                 <Avatar size="small" shape="square" icon="person"/>
               </div>
-              <div v-if="singleRecord.type === 'text'" class="content chat-single-record">
+              <div v-if="singleRecord.type === 'text'" v-html="singleRecord.msg" class="content chat-single-record">
                 {{ singleRecord.msg }}
               </div>
               <div v-else-if="singleRecord.type === 'image'" class="content chat-single-record" style="cursor: pointer">
@@ -318,13 +318,14 @@ new Vue({
               'type': 'text',
               'time': time
             })
+            let text = this.inputText
             this.inputText = ''
             if (this.chatState !== 'chat') {
               // robot
               const self = this
               axios.get(self.robotUrl, {
                 params: {
-                  'question': self.userId,
+                  'question': text,
                   'companyId': self.companyId
                 }
               }).then(response => {
@@ -334,11 +335,11 @@ new Vue({
                 } else {
                   let results = response.data.data.split('\n')
                   let len = results.length
-                  let resultMessage = '我们筛选到' + len + '条可能有用的答案:'
+                  let resultMessage = '我们筛选到' + len + '条可能有用的答案:<br />'
                   for (let i = 0; i < len; i++) {
-                    resultMessage += (i + 1) + results[i]
+                    resultMessage += (i + 1) + '.&nbsp' + results[i]
                     if (i !== len - 1) {
-                      resultMessage += ';'
+                      resultMessage += '<br />'
                     }
                   }
                   time = self.getCurrentTime()

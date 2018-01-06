@@ -313,12 +313,13 @@
               // 'hasSent': false
             }
           })
+          let text = this.inputText
           this.inputText = ''
           // get answer
           const self = this
           axios.get(self.$store.state.robotUrl, {
             params: {
-              'question': self.userId,
+              'question': text,
               'companyId': self.companyId
             }
           }).then(response => {

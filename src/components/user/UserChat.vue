@@ -41,7 +41,7 @@
                 <div v-else-if="singleRecord.type === 'image'" class="content chat-single-record" style="cursor: pointer">
                   <img class="chat-image" :src="singleRecord.compressedUrl" alt="聊天图片" @click="showLargeImage(singleRecord.url)">
                 </div>
-                <div v-else-if="singleRecord.type === 'file'" :class="singleRecord.type" @click="singleRecord.from === staffId ? downloadFile() : showLocalFile()" style="cursor: pointer" class="content chat-single-record">
+                <div v-else-if="singleRecord.type === 'file'" :class="singleRecord.type" @click="singleRecord.from === staffId ? downloadFile() : showLocalFile()" class="content chat-single-record">
                     <div class="chat-file-prepend">
                       <svg class="file-icon">
                         <use :xlink:href="getFileIconName(singleRecord.name)" />
@@ -127,21 +127,22 @@
         </div>
         </Col>
       </Row>
-      <Modal v-model="showLargeImageModal" width="80%" title="查看图片">
-        <div class="large-image">
-          <img :src="largeImageSrc" />
-        </div>
-        <div slot="footer"></div>
-      </Modal>
       <Modal
         v-model="showAskScreenShotModal"
-        width="80%"
         title="请求截图"
+        width="560px"
+        styles.height="auto"
         @on-ok="screenShot"
         ok-text="允许"
         @on-cancel="showAskScreenShotModal = false"
         cancel-text="拒绝">
         客服向您请求截图
+      </Modal>
+      <Modal v-model="showLargeImageModal" width="80%" title="查看图片">
+        <div class="large-image">
+          <img :src="largeImageSrc" />
+        </div>
+        <div slot="footer"></div>
       </Modal>
       <Modal
         v-model="showScreenShotModal"
@@ -234,12 +235,15 @@
     vertical-align: text-top;
     margin-right: 10px;
   }
+  .chat-msg-body{
+    vertical-align: middle;
+  }
   .chat-msg-body > .content {
     position: relative;
     padding: 0 10px;
-    max-width: calc(50vw);
+    max-width: 350px;
     min-height: 30px;
-    line-height: 2.5;
+    line-height: 2;
     font-size: 16px;
     text-align: left;
     word-break: break-all;
@@ -302,26 +306,23 @@
     overflow: hidden;
   }
   .chat-msg-body > .file {
-    padding: 10px 5px 0px 5px;
+    padding: 7px 0 7px 0;
     cursor: pointer;
-    width: 260px;
   }
   .chat-file-prepend {
-    max-width: 70px;
-    max-height: 70px;
+    width: 70px;
+    height: 70px;
     margin-right: 10px;
   }
-  .file-icon
-  {
-    /*width: 60px;*/
-    /*height: 60px;*/
-    /*margin-top: 10px;*/
-    /*margin-bottom: 10px;*/
-    /*vertical-align: middle;*/
+  .file-icon {
     width: 100%;
     height: 100%;
     object-fit: contain;
     cursor: pointer;
+  }
+  .chat-file-info{
+    line-height: 1.5;
+    width: 160px;
   }
   .chat-input-actions{
     height: 50px;
@@ -957,6 +958,7 @@
       }).then(response => {
         let body = response.data.data
         if (body.code !== 0) {
+          window.localStorage.clear()
           self.$router.push('login')
         }
       })

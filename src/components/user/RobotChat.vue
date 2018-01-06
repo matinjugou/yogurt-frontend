@@ -12,6 +12,8 @@
             <Modal
               v-model="showModal"
               title="选择人工服务类型"
+              styles.height="auto"
+              width="560px"
               @on-ok="switchToHuman()">
               请选择人工服务类型：
               <Select v-model="staffTypeForm.staffType">
@@ -24,12 +26,16 @@
               title="暂无空闲客服"
               ok-text="留言"
               cancel-text="继续等待"
+              styles.height="auto"
+              width="560px"
               @on-ok="showLeaveMessageModal = true">
               暂无空闲的该类型人工客服，您可以选择留言或继续等待
             </Modal>
             <Modal
               v-model="showLeaveMessageModal"
               title="留言"
+              styles.height="auto"
+              width="560px"
               @on-ok="leaveMessage()"
               @on-cancel="cancelLeaveMessage()"
               :loading="loading">
@@ -60,8 +66,7 @@
                 <div class="avatar chat-single-record">
                   <Avatar shape="square" icon="person"/>
                 </div>
-                <div v-if="singleRecord.type === 'text'" class="content chat-single-record">
-                  {{ singleRecord.msg }}
+                <div v-if="singleRecord.type === 'text'" v-html="singleRecord.msg" class="content chat-single-record">
                 </div>
               </div>
             </li>
@@ -165,7 +170,7 @@
     display: inline-block;
     position: relative;
     padding: 0 10px;
-    max-width: calc(50vw);
+    max-width: 350px;
     min-height: 30px;
     line-height: 2;
     font-size: 16px;
@@ -194,6 +199,9 @@
     color: #ffffff;
     background-color: #2d8cf0;
   }
+  .from-me > .chat-single-record {
+    margin-right: 0;
+  }
   .from-me > .content::before {
     right: inherit;
     left: 100%;
@@ -217,9 +225,6 @@
   }
   .layout-hide-text .layout-text{
     display: none;
-  }
-  .ivu-modal-body {
-    height: auto;
   }
   .ivu-col{
     transition: width .2s ease-in-out;
@@ -323,12 +328,15 @@
               // 'hasSent': false
             }
           })
+          let text = this.inputText
           this.inputText = ''
           // get answer
           const self = this
+          // debug
+          console.log(text)
           axios.get(self.$store.state.robotUrl, {
             params: {
-              'question': self.userId,
+              'question': text,
               'companyId': self.companyId
             }
           }).then(response => {
@@ -342,11 +350,11 @@
             } else {
               let results = response.data.data.split('\n')
               let len = results.length
-              let resultMessage = '我们筛选到' + len + '条可能有用的答案:'
+              let resultMessage = '我们筛选到' + len + '条可能有用的答案:<br />'
               for (let i = 0; i < len; i++) {
-                resultMessage += (i + 1) + results[i]
+                resultMessage += (i + 1) + '.&nbsp' + results[i]
                 if (i !== len - 1) {
-                  resultMessage += ';'
+                  resultMessage += '<br />'
                 }
               }
               time = self.getCurrentTime()
