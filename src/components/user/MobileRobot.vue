@@ -109,12 +109,12 @@
       </v-container>
       <v-container id="input-container">
         <v-layout row>
-          <v-flex p>
-            <v-btn flat icon color="indigo" @click="showFunctionPanel">
-              <v-icon>add</v-icon>
-            </v-btn>
-          </v-flex>
-          <v-flex xs12>
+          <!--<v-flex p>-->
+            <!--<v-btn flat icon color="indigo" @click="showFunctionPanel">-->
+              <!--<v-icon>add</v-icon>-->
+            <!--</v-btn>-->
+          <!--</v-flex>-->
+          <v-flex xs11 offset-xs1>
             <v-text-field id="text-field"
                           @click="textFieldClicked"
                           label="在此输入消息"
@@ -124,23 +124,6 @@
           <v-flex p>
             <v-btn flat icon color="indigo" @click="sendMessage">
               <v-icon>send</v-icon>
-            </v-btn>
-          </v-flex>
-        </v-layout>
-        <v-layout v-show="functionPanelVisible" id="function-panel-layout">
-          <!--<v-flex p>-->
-            <!--<v-btn flat>-->
-              <!--<v-icon>tag_faces</v-icon>表情-->
-            <!--</v-btn>-->
-          <!--</v-flex>-->
-          <v-flex p>
-            <v-btn flat>
-              <v-icon>folder_open</v-icon>文件
-            </v-btn>
-          </v-flex>
-          <v-flex p>
-            <v-btn flat>
-              <v-icon>chat</v-icon>历史
             </v-btn>
           </v-flex>
         </v-layout>
@@ -274,6 +257,9 @@
       staffId () {
         return window.localStorage.getItem('staffId')
       },
+      companyId () {
+        return 1
+      },
       token () {
         return window.localStorage.getItem('token')
       },
@@ -327,12 +313,13 @@
               // 'hasSent': false
             }
           })
+          let text = this.inputText
           this.inputText = ''
           // get answer
           const self = this
           axios.get(self.$store.state.robotUrl, {
             params: {
-              'question': self.userId,
+              'question': text,
               'companyId': self.companyId
             }
           }).then(response => {
