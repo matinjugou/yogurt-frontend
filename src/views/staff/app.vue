@@ -60,6 +60,8 @@
           </footer>
         </Menu>
       </Col>
+
+      <!-- router view -->
       <Col class="staff-right" :span="spanRight">
         <transition name="slide-fade" mode="out-in">
           <router-view/>
